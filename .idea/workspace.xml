@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="6d4723b4-e60c-4c8a-8753-020dbca75361" name="Changes" comment="jasypt 설정">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nextClass/config/JasyptConfigAES.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/config/JasyptConfigAES.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application-local.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-local.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -199,6 +199,7 @@
       <method v="2" />
     </configuration>
     <configuration name="NextClassApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="NextClass.main" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.nextClass.NextClassApplication" />
       <option name="VM_PARAMETERS" value="-Djasypt.encryptor.password=banpoxi" />
@@ -250,7 +251,10 @@
       <workItem from="1718003449109" duration="115000" />
       <workItem from="1718003636217" duration="138000" />
       <workItem from="1718003782052" duration="1260000" />
-      <workItem from="1718005134727" duration="333000" />
+      <workItem from="1718005134727" duration="454000" />
+      <workItem from="1718005599359" duration="4148000" />
+      <workItem from="1718011379909" duration="80000" />
+      <workItem from="1718012615359" duration="106000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <option name="closed" value="true" />
@@ -292,7 +296,15 @@
       <option name="project" value="LOCAL" />
       <updated>1718004999115</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="jasypt 설정">
+      <option name="closed" value="true" />
+      <created>1718005498526</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1718005498526</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

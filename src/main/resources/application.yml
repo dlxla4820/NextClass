@@ -3,16 +3,11 @@ server:
 #  port: 8080
 
 spring:
-  datasource:
-    url: ENC(6tRzSFuvEoj7Zbc7LkB+cCRbM9xoZWigo67+/7CTaO9ea3m1M4rK9g38D1jTOll76D+PY5gSNyoA2xU52kSy2PaEnhcwlY59fEK8KhYlMdf0rYQeSx/YZkzAvzOLYDsXTsyS0BoGkDNXaG/YUk7K4Q==)
-    username: ENC(DUVkrP7JeIYRhqHKwtcDzP4C2OSxSxOy1udJY7ql0r0ISPCmfJSgLyJXcZRN6xT9)
-    password: ENC(GOQauz2iCeSkjbqfl0UpDu0tFA1vySAnzNYrF/uGF5S8+1pOQY1jNJY0/Pj8MBor)
-    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     open-in-view: false
     database: mysql
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
 jasypt:
   encryptor:
     bean: jasyptEncryptor
