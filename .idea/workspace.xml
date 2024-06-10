@@ -4,10 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6d4723b4-e60c-4c8a-8753-020dbca75361" name="Changes" comment="jasypt 설정">
+    <list default="true" id="6d4723b4-e60c-4c8a-8753-020dbca75361" name="Changes" comment="local, dev, prod 분리">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application-local.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-local.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nextClass/entity/MemberEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/entity/Member.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nextClass/repository/MemberRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/repository/MemberRepository.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,6 +48,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
@@ -96,7 +101,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Spring Boot.NextClassApplication">
+  <component name="RunManager" selected="Gradle.JasyptTest">
     <configuration name="JasyptTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="env">
@@ -222,8 +227,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Spring Boot.NextClassApplication" />
         <item itemvalue="Gradle.JasyptTest" />
+        <item itemvalue="Spring Boot.NextClassApplication" />
         <item itemvalue="Gradle.ReadJasyptConfigTest" />
         <item itemvalue="Gradle.ReadJasyptConfigTest.decryption_config_url" />
         <item itemvalue="Gradle.JasyptTest.custom_jasypt_test_dev_url" />
@@ -254,7 +259,7 @@
       <workItem from="1718005134727" duration="454000" />
       <workItem from="1718005599359" duration="4148000" />
       <workItem from="1718011379909" duration="80000" />
-      <workItem from="1718012615359" duration="106000" />
+      <workItem from="1718012615359" duration="2579000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <option name="closed" value="true" />
@@ -304,7 +309,15 @@
       <option name="project" value="LOCAL" />
       <updated>1718005498526</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="local, dev, prod 분리">
+      <option name="closed" value="true" />
+      <created>1718012750990</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1718012750990</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -321,7 +334,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="origin/main" />
+                        <option value="register" />
                       </list>
                     </value>
                   </entry>
@@ -339,7 +352,8 @@
     <MESSAGE value="local 설정 파일 구성" />
     <MESSAGE value="초기 세팅" />
     <MESSAGE value="jasypt 설정" />
-    <option name="LAST_COMMIT_MESSAGE" value="jasypt 설정" />
+    <MESSAGE value="local, dev, prod 분리" />
+    <option name="LAST_COMMIT_MESSAGE" value="local, dev, prod 분리" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
