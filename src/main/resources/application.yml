@@ -1,1 +1,23 @@
-spring.application.name=nextClass
+server:
+  shutdown: graceful
+#  port: 8080
+
+spring:
+  datasource:
+#    url: ENC(lERIR2dAIZa8jETVJdSM3g0glYeCpjTqYj+eTQFEDX0KfZVb/+Un3/FD31EMBpUYUwjZViV/kSVp1NzQSUE1IZEjAhSxQZSi4rWmm8FgLgrWISMJBHwmpR79XAzdZIECWXsCixDblCen6tjnCkEmRw==)
+#    username: ENC(i0IDuL7A9lXPbu2qdvRpFlBKueWfcwWu4dDRcSMYjg5DqMU8e/xfuyabJN2qvOZi)
+#    password: ENC(UKgXl+XwnLJo1akrnxbKr4nCpKzNsG1ke9PLvpjH+3AaeB+MmnCFzcLypSZ0ryof)
+    url: jdbc:mysql://localhost:3306/next_class?serverTimezone=Asia/Seoul
+    username: dev_user
+    password: 1q2w3e4r!@
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    open-in-view: false
+    database: mysql
+    hibernate:
+      ddl-auto: update
+jasypt:
+  encryptor:
+    bean: jasyptEncryptor
+
+
