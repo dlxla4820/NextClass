@@ -1,5 +1,6 @@
 package com.nextClass.entity;
 
+import com.nextClass.enums.GradeType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,7 +28,8 @@ public class Member {
 
     private String email;
 
-    private int member_grade;
+    @Enumerated(EnumType.STRING)
+    private GradeType member_grade;
 
     private String member_school;
 

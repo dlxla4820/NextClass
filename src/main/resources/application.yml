@@ -7,7 +7,7 @@ spring:
     open-in-view: false
     database: mysql
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
 jasypt:
   encryptor:
     bean: jasyptEncryptor
