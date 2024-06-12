@@ -6,15 +6,14 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum ErrorCode {
     JSON_INVALID("E00101", "유효하지 않는 Json형식입니다."),
-    ID_INVALID("E00201", "id이(가) 유효하지 않습니다."),
-    NAME_INVALID("E00202","name이(가) 유효하지 않습니다."),
-    PASSWORD_INVALID("E00203","password이(가) 유효하지 않습니다."),
-    EMAIL_INVALID("E00204","email이(가) 유효하지 않습니다."),
-    MEMBER_GRADE_INVALID("E00205","member_grade이(가) 유효하지 않습니다."),
-    MEMBER_SCHOOL_INVALID("E00206","member_school이(가) 유효하지 않습니다.");
+    REQUEST_BODY_NULL("E00102","요청본문이 비어있습니다."),
+    PARAMETER_INVALID_GENERAL("E00103", "유효하지 않는 Parameter가 포함되어 있습니다."),
+    PARAMETER_INVALID_SPECIFIC("E00104", "%s이(가) 유효하지 않습니다."),
+
+    MEMBER_DUPLICATED("E00201","%s이(가) 중복되었습니다.");
+
 
     private final String errorCode;
     private final String errorDescription;

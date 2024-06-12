@@ -4,11 +4,16 @@ import com.nextClass.dto.MemberRequestDto;
 import com.nextClass.dto.ResponseDto;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
+import com.nextClass.enums.GradeType;
+import com.nextClass.repository.LoginRepository;
 import com.nextClass.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.nextClass.utils.CommonUtils.checkLength;
@@ -16,56 +21,94 @@ import static com.nextClass.utils.CommonUtils.checkLength;
 @Service
 public class MemberService {
 
-    private final MemberRepository memberRepository;
 
-    private final static String idError = "id(id)가 유효하지 않습니다.";
-
+    private final LoginRepository loginRepository;
+    private final String[] duplicatedKey= {"id","email"};
 
     @Autowired
-    public MemberService(MemberRepository memberRepository) {
-        this.memberRepository = memberRepository;
+    public MemberService(LoginRepository loginRepository) {
+        this.loginRepository = loginRepository;
     }
 
     public ResponseDto<?> saveMember(MemberRequestDto requestBody){
-        ErrorCode errorCode = checkMemberData(requestBody);
-        if(errorCode != null)
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,errorCode);
+        //유효성 체크
+        String errorDescription = checkMemberData(requestBody);
+        System.out.println("requestBody.getId() = " + requestBody.getId());
+        if(errorDescription != null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
+
+        // 중복체크
+        if(loginRepository.getMemberByKeyValue("id",requestBody.getId()) != null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MEMBER_DUPLICATED.getErrorCode(), String.format(ErrorCode.MEMBER_DUPLICATED.getErrorDescription(),"id"));
+        if(loginRepository.getMemberByKeyValue("email",requestBody.getEmail()) != null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MEMBER_DUPLICATED.getErrorCode(), String.format(ErrorCode.MEMBER_DUPLICATED.getErrorDescription(),"email"));
+
+        // 비밀번호 hashing
+
+
+        // 저장
+        loginRepository.saveMember(requestBody);
 
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
-    private ErrorCode checkMemberData(MemberRequestDto memberRequestDto){
+    public ResponseDto<?> checkDuplicatedMemberData(Map<String, String> data){
+
+        for (String key : duplicatedKey){
+            if(data.containsKey(key)){
+                if(loginRepository.getMemberByKeyValue(key, data.get(key)) != null)
+                    return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+                else
+                    return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MEMBER_DUPLICATED.getErrorCode(), String.format(ErrorCode.MEMBER_DUPLICATED.getErrorDescription(),key));
+            }
+        }
+        return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), ErrorCode.PARAMETER_INVALID_GENERAL.getErrorDescription());
+    }
+
+
+    private String checkMemberData(MemberRequestDto memberRequestDto){
         // id check
-        if(memberRequestDto.getId().isBlank())
-            return ErrorCode.ID_INVALID;
-        if(checkId(memberRequestDto.getId()))
-            return ErrorCode.ID_INVALID;
+        HashSet<ErrorCode> errorCodeHashSet;
+        if(memberRequestDto.getId() == null || memberRequestDto.getId().isBlank())
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"id");
+        if(!Pattern.compile("^[a-zA-Z0-9]{5,20}$").matcher(memberRequestDto.getId()).find())
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"id");
         // name check
-        if(memberRequestDto.getName().isBlank())
-            return ErrorCode.NAME_INVALID;
-        if(checkName(memberRequestDto.getName()))
-            return ErrorCode.NAME_INVALID;
+        if(memberRequestDto.getName() == null || memberRequestDto.getName().isBlank())
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"name");
+        if(!Pattern.compile("^[가-힣]{2,11}$").matcher(memberRequestDto.getName()).find())
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"name");
         // password check
-        if(memberRequestDto.getPassword().isBlank())
-            return ErrorCode.PASSWORD_INVALID;
-        if(checkPassword(memberRequestDto.getPassword()))
-            return ErrorCode.PASSWORD_INVALID;
+        if(memberRequestDto.getPassword()== null || memberRequestDto.getPassword().isBlank())
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"password");
+        if(!Pattern.compile("^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[~'!@#$%^()\\-={\\[}\\];:<>,.?/])[a-zA-Z0-9~'!@#$%^()\\-={\\[}\\];:<>,.?/]{9,18}$").matcher(memberRequestDto.getPassword()).find())
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"password");
         // email check
+        if(memberRequestDto.getEmail() == null || memberRequestDto.getEmail().isBlank())
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"email");
+        if(!Pattern.compile("[0-9a-zA-Z]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w{1,320}$").matcher(memberRequestDto.getEmail()).find())
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"email");
+        // member_grade check
+        if(memberRequestDto.getMember_grade() == null)
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"member_grade");
+        try {
+            GradeType.getInstance(memberRequestDto.getMember_grade());
+        } catch (IllegalArgumentException e){
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"member_grade");
+        }
+        //member_school check
+        if(memberRequestDto.getMember_school() == null || memberRequestDto.getMember_school().isBlank())
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"member_school");
+        if(!Pattern.compile("^[가-힣]{2,11}$").matcher(memberRequestDto.getMember_school()).find())
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"member_school");
         return null;
     }
 
-    private boolean checkId(String id){
-        return !checkLength(id,5,20) || !Pattern.compile("[a-zA-Z0-9]+").matcher(id).find();
-    }
-    private boolean checkName(String name){
-        return !checkLength(name, 2, 11) || !Pattern.compile("^[가-힣]*$").matcher(name).find();
-    }
-    private boolean checkPassword(String password) {
-        return !checkLength(password, 8, 16) // 길이 체크
-                || !Pattern.compile("(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?])").matcher(password).find() // 숫자, 영어, 특수문자 체크
-                || Pattern.compile("^[가-힣]*$").matcher(password).find(); // 한글 체크
-    }
-
-
+//    private ErrorCode checkDuplicated(String checkData) {
+//        memberRepository.findById(checkData)
+//
+//
+//        return null;
+//    }
 
 }

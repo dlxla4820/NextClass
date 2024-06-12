@@ -26,6 +26,13 @@ dependencies {
 	implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.hibernate:hibernate-core:6.2.5.Final'
+
+	// QueryDSL 설정
+	implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
+	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
@@ -39,3 +46,27 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// querydsl
+def generatedDir = 'src/main/generated'
+
+clean {
+	delete file (generatedDir)
+}
+
+//querydsl {
+//	jpa = true
+//	querydslSourcesDir = generated
+//}
+//sourceSets {
+//	main.java.srcDir generated
+//}
+//compileQuerydsl{
+//	options.annotationProcessorPath = configurations.querydsl
+//}
+//configurations {
+//	compileOnly {
+//		extendsFrom annotationProcessor
+//	}
+//	querydsl.extendsFrom compileClasspath
+//}
