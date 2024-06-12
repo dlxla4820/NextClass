@@ -5,20 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6d4723b4-e60c-4c8a-8753-020dbca75361" name="Changes" comment="local, dev, prod 분리">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/controller/LoginController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/dto/ResponseDto.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/enums/Description.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/enums/ErrorCode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/utils/GradeTypeConverter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/config/QuerydslConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/controller/ExceptionController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/repository/LoginRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nextClass/controller/LoginController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/controller/LoginController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nextClass/dto/MemberRequestDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/dto/MemberRequestDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nextClass/entity/Member.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/entity/Member.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nextClass/enums/GradeType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/enums/GradeType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nextClass/dto/ResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/dto/ResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/nextClass/enums/ErrorCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/enums/ErrorCode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nextClass/repository/MemberRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/repository/MemberRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/nextClass/service/MemberService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/service/MemberService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nextClass/utils/CommonUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nextClass/utils/CommonUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,6 +40,11 @@
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="NextClass" type="f1a62948:ProjectNode" />
               </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="NextClass" type="f1a62948:ProjectNode" />
+                <item name="Dependencies" type="6de06a37:ExternalSystemViewDefaultContributor$MyDependenciesNode" />
+              </path>
             </expand>
             <select />
           </tree_state>
@@ -53,8 +55,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Enum" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -77,41 +79,41 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Gradle.Build nextClass.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.JasyptTest.custom_jasypt_test.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.JasyptTest.custom_jasypt_test_dev_url.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.JasyptTest.custom_jasypt_test_pw.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.JasyptTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.JasyptTest.jasypt_test.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ReadJasyptConfigTest.decryption_config_url.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ReadJasyptConfigTest.executor&quot;: &quot;Run&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;Spring Boot.NextClassApplication.executor&quot;: &quot;Debug&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/NextClass/build.gradle&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;spring.configuration.checksum&quot;: &quot;ca4b70c3f8bc9c1ce7b070695310aacc&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.Build nextClass.executor": "Run",
+    "Gradle.JasyptTest.custom_jasypt_test.executor": "Run",
+    "Gradle.JasyptTest.custom_jasypt_test_dev_url.executor": "Run",
+    "Gradle.JasyptTest.custom_jasypt_test_pw.executor": "Run",
+    "Gradle.JasyptTest.executor": "Run",
+    "Gradle.JasyptTest.jasypt_test.executor": "Run",
+    "Gradle.ReadJasyptConfigTest.decryption_config_url.executor": "Run",
+    "Gradle.ReadJasyptConfigTest.executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Spring Boot.NextClassApplication.executor": "Run",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/nextClass/build.gradle",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "spring.configuration.checksum": "ca4b70c3f8bc9c1ce7b070695310aacc",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Spring Boot.NextClassApplication">
     <configuration name="JasyptTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
@@ -139,7 +141,7 @@
       <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
       <DebugAllEnabled>false</DebugAllEnabled>
-      <ForceTestExec>false</ForceTestExec>
+      <RunAsTest>true</RunAsTest>
       <method v="2" />
     </configuration>
     <configuration name="JasyptTest.custom_jasypt_test_dev_url" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -163,7 +165,7 @@
       <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
       <DebugAllEnabled>false</DebugAllEnabled>
-      <ForceTestExec>false</ForceTestExec>
+      <RunAsTest>true</RunAsTest>
       <method v="2" />
     </configuration>
     <configuration name="ReadJasyptConfigTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -187,7 +189,7 @@
       <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
       <DebugAllEnabled>false</DebugAllEnabled>
-      <ForceTestExec>false</ForceTestExec>
+      <RunAsTest>true</RunAsTest>
       <method v="2" />
     </configuration>
     <configuration name="ReadJasyptConfigTest.decryption_config_url" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -211,7 +213,7 @@
       <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
       <DebugAllEnabled>false</DebugAllEnabled>
-      <ForceTestExec>false</ForceTestExec>
+      <RunAsTest>true</RunAsTest>
       <method v="2" />
     </configuration>
     <configuration name="NextClassApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
@@ -271,6 +273,7 @@
       <workItem from="1718005599359" duration="4148000" />
       <workItem from="1718011379909" duration="80000" />
       <workItem from="1718012615359" duration="2579000" />
+      <workItem from="1718158507087" duration="22246000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <option name="closed" value="true" />

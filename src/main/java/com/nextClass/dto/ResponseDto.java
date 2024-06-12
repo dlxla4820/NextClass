@@ -18,28 +18,36 @@ public class ResponseDto<T> {
     private Integer code; // return code 200, 400 ...
     private Description description;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private ErrorCode error;
+    private String errorCode;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String errorDescription;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private T data;
 
+    // Success
     public ResponseDto(Integer code, Description description){
         this.code = code;
         this.description = description;
     }
-    public ResponseDto(Integer code, Description description, ErrorCode error){
+    // Fail
+    public ResponseDto(Integer code, Description description, String errorCode, String errorDescription){
         this.code = code;
         this.description = description;
-        this.error = error;
+        this.errorCode = errorCode;
+        this.errorDescription = errorDescription;
     }
+    // Success + Data
     public ResponseDto(Integer code, Description description, T data){
         this.code = code;
         this.description = description;
         this.data = data;
     }
-    public ResponseDto(Integer code, Description description, ErrorCode error, T data){
+    // Fail + data
+    public ResponseDto(Integer code, Description description, String errorCode,String errorDescription, T data){
         this.code = code;
         this.description = description;
-        this.error = error;
+        this.errorCode = errorCode;
+        this.errorDescription = errorDescription;
         this.data = data;
     }
 
@@ -48,7 +56,8 @@ public class ResponseDto<T> {
         return new StringJoiner(", ", ResponseDto.class.getSimpleName() + "[", "]")
                 .add("code='" + code + "'" )
                 .add("description='"+ description + "'")
-                .add("error='"+ error + "'")
+                .add("errorCode='"+ errorCode + "'")
+                .add("errorDescription='"+ errorDescription + "'")
                 .add("data=" + data)
                 .toString();
     }
