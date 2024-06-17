@@ -51,6 +51,16 @@ public class LoginRepository {
                 .fetchOne();
     }
 
+    /**
+     * DB SELECT : MEMBER
+     * @param id
+     **/
+    public Member getMemberById(String id){
+        return queryFactory.selectFrom(member)
+                .where(member.id.eq(id))
+                .fetchOne();
+    }
+
     private BooleanExpression propertyEqByKeyValue(String key, String value) {
         if (key.equals("id")) {
             return member.id.eq(value);

@@ -9,6 +9,9 @@ import com.nextClass.repository.LoginRepository;
 import com.nextClass.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -19,7 +22,7 @@ import java.util.regex.Pattern;
 import static com.nextClass.utils.CommonUtils.checkLength;
 
 @Service
-public class MemberService {
+public class MemberService implements UserDetailsService {
 
 
     private final LoginRepository loginRepository;
@@ -102,6 +105,11 @@ public class MemberService {
         if(!Pattern.compile("^[가-힣]{2,11}$").matcher(memberRequestDto.getMember_school()).find())
             return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"member_school");
         return null;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        return loginRepository.getMemberById(userId);
     }
 
 //    private ErrorCode checkDuplicated(String checkData) {

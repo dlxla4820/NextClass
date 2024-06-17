@@ -12,4 +12,6 @@ jasypt:
   encryptor:
     bean: jasyptEncryptor
 
-
+jwt:
+  expiration_time: 863400000
+  secret: blackcow
