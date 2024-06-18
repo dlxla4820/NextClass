@@ -32,8 +32,7 @@ public class Member implements UserDetails {
 
     private String email;
 
-    @Enumerated(EnumType.STRING)
-    private GradeType member_grade;
+    private Integer member_grade;
 
     private String member_school;
 

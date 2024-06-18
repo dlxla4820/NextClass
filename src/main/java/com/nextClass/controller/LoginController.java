@@ -1,5 +1,6 @@
 package com.nextClass.controller;
 
+import com.nextClass.dto.LoginRequestDto;
 import com.nextClass.dto.MemberRequestDto;
 import com.nextClass.dto.ResponseDto;
 import com.nextClass.enums.Description;
@@ -34,10 +35,9 @@ public class LoginController {
         return ResponseEntity.ok(memberService.checkDuplicatedMemberData(checkMapData));
     }
 
-
-    @GetMapping(value = "/register")
-    public ResponseEntity<?> test(){
-        return ResponseEntity.ok("test");
+    @PostMapping(value = "/login")
+    public ResponseEntity<ResponseDto<?>> login(@RequestBody LoginRequestDto requestBody){
+        return ResponseEntity.ok(memberService.loginMember(requestBody));
     }
 
 }

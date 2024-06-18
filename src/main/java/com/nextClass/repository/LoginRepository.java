@@ -33,7 +33,8 @@ public class LoginRepository {
                 .id(MemberRequestDto.getId())
                 .name(MemberRequestDto.getName())
                 .password(encodePassword)
-                .member_grade(GradeType.getInstance(MemberRequestDto.getMember_grade()))
+                .email(MemberRequestDto.getEmail())
+                .member_grade(MemberRequestDto.getMember_grade())
                 .member_school(MemberRequestDto.getMember_school())
                 .reg_date(LocalDateTime.now())
                 .build();

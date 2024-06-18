@@ -1,5 +1,7 @@
 package com.nextClass.service;
 
+import com.nextClass.auth.TokenProvider;
+import com.nextClass.dto.LoginRequestDto;
 import com.nextClass.dto.MemberRequestDto;
 import com.nextClass.dto.ResponseDto;
 import com.nextClass.entity.Member;
@@ -7,7 +9,6 @@ import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.enums.GradeType;
 import com.nextClass.repository.LoginRepository;
-import com.nextClass.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,12 +27,14 @@ import static com.nextClass.enums.ErrorCode.MEMBER_NOT_EXIST;
 public class MemberService implements UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
+    private final TokenProvider tokenProvider;
     private final LoginRepository loginRepository;
     private final String[] duplicatedKey= {"id","email"};
 
     @Autowired
-    public MemberService(PasswordEncoder passwordEncoder, LoginRepository loginRepository) {
+    public MemberService(PasswordEncoder passwordEncoder, TokenProvider tokenProvider, LoginRepository loginRepository) {
         this.passwordEncoder = passwordEncoder;
+        this.tokenProvider = tokenProvider;
         this.loginRepository = loginRepository;
     }
 
@@ -53,14 +56,15 @@ public class MemberService implements UserDetailsService {
 
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
-    public ResponseDto<?> loginMember(MemberRequestDto requestBody) {
+    public ResponseDto<?> loginMember(LoginRequestDto requestBody) {
         Member member = loginRepository.getMemberById(requestBody.getId());
         if(member == null)
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
         if(!passwordEncoder.matches(requestBody.getPassword(), member.getPassword()))
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
 
-        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+        String token = tokenProvider.createToken(String.valueOf(member.getUuid()));
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, token);
     }
 
 

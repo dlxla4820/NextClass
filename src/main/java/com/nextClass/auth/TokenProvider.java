@@ -20,9 +20,9 @@ public class TokenProvider {
     private final String issuer;
 
     public TokenProvider(
-            @Value("${jwt.key}") String secretKey,
-            @Value("${expiration-hours}") long expirationHours,
-            @Value("${issuer}") String issuer
+            @Value("${jwt.secret-key}") String secretKey,
+            @Value("${jwt.expiration-hours}") long expirationHours,
+            @Value("${jwt.issuer}") String issuer
     ) {
         this.secretKey = secretKey;
         this.expirationHours = expirationHours;
@@ -37,6 +37,15 @@ public class TokenProvider {
                 .setIssuedAt(Timestamp.valueOf(LocalDateTime.now()))    // JWT 토큰 발급 시간
                 .setExpiration(Date.from(Instant.now().plus(expirationHours, ChronoUnit.HOURS)))    // JWT 토큰 만료 시간
                 .compact(); // JWT 토큰 생성
+    }
+
+    public String validateTokenAndGetSubject(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey.getBytes())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
 }
