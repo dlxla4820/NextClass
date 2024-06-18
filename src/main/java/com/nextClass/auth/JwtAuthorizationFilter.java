@@ -25,6 +25,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         if(accessList.contains(request.getRequestURI())){
             filterChain.doFilter(request, response);
+            return;
         }
 
         Cookie[] cookies = request.getCookies();
@@ -40,7 +41,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         try{
             // 토큰 존재
-            if(token != null && !token.equalsIgnoreCase(""))
+            if(token != null && !token.equalsIgnoreCase("")){
+                if(TokenUtils)
+            }
         }
 
 

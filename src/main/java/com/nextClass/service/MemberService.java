@@ -2,6 +2,7 @@ package com.nextClass.service;
 
 import com.nextClass.dto.MemberRequestDto;
 import com.nextClass.dto.ResponseDto;
+import com.nextClass.entity.Member;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.enums.GradeType;
@@ -12,24 +13,25 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static com.nextClass.utils.CommonUtils.checkLength;
+import static com.nextClass.enums.ErrorCode.MEMBER_NOT_EXIST;
 
 @Service
 public class MemberService implements UserDetailsService {
 
-
+    private final PasswordEncoder passwordEncoder;
     private final LoginRepository loginRepository;
     private final String[] duplicatedKey= {"id","email"};
 
     @Autowired
-    public MemberService(LoginRepository loginRepository) {
+    public MemberService(PasswordEncoder passwordEncoder, LoginRepository loginRepository) {
+        this.passwordEncoder = passwordEncoder;
         this.loginRepository = loginRepository;
     }
 
@@ -46,14 +48,22 @@ public class MemberService implements UserDetailsService {
         if(loginRepository.getMemberByKeyValue("email",requestBody.getEmail()) != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MEMBER_DUPLICATED.getErrorCode(), String.format(ErrorCode.MEMBER_DUPLICATED.getErrorDescription(),"email"));
 
-        // 비밀번호 hashing
-
-
-        // 저장
-        loginRepository.saveMember(requestBody);
+        // 비밀번호 hashing + 저장
+        loginRepository.saveMember(requestBody, passwordEncoder.encode(requestBody.getPassword()));
 
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
+    public ResponseDto<?> loginMember(MemberRequestDto requestBody) {
+        Member member = loginRepository.getMemberById(requestBody.getId());
+        if(member == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
+        if(!passwordEncoder.matches(requestBody.getPassword(), member.getPassword()))
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
+
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+    }
+
+
 
     public ResponseDto<?> checkDuplicatedMemberData(Map<String, String> data){
 
@@ -112,11 +122,5 @@ public class MemberService implements UserDetailsService {
         return loginRepository.getMemberById(userId);
     }
 
-//    private ErrorCode checkDuplicated(String checkData) {
-//        memberRepository.findById(checkData)
-//
-//
-//        return null;
-//    }
 
 }

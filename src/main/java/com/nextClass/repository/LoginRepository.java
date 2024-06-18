@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 import static com.nextClass.entity.QMember.member;
@@ -27,11 +28,11 @@ public class LoginRepository {
      * DB INSERT : MEMBER
      * @param MemberRequestDto
      **/
-    public void saveMember(MemberRequestDto MemberRequestDto){
+    public void saveMember(MemberRequestDto MemberRequestDto, String encodePassword){
         Member member = Member.builder()
                 .id(MemberRequestDto.getId())
                 .name(MemberRequestDto.getName())
-                .password(MemberRequestDto.getPassword())
+                .password(encodePassword)
                 .member_grade(GradeType.getInstance(MemberRequestDto.getMember_grade()))
                 .member_school(MemberRequestDto.getMember_school())
                 .reg_date(LocalDateTime.now())
@@ -60,6 +61,9 @@ public class LoginRepository {
                 .where(member.id.eq(id))
                 .fetchOne();
     }
+
+
+
 
     private BooleanExpression propertyEqByKeyValue(String key, String value) {
         if (key.equals("id")) {

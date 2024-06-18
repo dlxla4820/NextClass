@@ -1,15 +1,18 @@
 package com.nextClass.config;
 
+import com.nextClass.auth.JwtAuthorizationFilter;
 import com.nextClass.service.MemberService;
 import jakarta.servlet.ServletException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.reactive.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -54,43 +57,17 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
-        http
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
                 .csrf(org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer::disable)
-                /*.sessionManagement((sessionManagement) ->
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )*/
-//                .cors(cors -> cors.configurationSource(new CorsConfigurationSource))
-                .sessionManagement(sessionManagement ->
-                        sessionManagement
-                                .maximumSessions(1)
-                                .maxSessionsPreventsLogin(false) // 기존 세션 유지 허용
-                                .expiredSessionStrategy(new RemoveExistingSessionStrategy())
-                )
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/register","/duplicated_check", "/find", "/login", "/login-process").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore()
-                .httpBasic(withDefaults())
-                .formLogin(login -> login
-                        .loginPage("/login")
-                        .usernameParameter("userId")
-                        .passwordParameter("password")
-                        .loginProcessingUrl("/login-process")
-                        .defaultSuccessUrl("/", true)
-                        .failureUrl("/login?error=true")
-                        .permitAll()
+                .sessionManagement(sessionManagement ->
+                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                        .logoutSuccessUrl("/login?logout=true")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                );
-
-        return http.build();
+                .build();
 
     }
 
@@ -102,4 +79,7 @@ public class SecurityConfig {
         authenticationProvider.setUserDetailsService(memberService);
         return authenticationProvider;
     }
+
+
+
 }
