@@ -12,7 +12,9 @@ public enum ErrorCode {
     PARAMETER_INVALID_GENERAL("E00103", "유효하지 않는 Parameter가 포함되어 있습니다."),
 
     PARAMETER_INVALID_SPECIFIC("E00201", "%s이(가) 유효하지 않습니다."),
-    MEMBER_DUPLICATED("E00202","%s이(가) 중복되었습니다.");
+    MEMBER_DUPLICATED("E00202","%s이(가) 중복되었습니다."),
+
+    DATA_ALREADY_EXIST("E00301","해당 수업이 시간표 상에 이미 존재합니다.");
 
 
     private final String errorCode;
