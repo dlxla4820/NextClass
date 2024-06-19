@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -24,7 +25,7 @@ import java.util.regex.Pattern;
 import static com.nextClass.enums.ErrorCode.MEMBER_NOT_EXIST;
 
 @Service
-public class MemberService implements UserDetailsService {
+public class MemberService {
 
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
@@ -62,8 +63,7 @@ public class MemberService implements UserDetailsService {
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
         if(!passwordEncoder.matches(requestBody.getPassword(), member.getPassword()))
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
-
-        String token = tokenProvider.createToken(String.valueOf(member.getUuid()));
+        Map<String, String> token = new HashMap<String, String>(){{put("token",tokenProvider.createToken(String.valueOf(member.getUuid())));}};
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, token);
     }
 
@@ -73,7 +73,7 @@ public class MemberService implements UserDetailsService {
 
         for (String key : duplicatedKey){
             if(data.containsKey(key)){
-                if(loginRepository.getMemberByKeyValue(key, data.get(key)) != null)
+                if(loginRepository.getMemberByKeyValue(key, data.get(key)) == null)
                     return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
                 else
                     return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MEMBER_DUPLICATED.getErrorCode(), String.format(ErrorCode.MEMBER_DUPLICATED.getErrorDescription(),key));
@@ -121,10 +121,6 @@ public class MemberService implements UserDetailsService {
         return null;
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        return loginRepository.getMemberById(userId);
-    }
 
 
 }

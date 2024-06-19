@@ -3,14 +3,9 @@ package com.nextClass.controller;
 import com.nextClass.dto.LoginRequestDto;
 import com.nextClass.dto.MemberRequestDto;
 import com.nextClass.dto.ResponseDto;
-import com.nextClass.enums.Description;
-import com.nextClass.enums.ErrorCode;
 import com.nextClass.service.MemberService;
-import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,5 +34,10 @@ public class LoginController {
     public ResponseEntity<ResponseDto<?>> login(@RequestBody LoginRequestDto requestBody){
         return ResponseEntity.ok(memberService.loginMember(requestBody));
     }
+    @PostMapping(value = "/test")
+    public ResponseEntity<String> test(){
+        return ResponseEntity.ok().body("test");
+    }
+
 
 }

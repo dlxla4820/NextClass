@@ -3,6 +3,7 @@ package com.nextClass.controller;
 import com.nextClass.dto.ResponseDto;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
+import io.jsonwebtoken.UnsupportedJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -26,6 +27,12 @@ public class ExceptionController {
 //            System.out.println("기타 예외: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @ExceptionHandler(UnsupportedJwtException.class)
+    public ResponseEntity<?> jwtExceptionHandler(UnsupportedJwtException e){
+
+        return ResponseEntity.ok().body(new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, ErrorCode.REQUEST_BODY_NULL.getErrorCode(), ErrorCode.REQUEST_BODY_NULL.getErrorDescription()));
     }
 
 }
