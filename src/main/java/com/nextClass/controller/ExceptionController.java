@@ -3,11 +3,17 @@ package com.nextClass.controller;
 import com.nextClass.dto.ResponseDto;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.security.SignatureException;
 
 @ControllerAdvice
 public class ExceptionController {
