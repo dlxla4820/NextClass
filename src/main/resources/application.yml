@@ -12,4 +12,7 @@ jasypt:
   encryptor:
     bean: jasyptEncryptor
 
-
+jwt:
+  secret-key: NiOeyFbN1Gqo10bPgUyTFsRMkJpGLXSvGP04eFqj5B30r5TcrtlSXfQ7TndvYjNvfkEKLqILn0j1SmKODO1Yw3JpBBgI3nVPEahqxeY8qbPSFGyzyEVxnl4AQcrnVneI
+  expiration-hours: 3
+  issuer: DaeHan

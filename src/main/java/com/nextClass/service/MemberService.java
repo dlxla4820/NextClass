@@ -1,32 +1,41 @@
 package com.nextClass.service;
 
+import com.nextClass.auth.TokenProvider;
+import com.nextClass.dto.LoginRequestDto;
 import com.nextClass.dto.MemberRequestDto;
 import com.nextClass.dto.ResponseDto;
+import com.nextClass.entity.Member;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.enums.GradeType;
 import com.nextClass.repository.LoginRepository;
-import com.nextClass.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static com.nextClass.utils.CommonUtils.checkLength;
+import static com.nextClass.enums.ErrorCode.MEMBER_NOT_EXIST;
 
 @Service
 public class MemberService {
 
-
+    private final PasswordEncoder passwordEncoder;
+    private final TokenProvider tokenProvider;
     private final LoginRepository loginRepository;
     private final String[] duplicatedKey= {"id","email"};
 
     @Autowired
-    public MemberService(LoginRepository loginRepository) {
+    public MemberService(PasswordEncoder passwordEncoder, TokenProvider tokenProvider, LoginRepository loginRepository) {
+        this.passwordEncoder = passwordEncoder;
+        this.tokenProvider = tokenProvider;
         this.loginRepository = loginRepository;
     }
 
@@ -43,20 +52,28 @@ public class MemberService {
         if(loginRepository.getMemberByKeyValue("email",requestBody.getEmail()) != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MEMBER_DUPLICATED.getErrorCode(), String.format(ErrorCode.MEMBER_DUPLICATED.getErrorDescription(),"email"));
 
-        // 비밀번호 hashing
-
-
-        // 저장
-        loginRepository.saveMember(requestBody);
+        // 비밀번호 hashing + 저장
+        loginRepository.saveMember(requestBody, passwordEncoder.encode(requestBody.getPassword()));
 
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
+    public ResponseDto<?> loginMember(LoginRequestDto requestBody) {
+        Member member = loginRepository.getMemberById(requestBody.getId());
+        if(member == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
+        if(!passwordEncoder.matches(requestBody.getPassword(), member.getPassword()))
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
+        Map<String, String> token = new HashMap<>(){{put("token",tokenProvider.createToken(String.format("%s:%s", member.getUuid(), member.getRoleType())));}};
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, token);
+    }
+
+
 
     public ResponseDto<?> checkDuplicatedMemberData(Map<String, String> data){
 
         for (String key : duplicatedKey){
             if(data.containsKey(key)){
-                if(loginRepository.getMemberByKeyValue(key, data.get(key)) != null)
+                if(loginRepository.getMemberByKeyValue(key, data.get(key)) == null)
                     return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
                 else
                     return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MEMBER_DUPLICATED.getErrorCode(), String.format(ErrorCode.MEMBER_DUPLICATED.getErrorDescription(),key));
@@ -104,11 +121,6 @@ public class MemberService {
         return null;
     }
 
-//    private ErrorCode checkDuplicated(String checkData) {
-//        memberRepository.findById(checkData)
-//
-//
-//        return null;
-//    }
+
 
 }

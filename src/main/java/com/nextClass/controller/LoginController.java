@@ -1,22 +1,27 @@
 package com.nextClass.controller;
 
+import com.nextClass.dto.LoginRequestDto;
 import com.nextClass.dto.MemberRequestDto;
+import com.nextClass.dto.MemberSessionDto;
 import com.nextClass.dto.ResponseDto;
-import com.nextClass.enums.Description;
-import com.nextClass.enums.ErrorCode;
 import com.nextClass.service.MemberService;
-import jakarta.annotation.Nullable;
+import com.nextClass.utils.CommonUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+import static com.nextClass.utils.CommonUtils.getUserSession;
+
 @RestController
+@Slf4j
+@PreAuthorize("hasAuthority('USER')")
 public class LoginController {
 
     private final MemberService memberService;
@@ -34,10 +39,15 @@ public class LoginController {
         return ResponseEntity.ok(memberService.checkDuplicatedMemberData(checkMapData));
     }
 
-
-    @GetMapping(value = "/register")
-    public ResponseEntity<?> test(){
-        return ResponseEntity.ok("test");
+    @PostMapping(value = "/login")
+    public ResponseEntity<ResponseDto<?>> login(@RequestBody LoginRequestDto requestBody){
+        return ResponseEntity.ok(memberService.loginMember(requestBody));
     }
+    @PostMapping(value = "/test")
+    public ResponseEntity<String> test(){
+        MemberSessionDto userSession = getUserSession();
+        return ResponseEntity.ok().body("test");
+    }
+
 
 }
