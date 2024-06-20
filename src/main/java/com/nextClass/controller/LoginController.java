@@ -2,8 +2,12 @@ package com.nextClass.controller;
 
 import com.nextClass.dto.LoginRequestDto;
 import com.nextClass.dto.MemberRequestDto;
+import com.nextClass.dto.MemberSessionDto;
 import com.nextClass.dto.ResponseDto;
 import com.nextClass.service.MemberService;
+import com.nextClass.utils.CommonUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
+@Slf4j
 public class LoginController {
 
     private final MemberService memberService;
@@ -36,6 +41,8 @@ public class LoginController {
     }
     @PostMapping(value = "/test")
     public ResponseEntity<String> test(){
+        MemberSessionDto userSession = CommonUtils.getUserSession();
+        log.info("uuid" + userSession.getUuid());
         return ResponseEntity.ok().body("test");
     }
 

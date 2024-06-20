@@ -36,8 +36,15 @@ public class Member {
 
     private String member_school;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private RoleType roleType = RoleType.USER;
+
     private LocalDateTime reg_date;
 
     private LocalDateTime mod_date;
 
+    public enum RoleType {
+        ADMIN, USER, ANONYMOUS
+    }
 }

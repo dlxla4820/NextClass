@@ -63,7 +63,7 @@ public class MemberService {
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
         if(!passwordEncoder.matches(requestBody.getPassword(), member.getPassword()))
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
-        Map<String, String> token = new HashMap<String, String>(){{put("token",tokenProvider.createToken(String.valueOf(member.getUuid())));}};
+        Map<String, String> token = new HashMap<>(){{put("token",tokenProvider.createToken(String.format("%s:%s", member.getUuid(), member.getRoleType())));}};
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, token);
     }
 
