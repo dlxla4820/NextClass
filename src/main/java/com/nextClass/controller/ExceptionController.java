@@ -34,25 +34,4 @@ public class ExceptionController {
         }
     }
 
-    // JWT 토큰 에러 관리
-    @ExceptionHandler(UnsupportedJwtException.class)
-    public ResponseEntity<?> jwtExceptionHandler(UnsupportedJwtException e){
-
-        return ResponseEntity.ok().body(new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, ErrorCode.REQUEST_BODY_NULL.getErrorCode(), ErrorCode.REQUEST_BODY_NULL.getErrorDescription()));
-    }
-    @ExceptionHandler(SignatureException.class)
-    public ResponseEntity<ResponseDto<?>> handleSignatureException() {
-        return ResponseEntity.ok().body(new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, ErrorCode.REQUEST_BODY_NULL.getErrorCode(), ErrorCode.REQUEST_BODY_NULL.getErrorDescription()));
-    }
-
-    @ExceptionHandler(MalformedJwtException.class)
-    public ResponseEntity<ResponseDto<?>>  handleMalformedJwtException() {
-        return ResponseEntity.ok().body(new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, ErrorCode.REQUEST_BODY_NULL.getErrorCode(), ErrorCode.REQUEST_BODY_NULL.getErrorDescription()));
-    }
-
-    @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<ResponseDto<?>>  handleExpiredJwtException() {
-        return ResponseEntity.ok().body(new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, ErrorCode.REQUEST_BODY_NULL.getErrorCode(), ErrorCode.REQUEST_BODY_NULL.getErrorDescription()));
-    }
-
 }

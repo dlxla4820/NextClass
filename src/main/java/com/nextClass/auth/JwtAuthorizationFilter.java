@@ -35,15 +35,19 @@ import java.util.Optional;
 
 @Order(0)
 @Slf4j
-@RequiredArgsConstructor
 @Component
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
+
+    public JwtAuthorizationFilter(TokenProvider tokenProvider) {
+        this.tokenProvider = tokenProvider;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // 특정 URL에 대해서는 인증을 수행하지 않도록 설정
         List<String> nonAuthUrls = Arrays.asList("/login", "/login-process", "/register");
+
 
         // 요청 URL을 가져옴
         String requestURI = request.getRequestURI();
@@ -61,6 +65,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             AbstractAuthenticationToken authenticated = UsernamePasswordAuthenticationToken.authenticated(user, token, user.getAuthorities());
             authenticated.setDetails(new WebAuthenticationDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authenticated);
+            filterChain.doFilter(request, response);
             log.info("토큰 인증완료");
         } catch (ExpiredJwtException e){
             //토큰의 유효기간 만료
