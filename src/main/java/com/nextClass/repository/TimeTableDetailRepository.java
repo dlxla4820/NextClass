@@ -4,14 +4,14 @@ import com.nextClass.dto.TimeTableRequestDto;
 import com.nextClass.entity.ClassDetail;
 import com.nextClass.entity.TimeTable;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-import static com.nextClass.entity.QClassDetail.classDetail;
 
+@Slf4j
 @Repository
 public class TimeTableDetailRepository {
     private final JPAQueryFactory queryFactory;
@@ -26,6 +26,31 @@ public class TimeTableDetailRepository {
         this.timeTableRepository = timeTableRepository;
         this.queryFactory = queryFactory;
     }
+    public boolean deleteAllTimeTableOnSemester(String semester){
+        //해당하는 학생의 해당하는 semester인 timetable list 가져오기
+        List<TimeTable> timeTableList = timeTableRepository.findAllBySemesterIs(semester);
+        //해당 학기에 포함되어 있는 class_detail들의 uuid를 모아서 리스트 생성
+        Set<ClassDetail> classDetails = new HashSet<>();
+        for(TimeTable currentTimeTable : timeTableList){
+            classDetails.add(currentTimeTable.getClassDetail());
+        }
+        //동일한 조건으로 timetable에서 해당하는 데이터 삭제
+        timeTableRepository.deleteAllBySemesterIs(semester);
+        //classDetail리스트에서 timeDetail에서 FK로 참조하고 있는 데이터가 있는지 확인
+        List<TimeTable> findFKOnTimeTable = new ArrayList<>();
+        for(ClassDetail classDetail : classDetails){
+            findFKOnTimeTable = timeTableRepository.findAllByClassDetail(classDetail);
+            if(findFKOnTimeTable.size() == 0){
+                //해당 하는 데이터가 없으므로 해당 ClassDetail 삭제
+                classDetailRepository.deleteById(classDetail.getUuid());
+            }
+            //없을 경우 해당하는 데이터가 존재하므로 삭제
+        }
+        return true;
+    }
+    public List<TimeTable> getTimeTableListOnThisSemester(String semester){
+        return timeTableRepository.findAllBySemesterIs(semester);
+    }
     @Transactional
     public boolean saveClassDetailAndTimeTable(TimeTableRequestDto timeTableRequestDto) {
         ClassDetail classDetail = ClassDetail.builder()
@@ -33,34 +58,59 @@ public class TimeTableDetailRepository {
                 .classGrade(timeTableRequestDto.getClass_grade())
                 .teacherName(timeTableRequestDto.getTeacher_name())
                 .score(timeTableRequestDto.getScore())
+                .school(timeTableRequestDto.getSchool())
                 .build();
-        Optional<ClassDetail> checkClassDetailDataAlreadyExist = classDetailRepository.findByTitleAndClassGradeAndTeacherNameAndScore(
-                classDetail.getTitle(), classDetail.getClassGrade(), classDetail.getTeacherName(), classDetail.getScore());
-        if (checkClassDetailDataAlreadyExist.isEmpty()) {
-            //데이터가 존재하지 않으면 해당 데이터를 저장
-            classDetailRepository.saveAndFlush(classDetail);
-        }
-        else if(checkClassDetailDataAlreadyExist.isPresent()){
-            //이미 존재하면 해당 데이터를 사용하지 않고, classDetail의 uuid를
-            classDetail = checkClassDetailDataAlreadyExist.get();
-        }
-        Optional<ClassDetail> ff = classDetailRepository.findById(classDetail.getUuid());
-        TimeTable timeTable = TimeTable.builder()
-//                    .member(UUID.randomUUID()) 나중에 member 나오면 추가하기
-                .classTime(timeTableRequestDto.getClass_time())
-                .classDetail(classDetail)
-                .week(timeTableRequestDto.getWeek())
-                .build();
-        //완전 똑같은 부분이 있으면 에러가 발생해야됨
-        Optional<TimeTable> checkTimeTableDataAlreadyExist
-                = timeTableRepository.findByClassDetailAndClassTimeAndWeek(
-                        timeTable.getClassDetail(), timeTable.getClassTime(),  timeTable.getWeek()
+        ClassDetail checkDataAlready = classDetailRepository.findByTitleAndClassGradeAndTeacherNameAndScoreAndSchool(
+                timeTableRequestDto.getTitle(),
+                timeTableRequestDto.getClass_grade(),
+                timeTableRequestDto.getTeacher_name(),
+                timeTableRequestDto.getScore(),
+                timeTableRequestDto.getSchool()
         );
-        if(checkTimeTableDataAlreadyExist.isEmpty()) {
+        if(checkDataAlready == null ){
+            classDetailRepository.save(classDetail);
+            classDetail = classDetailRepository.findByTitleAndClassGradeAndTeacherNameAndScoreAndSchool(
+                    timeTableRequestDto.getTitle(),
+                    timeTableRequestDto.getClass_grade(),
+                    timeTableRequestDto.getTeacher_name(),
+                    timeTableRequestDto.getScore(),
+                    timeTableRequestDto.getSchool()
+            );
+        }else{
+            classDetail = checkDataAlready;
+        }
+        //해결이 도저히 안되서 일단 전체 for문으로 처리
+        TimeTable timeTable = null;
+        List<TimeTable> timeTableList = timeTableRepository.findAll();
+//        TimeTable timeTable = timeTableRepository.findByClassDetailUuidAndClassTimeAndWeekAndSemester(
+//                checkDataAlready.getUuid(),
+//                timeTableRequestDto.getClass_time(),
+//                timeTableRequestDto.getWeek(),
+//                timeTableRequestDto.getSemester());
+
+        for(TimeTable i : timeTableList){
+            if(i.getClassDetail().getUuid().equals(classDetail.getUuid())){
+                if(i.getClassTime() == timeTableRequestDto.getClass_time()){
+                    if(i.getWeek().equals(timeTableRequestDto.getWeek())){
+                        if(i.getSemester().equals(timeTableRequestDto.getSemester())){
+                            timeTable = i;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if(timeTable == null){
+            timeTable = TimeTable.builder()
+//                    .member(UUID.randomUUID()) 나중에 member 나오면 추가하기
+                    .classTime(timeTableRequestDto.getClass_time())
+                    .classDetail(classDetail)
+                    .week(timeTableRequestDto.getWeek())
+                    .semester(timeTableRequestDto.getSemester())
+                    .build();
             timeTableRepository.save(timeTable);
-            return true;
-        } else {
-            //동일한 데이터가 이미 저장되어 있음
+            return true;}
+        else{
             return false;
         }
     }

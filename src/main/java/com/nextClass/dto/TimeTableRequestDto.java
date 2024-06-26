@@ -15,4 +15,6 @@ public class TimeTableRequestDto {
     private String teacher_name;
     private Integer score;
     private String title;
+    private String semester;
+    private String school;
 }

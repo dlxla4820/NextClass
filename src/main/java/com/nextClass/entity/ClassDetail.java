@@ -21,4 +21,5 @@ public class ClassDetail {
     @Column(name = "teacher_name")
     private String teacherName;
     private Integer score;
+    private String school;
 }

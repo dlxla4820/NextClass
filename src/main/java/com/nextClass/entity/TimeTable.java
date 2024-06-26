@@ -16,7 +16,7 @@ public class TimeTable {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Builder.Default
     private UUID uuid = UUID.randomUUID();
-//    @ManyToOne(fetch = FetchType.LAZY)
+//    @ManyToOne
 //    @JoinColumn(name = "member_uuid", referencedColumnName = "uuid", nullable = false)
 //    private Member member;
     @ManyToOne
@@ -26,4 +26,5 @@ public class TimeTable {
     //일단 int로 해놓고, 나중에 대한이가 된다고 하면 String으로 수정해서 enum타입 설정
     @Column(name = "time")
     private int classTime;
+    private String semester;
 }

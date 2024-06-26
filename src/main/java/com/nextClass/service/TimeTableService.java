@@ -3,24 +3,50 @@ package com.nextClass.service;
 import com.nextClass.dto.ResponseDto;
 import com.nextClass.dto.TimeTableRequestDto;
 import com.nextClass.entity.ClassDetail;
+import com.nextClass.entity.TimeTable;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.TimeTableDetailRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
+@Slf4j
 @Service
+@Transactional
 public class TimeTableService {
     private final TimeTableDetailRepository timeTableRepository;
 
     @Autowired
     public TimeTableService(TimeTableDetailRepository timeTableRepository){this.timeTableRepository = timeTableRepository;}
 
+    public ResponseDto deleteAllTimeTableOnSemester(String semester){
+        //repository에서 해당 학기 데이터 삭제
+        //false되면 삭제 실패했다고 보내기
+        boolean isDeleteSuccess = timeTableRepository.deleteAllTimeTableOnSemester(semester);
+        if(!isDeleteSuccess){
+            return new ResponseDto<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Description.FAIL, ErrorCode.DATA_ALREADY_EXIST.getErrorCode(), ErrorCode.DATA_ALREADY_EXIST.getErrorDescription());
+        }
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+    }
+
+    public ResponseDto getPersonalTimeTableAboutThatSemester(String semester){
+        //해당 학기 값이 전달되지 않으면 error 전달
+//        if(semester == (null)){
+//        }
+        //member와 semester를 가지고 해당 데이터 가져오기(현재는 semester만)
+        List<TimeTable> timeTableList = timeTableRepository.getTimeTableListOnThisSemester(semester);
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, timeTableList);
+    }
+
     public ResponseDto updatePersonalTimeTable(TimeTableRequestDto timeTableRequestDto){
         //DTO의 값이 비어 있으면 해당 값 비어 있다는 error를 담아서 responseDTO return, for문을 통해서 진행
         String errorDescription = checkTimeTableRequest(timeTableRequestDto);
-        System.out.println("Check TimeTableReqeustDto");
+        log.info("Check TimeTableReqeustDto");
         if(errorDescription != null){
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
         }
@@ -57,6 +83,12 @@ public class TimeTableService {
         }
         else if(timeTableRequestDto.getTitle() == null || timeTableRequestDto.getTitle().isBlank()){
             return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "title");
+        }
+        else if(timeTableRequestDto.getSemester() == null || timeTableRequestDto.getSemester().isBlank()){
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "semester");
+        }
+        else if(timeTableRequestDto.getSchool() == null || timeTableRequestDto.getSchool().isBlank()){
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "school");
         }
         else{
             //모든 조건 통과 = error 없음
