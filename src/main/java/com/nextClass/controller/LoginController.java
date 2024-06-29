@@ -4,11 +4,13 @@ import com.nextClass.dto.LoginRequestDto;
 import com.nextClass.dto.MemberRequestDto;
 import com.nextClass.dto.MemberSessionDto;
 import com.nextClass.dto.ResponseDto;
+import com.nextClass.enums.Description;
 import com.nextClass.service.MemberService;
 import com.nextClass.utils.CommonUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,11 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+import static com.nextClass.enums.ErrorCode.MEMBER_NOT_EXIST;
 import static com.nextClass.utils.CommonUtils.getUserSession;
 
 @RestController
 @Slf4j
-@PreAuthorize("hasAuthority('USER')")
 public class LoginController {
 
     private final MemberService memberService;
@@ -48,6 +50,5 @@ public class LoginController {
         MemberSessionDto userSession = getUserSession();
         return ResponseEntity.ok().body("test");
     }
-
 
 }

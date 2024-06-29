@@ -1,0 +1,18 @@
+server:
+  shutdown: graceful
+  port: 8080
+
+spring:
+  datasource:
+    url: ENC(EheiWTKlFzF6q9h7TlntpO4X2VoKxY2YqZYOpVSIaTHekvI63Neg3HNpUuXrytSFmcm/qVOyPbBIZadtUrTAr4yZv6p05uT/EaUeeGEmVokVB56pFjCI1LprSlWVvJNJqaeIS10dXT2xz/4q3GW9xQ==)
+    username: ENC(5K9Tdve7PrMGC/iAtXo/+uuQ+m01qdFKGjZ+DNXGkFofS/JI/5RhB8Cyerxt3KdR)
+    password: ENC(MZYFe0eXXOQIJKzWAYqXrnTEj1sYIZH1JKAOgwQqmOdwhn8q+FN/poyj6BE+qC/w)
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+
