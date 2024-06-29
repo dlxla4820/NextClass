@@ -48,7 +48,7 @@ public class SecurityConfig {
         return http
                 .csrf(org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/register","/duplicated_check", "/find", "/login","/test").permitAll()
+                        .requestMatchers("/register","/duplicated_check", "/findId", "/login","/findPw").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->

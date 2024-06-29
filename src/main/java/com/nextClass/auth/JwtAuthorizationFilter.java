@@ -47,7 +47,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // 특정 URL에 대해서는 인증을 수행하지 않도록 설정
-        List<String> nonAuthUrls = Arrays.asList("/login", "/login-process", "/register");
+        List<String> nonAuthUrls = Arrays.asList("/login", "/duplicated_check", "/register","/findId","/findPw");
 
 
         // 요청 URL을 가져옴
