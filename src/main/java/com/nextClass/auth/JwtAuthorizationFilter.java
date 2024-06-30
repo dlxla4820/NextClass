@@ -7,6 +7,7 @@ import com.nextClass.enums.ErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,7 +47,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // 특정 URL에 대해서는 인증을 수행하지 않도록 설정
-        List<String> nonAuthUrls = Arrays.asList("/login", "/login-process", "/register");
+        List<String> nonAuthUrls = Arrays.asList("/login", "/duplicated_check", "/register","/findId","/findPw");
 
 
         // 요청 URL을 가져옴
@@ -66,13 +67,15 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             authenticated.setDetails(new WebAuthenticationDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authenticated);
             filterChain.doFilter(request, response);
-            log.info("토큰 인증완료");
         } catch (ExpiredJwtException e){
-            //토큰의 유효기간 만료
-            setErrorResponse(response, ErrorCode.JWT_EXPIRED_INVALID);
+            // refresh 토큰이 있을경우
+            if(request.getHeader("refresh-token") != null)
+                recreateAccessTokenAndSetErrorResponse(response, request.getHeader("refresh-token"));
+            else
+                setErrorResponse(response, ErrorCode.JWT_ACCESS_EXPIRED_INVALID);
         }catch (JwtException | IllegalArgumentException e){
             //유효하지 않은 토큰
-            setErrorResponse(response, ErrorCode.JSON_INVALID);
+            setErrorResponse(response, ErrorCode.JWT_ACCESS_INVALID);
         }
     }
 
@@ -93,6 +96,23 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         return new User(split[0], "", List.of(new SimpleGrantedAuthority(split[1])));
     }
 
+
+
+    private void recreateAccessTokenAndSetErrorResponse(HttpServletResponse response, String refreshToken){
+        try {
+            String subject = tokenProvider.validateTokenAndGetSubject(refreshToken);
+            String accessToken = tokenProvider.createAccessToken(subject);
+            setErrorResponse(response,ErrorCode.JWT_ACCESS_EXPIRED_INVALID, accessToken);
+        } catch (ExpiredJwtException e){
+            setErrorResponse(response, ErrorCode.JWT_REFRESH_EXPIRED_INVALID);
+        } catch (JwtException | IllegalArgumentException e){
+            //유효하지 않은 토큰
+            setErrorResponse(response, ErrorCode.JWT_REFRESH_INVALID);
+        }
+    }
+
+
+
     private void setErrorResponse(
             HttpServletResponse response,
             ErrorCode errorCode
@@ -108,6 +128,20 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             e.printStackTrace();
         }
     }
-
-
+    private void setErrorResponse(
+            HttpServletResponse response,
+            ErrorCode errorCode,
+            String accessToken
+    ){
+        ObjectMapper objectMapper = new ObjectMapper();
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        ResponseDto<?> responseDto = new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, errorCode.getErrorCode(), errorCode.getErrorDescription(), accessToken);
+        try{
+            response.getWriter().write(objectMapper.writeValueAsString(responseDto));
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 }

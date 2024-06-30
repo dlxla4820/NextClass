@@ -1,6 +1,7 @@
 package com.nextClass.utils;
 
 import com.nextClass.dto.MemberSessionDto;
+import com.nextClass.entity.Member;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,5 +55,19 @@ public class CommonUtils {
                 .build();
     }
 
+    public static String getMemberUuidIfAdminOrUser(){
+        MemberSessionDto member = getUserSession();
+        String auth = member.getAuthorities().iterator().next().toString();
+        if(Member.RoleType.ADMIN.toString().equals(auth) || Member.RoleType.USER.toString().equals(auth))
+            return member.getUuid();
+        return null;
+    }
+
+    public static String getMemberUuidIfAdmin(){
+        MemberSessionDto member = getUserSession();
+        if(Member.RoleType.ADMIN.toString().equals(member.getAuthorities().iterator().next().toString()))
+            return member.getUuid();
+        return null;
+    }
 
 }

@@ -1,6 +1,6 @@
 server:
   shutdown: graceful
-#  port: 8080
+  port: 8080
 
 spring:
   jpa:
@@ -15,4 +15,5 @@ jasypt:
 jwt:
   secret-key: NiOeyFbN1Gqo10bPgUyTFsRMkJpGLXSvGP04eFqj5B30r5TcrtlSXfQ7TndvYjNvfkEKLqILn0j1SmKODO1Yw3JpBBgI3nVPEahqxeY8qbPSFGyzyEVxnl4AQcrnVneI
   expiration-hours: 3
+  refresh-expiration-weeks: 2
   issuer: DaeHan

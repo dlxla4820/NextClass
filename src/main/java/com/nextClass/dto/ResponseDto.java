@@ -23,6 +23,8 @@ public class ResponseDto<T> {
     private String errorDescription;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private T data;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String accessToken;
 
     // Success
     public ResponseDto(Integer code, Description description){
@@ -42,13 +44,13 @@ public class ResponseDto<T> {
         this.description = description;
         this.data = data;
     }
-    // Fail + data
-    public ResponseDto(Integer code, Description description, String errorCode,String errorDescription, T data){
+    // Fail + accessToken 만료
+    public ResponseDto(Integer code, Description description, String errorCode,String errorDescription, String accessToken){
         this.code = code;
         this.description = description;
         this.errorCode = errorCode;
         this.errorDescription = errorDescription;
-        this.data = data;
+        this.accessToken = accessToken;
     }
 
     @Override
