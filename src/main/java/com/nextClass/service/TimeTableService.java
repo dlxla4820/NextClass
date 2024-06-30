@@ -43,17 +43,21 @@ public class TimeTableService {
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, timeTableList);
     }
 
-    public ResponseDto updatePersonalTimeTable(TimeTableRequestDto timeTableRequestDto){
+    public ResponseDto makeTimeTable(TimeTableRequestDto timeTableRequestDto){
         //DTO의 값이 비어 있으면 해당 값 비어 있다는 error를 담아서 responseDTO return, for문을 통해서 진행
         String errorDescription = checkTimeTableRequest(timeTableRequestDto);
         log.info("Check TimeTableReqeustDto");
         if(errorDescription != null){
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
         }
-        //동일한 data가 존재하는지 확인하고 저장하기
+        //동일한 classDetail이 존재하는지 확인
+        ClassDetail classDetail = timeTableRepository.checkClassDetailAlreqdyExist(timeTableRequestDto);
+        if(classDetail == null ){
+            //새로 저장
+            classDetail = timeTableRepository.saveClassDetail(timeTableRequestDto);
+        }
         //member 추가하면 현재 추가한 데이터 같이 넣어주기
         boolean isDataSaved = timeTableRepository.saveClassDetailAndTimeTable(timeTableRequestDto);
-        //있을 경우엔 data 찾아서 진행
         //현재 로그인 한 사람으로부터 uuid 값을 가져옴
         //로그인 한 사람의 정보를 가져오지 못하면 에러 return(error를 등록하는)
         //생성된 데이터들을 더해서 time_table entity 생성
@@ -69,7 +73,10 @@ public class TimeTableService {
         if(timeTableRequestDto.getWeek() == null || timeTableRequestDto.getWeek().isBlank()){
             return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"week");
         }
-        else if(timeTableRequestDto.getClass_time() == null || timeTableRequestDto.getClass_time()<0 || timeTableRequestDto.getClass_time() > 8){
+        else if(timeTableRequestDto.getClass_start_time() == null || timeTableRequestDto.getClass_start_time()<0 || timeTableRequestDto.getClass_start_time() > 8){
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"class_time");
+        }
+        else if(timeTableRequestDto.getClass_end_time() == null || timeTableRequestDto.getClass_end_time()<0 || timeTableRequestDto.getClass_end_time() > 8){
             return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"class_time");
         }
         else if(timeTableRequestDto.getClass_grade() == null || timeTableRequestDto.getClass_grade()<1 || timeTableRequestDto.getClass_grade() > 4){

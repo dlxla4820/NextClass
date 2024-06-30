@@ -51,8 +51,17 @@ public class TimeTableDetailRepository {
     public List<TimeTable> getTimeTableListOnThisSemester(String semester){
         return timeTableRepository.findAllBySemesterIs(semester);
     }
-    @Transactional
-    public boolean saveClassDetailAndTimeTable(TimeTableRequestDto timeTableRequestDto) {
+    public ClassDetail checkClassDetailAlreqdyExist(TimeTableRequestDto timeTableRequestDto){
+        return classDetailRepository.findByTitleAndClassGradeAndTeacherNameAndScoreAndSchool(
+                timeTableRequestDto.getTitle(),
+                timeTableRequestDto.getClass_grade(),
+                timeTableRequestDto.getTeacher_name(),
+                timeTableRequestDto.getScore(),
+                timeTableRequestDto.getSchool()
+        );
+    }
+
+    public ClassDetail saveClassDetail(TimeTableRequestDto timeTableRequestDto){
         ClassDetail classDetail = ClassDetail.builder()
                 .title(timeTableRequestDto.getTitle())
                 .classGrade(timeTableRequestDto.getClass_grade())
@@ -60,46 +69,16 @@ public class TimeTableDetailRepository {
                 .score(timeTableRequestDto.getScore())
                 .school(timeTableRequestDto.getSchool())
                 .build();
-        ClassDetail checkDataAlready = classDetailRepository.findByTitleAndClassGradeAndTeacherNameAndScoreAndSchool(
-                timeTableRequestDto.getTitle(),
-                timeTableRequestDto.getClass_grade(),
-                timeTableRequestDto.getTeacher_name(),
-                timeTableRequestDto.getScore(),
-                timeTableRequestDto.getSchool()
-        );
-        if(checkDataAlready == null ){
-            classDetailRepository.save(classDetail);
-            classDetail = classDetailRepository.findByTitleAndClassGradeAndTeacherNameAndScoreAndSchool(
-                    timeTableRequestDto.getTitle(),
-                    timeTableRequestDto.getClass_grade(),
-                    timeTableRequestDto.getTeacher_name(),
-                    timeTableRequestDto.getScore(),
-                    timeTableRequestDto.getSchool()
-            );
-        }else{
-            classDetail = checkDataAlready;
-        }
-        //해결이 도저히 안되서 일단 전체 for문으로 처리
+        return classDetailRepository.save(classDetail);
+    }
+    public boolean saveClassDetailAndTimeTable(TimeTableRequestDto timeTableRequestDto) {
         TimeTable timeTable = null;
         List<TimeTable> timeTableList = timeTableRepository.findAll();
-//        TimeTable timeTable = timeTableRepository.findByClassDetailUuidAndClassTimeAndWeekAndSemester(
-//                checkDataAlready.getUuid(),
-//                timeTableRequestDto.getClass_time(),
-//                timeTableRequestDto.getWeek(),
-//                timeTableRequestDto.getSemester());
-
-        for(TimeTable i : timeTableList){
-            if(i.getClassDetail().getUuid().equals(classDetail.getUuid())){
-                if(i.getClassTime() == timeTableRequestDto.getClass_time()){
-                    if(i.getWeek().equals(timeTableRequestDto.getWeek())){
-                        if(i.getSemester().equals(timeTableRequestDto.getSemester())){
-                            timeTable = i;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+        TimeTable timeTable = timeTableRepository.findByClassDetailUuidAndClassTimeAndWeekAndSemester(
+                checkDataAlready.getUuid(),
+                timeTableRequestDto.getClass_time(),
+                timeTableRequestDto.getWeek(),
+                timeTableRequestDto.getSemester());
         if(timeTable == null){
             timeTable = TimeTable.builder()
 //                    .member(UUID.randomUUID()) 나중에 member 나오면 추가하기

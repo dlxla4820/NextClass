@@ -24,7 +24,9 @@ public class TimeTable {
     private ClassDetail classDetail;
     private String week;
     //일단 int로 해놓고, 나중에 대한이가 된다고 하면 String으로 수정해서 enum타입 설정
-    @Column(name = "time")
-    private int classTime;
+    @Column(name = "start_time")
+    private int classStartTime;
+    @Column(name = "end_time")
+    private int classEndTime;
     private String semester;
 }

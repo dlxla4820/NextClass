@@ -26,7 +26,7 @@ public class TimeTableController {
 
     @PostMapping(value = "timetable")
     public ResponseEntity<ResponseDto<?>> postTimeTable(@RequestBody TimeTableRequestDto timeTableRequestDto){
-        return ResponseEntity.ok(timeTableService.updatePersonalTimeTable(timeTableRequestDto));
+        return ResponseEntity.ok(timeTableService.makeTimeTable(timeTableRequestDto));
     }
 
     @DeleteMapping(value="timetable")
