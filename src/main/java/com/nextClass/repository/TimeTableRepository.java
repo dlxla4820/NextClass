@@ -27,4 +27,14 @@ public interface TimeTableRepository extends JpaRepository<TimeTable, UUID> {
     void deleteAllBySemesterIs(String semester);
 
     List<TimeTable> findAllByClassDetail(ClassDetail classDetail);
+
+    @Query("SELECT t from TimeTable t where left(hex(t.classDetail.uuid),32) = :classUuid and left(hex(t.member.uuid),32) = :memberUuid and t.week = :week and t.semester = :semester and t.classEndTime = :endTime and t.classStartTime = :startTime")
+    TimeTable findByClassDetailUuidAndClassStartTimeAAndClassStartTimeAndWeekAndSemester(
+            @Param("classUuid") UUID classUuid,
+            @Param("memberUuid") UUID memberUuid,
+            @Param("week") String week,
+            @Param("semester") String semester,
+            @Param("startTime") int startTime,
+            @Param("endTime") int endTime
+    );
 }

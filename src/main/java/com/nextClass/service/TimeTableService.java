@@ -1,12 +1,15 @@
 package com.nextClass.service;
 
 import com.nextClass.dto.ResponseDto;
+import com.nextClass.dto.TimeTableDto;
 import com.nextClass.dto.TimeTableRequestDto;
 import com.nextClass.entity.ClassDetail;
+import com.nextClass.entity.Member;
 import com.nextClass.entity.TimeTable;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.TimeTableDetailRepository;
+import com.nextClass.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -57,10 +60,11 @@ public class TimeTableService {
             classDetail = timeTableRepository.saveClassDetail(timeTableRequestDto);
         }
         //member 추가하면 현재 추가한 데이터 같이 넣어주기
-        boolean isDataSaved = timeTableRepository.saveClassDetailAndTimeTable(timeTableRequestDto);
-        //현재 로그인 한 사람으로부터 uuid 값을 가져옴
-        //로그인 한 사람의 정보를 가져오지 못하면 에러 return(error를 등록하는)
-        //생성된 데이터들을 더해서 time_table entity 생성
+        String memberUUID = CommonUtils.getMemberUuidIfAdminOrUser();
+        Member currentUser = timeTableRepository.findMember(memberUUID);
+        TimeTableDto timeTableDto = new TimeTableDto(currentUser, classDetail, timeTableRequestDto);
+        TimeTable isDataSaved = timeTableRepository.findTimeTable(timeTableDto);
+
         if(!isDataSaved){
             //해당 수업이 이미 저장되어 있음
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.DATA_ALREADY_EXIST.getErrorCode(), ErrorCode.DATA_ALREADY_EXIST.getErrorDescription());

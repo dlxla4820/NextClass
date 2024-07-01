@@ -1,14 +1,20 @@
 package com.nextClass.repository;
 
+import com.nextClass.dto.TimeTableDto;
 import com.nextClass.dto.TimeTableRequestDto;
 import com.nextClass.entity.ClassDetail;
+import com.nextClass.entity.Member;
 import com.nextClass.entity.TimeTable;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+
+import static com.nextClass.entity.QMember.member;
+import static com.nextClass.entity.QTimeTable.timeTable;
 
 
 @Slf4j
@@ -17,13 +23,16 @@ public class TimeTableDetailRepository {
     private final JPAQueryFactory queryFactory;
     private final TimeTableRepository timeTableRepository;
     private final ClassDetailRepository classDetailRepository;
+    private final MemberRepository memberRepository;
 
     TimeTableDetailRepository(
             TimeTableRepository timeTableRepository,
             ClassDetailRepository classDetailRepository,
+            MemberRepository memberRepository,
             JPAQueryFactory queryFactory) {
         this.classDetailRepository = classDetailRepository;
         this.timeTableRepository = timeTableRepository;
+        this.memberRepository = memberRepository;
         this.queryFactory = queryFactory;
     }
     public boolean deleteAllTimeTableOnSemester(String semester){
@@ -70,6 +79,19 @@ public class TimeTableDetailRepository {
                 .school(timeTableRequestDto.getSchool())
                 .build();
         return classDetailRepository.save(classDetail);
+    }
+
+    public Member findMember(String uuid){
+        return queryFactory.selectFrom(member)
+                .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
+                .fetchOne();
+    }
+    public TimeTable findTimeTable(TimeTableDto timeTableDto){
+        return timeTableRepository.findByClassDetailUuidAndClassStartTimeAAndClassStartTimeAndWeekAndSemester(
+                timeTableDto.getClassDetail().getUuid(),
+                timeTableDto.getMember().getUuid(),
+                timeTableDto.
+        );
     }
     public boolean saveClassDetailAndTimeTable(TimeTableRequestDto timeTableRequestDto) {
         TimeTable timeTable = null;

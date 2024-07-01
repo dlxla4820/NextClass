@@ -16,9 +16,9 @@ public class TimeTable {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Builder.Default
     private UUID uuid = UUID.randomUUID();
-//    @ManyToOne
-//    @JoinColumn(name = "member_uuid", referencedColumnName = "uuid", nullable = false)
-//    private Member member;
+    @ManyToOne
+    @JoinColumn(name = "member_uuid", referencedColumnName = "uuid", nullable = false)
+    private Member member;
     @ManyToOne
     @JoinColumn(name = "class_uuid", referencedColumnName = "uuid", nullable = false)
     private ClassDetail classDetail;

@@ -1,6 +1,7 @@
 package com.nextClass.dto;
 
 import com.nextClass.entity.ClassDetail;
+import com.nextClass.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,9 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TimeTableDto {
+    private Member member;
     private ClassDetail classDetail;
-    private String week;
-    private int classStartTime;
-    private int classEndTime;
-    private String semester;
+    private TimeTableRequestDto timeTableRequestDto;
 }
