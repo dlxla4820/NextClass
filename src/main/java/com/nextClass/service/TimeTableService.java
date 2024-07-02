@@ -54,7 +54,7 @@ public class TimeTableService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
         }
         //동일한 classDetail이 존재하는지 확인
-        ClassDetail classDetail = timeTableRepository.checkClassDetailAlreqdyExist(timeTableRequestDto);
+        ClassDetail classDetail = timeTableRepository.checkClassDetailAlreadyExist(timeTableRequestDto);
         if(classDetail == null ){
             //새로 저장
             classDetail = timeTableRepository.saveClassDetail(timeTableRequestDto);
@@ -64,11 +64,11 @@ public class TimeTableService {
         Member currentUser = timeTableRepository.findMember(memberUUID);
         TimeTableDto timeTableDto = new TimeTableDto(currentUser, classDetail, timeTableRequestDto);
         TimeTable isDataSaved = timeTableRepository.findTimeTable(timeTableDto);
-
-        if(!isDataSaved){
+        if(isDataSaved != null){
             //해당 수업이 이미 저장되어 있음
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.DATA_ALREADY_EXIST.getErrorCode(), ErrorCode.DATA_ALREADY_EXIST.getErrorDescription());
         }
+        timeTableRepository.findTimeTable(timeTableDto);
         return new ResponseDto<>(HttpStatus.ACCEPTED.value(), Description.SUCCESS);
     }
 

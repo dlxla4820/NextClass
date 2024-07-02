@@ -60,7 +60,7 @@ public class TimeTableDetailRepository {
     public List<TimeTable> getTimeTableListOnThisSemester(String semester){
         return timeTableRepository.findAllBySemesterIs(semester);
     }
-    public ClassDetail checkClassDetailAlreqdyExist(TimeTableRequestDto timeTableRequestDto){
+    public ClassDetail checkClassDetailAlreadyExist(TimeTableRequestDto timeTableRequestDto){
         return classDetailRepository.findByTitleAndClassGradeAndTeacherNameAndScoreAndSchool(
                 timeTableRequestDto.getTitle(),
                 timeTableRequestDto.getClass_grade(),
@@ -87,32 +87,13 @@ public class TimeTableDetailRepository {
                 .fetchOne();
     }
     public TimeTable findTimeTable(TimeTableDto timeTableDto){
-        return timeTableRepository.findByClassDetailUuidAndClassStartTimeAAndClassStartTimeAndWeekAndSemester(
-                timeTableDto.getClassDetail().getUuid(),
-                timeTableDto.getMember().getUuid(),
-                timeTableDto.
+        return timeTableRepository.findByClassDetailUuidAndMemberUuidClassStartTimeAAndClassStartTimeAndWeekAndSemester(
+                timeTableDto.getClassDetail().getUuid().toString().replace("-",""),
+                timeTableDto.getMember().getUuid().toString().replace("-",""),
+                timeTableDto.getTimeTableRequestDto().getWeek(),
+                timeTableDto.getTimeTableRequestDto().getSemester(),
+                timeTableDto.getTimeTableRequestDto().getClass_start_time(),
+                timeTableDto.getTimeTableRequestDto().getClass_end_time()
         );
-    }
-    public boolean saveClassDetailAndTimeTable(TimeTableRequestDto timeTableRequestDto) {
-        TimeTable timeTable = null;
-        List<TimeTable> timeTableList = timeTableRepository.findAll();
-        TimeTable timeTable = timeTableRepository.findByClassDetailUuidAndClassTimeAndWeekAndSemester(
-                checkDataAlready.getUuid(),
-                timeTableRequestDto.getClass_time(),
-                timeTableRequestDto.getWeek(),
-                timeTableRequestDto.getSemester());
-        if(timeTable == null){
-            timeTable = TimeTable.builder()
-//                    .member(UUID.randomUUID()) 나중에 member 나오면 추가하기
-                    .classTime(timeTableRequestDto.getClass_time())
-                    .classDetail(classDetail)
-                    .week(timeTableRequestDto.getWeek())
-                    .semester(timeTableRequestDto.getSemester())
-                    .build();
-            timeTableRepository.save(timeTable);
-            return true;}
-        else{
-            return false;
-        }
     }
 }
