@@ -19,8 +19,8 @@ public class TimeTableController {
     @Autowired
     public TimeTableController(TimeTableService timeTableService){this.timeTableService = timeTableService;}
 
-    @GetMapping(value="timetable")
-    public ResponseEntity<ResponseDto<?>> getTimeTable(@RequestParam String semester){
+    @PostMapping(value="timetable_semester")
+    public ResponseEntity<ResponseDto<?>> getTimeTable(@RequestBody String semester){
         //member_uuid를통해서 해당 member의 timetable 만을 조회
         //semester의 데이터 만을 가져오기
         TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), semester);
@@ -34,7 +34,7 @@ public class TimeTableController {
     }
 
     @DeleteMapping(value="timetable")
-    public ResponseEntity<ResponseDto<?>> deleteAllTimeTableOnThisSemester(@RequestParam String semester){
+    public ResponseEntity<ResponseDto<?>> deleteAllTimeTableOnThisSemester(@RequestBody String semester){
         //member와 semester 2개를 받아서 삭제
         TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), semester);
         return ResponseEntity.ok(timeTableService.deleteAllTimeTableOnSemester(timeTableDto));

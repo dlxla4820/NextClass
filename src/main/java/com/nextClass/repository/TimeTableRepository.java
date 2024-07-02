@@ -6,8 +6,6 @@ import com.nextClass.entity.TimeTable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,8 +23,14 @@ public interface TimeTableRepository extends JpaRepository<TimeTable, UUID> {
 
     List<TimeTable> findAllByClassDetail(ClassDetail classDetail);
 
-    @Query("SELECT t from TimeTable t where left(hex(t.classDetail.uuid),32) = :classUuid and left(hex(t.member.uuid),32) = :memberUuid and t.week = :week and t.semester = :semester and t.classEndTime = :endTime and t.classStartTime = :startTime")
-    TimeTable findByClassDetailUuidAndMemberUuidClassStartTimeAAndClassStartTimeAndWeekAndSemester(
+    @Query(value = "SELECT t FROM TimeTable t WHERE UNHEX(t.classDetail.uuid)= :classUuid AND " +
+            "UNHEX(t.member.uuid) = :memberUuid AND " +
+            "t.week = :week AND " +
+            "t.semester = :semester AND " +
+            "t.classEndTime = :endTime AND " +
+            "t.classStartTime = :startTime"
+            )
+    TimeTable findByDetails(
             @Param("classUuid") String classUuid,
             @Param("memberUuid") String memberUuid,
             @Param("week") String week,

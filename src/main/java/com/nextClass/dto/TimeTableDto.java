@@ -15,6 +15,7 @@ public class TimeTableDto {
     private TimeTableRequestDto timeTableRequestDto;
     private String semester;
 
+
     public TimeTableDto(String memberUUID, TimeTableRequestDto timeTableRequestDto){
         this.memberUUID = memberUUID;
         this.timeTableRequestDto = timeTableRequestDto;

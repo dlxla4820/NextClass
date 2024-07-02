@@ -46,9 +46,6 @@ public class TimeTableDetailRepository {
     public void deleteAllClassDetailSelected(List<String> classDetailUuidList){
         classDetailRepository.DeleteAllWhichIsNotForeignKeyInTimeTable(classDetailUuidList);
     }
-    public List<TimeTable> getTimeTableListOnThisSemester(String semester){
-        return timeTableRepository.findAllBySemesterIs(semester);
-    }
     public ClassDetail checkClassDetailAlreadyExist(TimeTableRequestDto timeTableRequestDto){
         return classDetailRepository.findByTitleAndClassGradeAndTeacherNameAndScoreAndSchool(
                 timeTableRequestDto.getTitle(),
@@ -76,7 +73,7 @@ public class TimeTableDetailRepository {
                 .fetchOne();
     }
     public TimeTable findTimeTable(TimeTableDto timeTableDto){
-        return timeTableRepository.findByClassDetailUuidAndMemberUuidClassStartTimeAAndClassStartTimeAndWeekAndSemester(
+        return timeTableRepository.findByDetails(
                 timeTableDto.getClassDetailUUID(),
                 timeTableDto.getMemberUUID(),
                 timeTableDto.getTimeTableRequestDto().getWeek(),
@@ -85,4 +82,14 @@ public class TimeTableDetailRepository {
                 timeTableDto.getTimeTableRequestDto().getClass_end_time()
         );
     }
+    public TimeTable saveTimeTable(TimeTableDto timeTableDto){
+        TimeTable timeTable = TimeTable.builder()
+                .member(timeTableDto.getMemberUUID())
+                .classDetail(timeTableDto.getClassDetailUUID())
+                .build();
+        timeTableRepository.save()
+    }
+//    public TimeTable findTimeTableByUuid(TimeTableDto timeTableDto){
+//        return timeTableRepository.findById(timeTableDto.)
+//    }
 }

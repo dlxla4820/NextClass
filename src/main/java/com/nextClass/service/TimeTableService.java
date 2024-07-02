@@ -42,13 +42,14 @@ public class TimeTableService {
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
-    public ResponseDto deleteOneTimeTableOnSemester(TimeTableDto timeTableDto){
-
-    }
+//    public ResponseDto deleteOneTimeTableOnSemester(TimeTableDto timeTableDto){
+//        if(timeTableRepository.findTimeTableByUuid())
+//        timeTableRepository.deleteAllTimeTable
+//    }
 
     public ResponseDto getPersonalThisSemesterTimeTable(TimeTableDto timeTableDto){
         //member와 semester를 가지고 해당 데이터 가져오기(현재는 semester만)
-        List<TimeTable> timeTableList = timeTableRepository.getTimeTableListOnThisSemester(timeTableDto.getSemester());
+        List<TimeTable> timeTableList = timeTableRepository.getTimeTableListOnSemesterFromUser(timeTableDto);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, timeTableList);
     }
 
@@ -82,10 +83,10 @@ public class TimeTableService {
             return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"week");
         }
         else if(timeTableRequestDto.getClass_start_time() == null || timeTableRequestDto.getClass_start_time()<0 || timeTableRequestDto.getClass_start_time() > 8){
-            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"class_time");
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"class_start_time");
         }
         else if(timeTableRequestDto.getClass_end_time() == null || timeTableRequestDto.getClass_end_time()<0 || timeTableRequestDto.getClass_end_time() > 8){
-            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"class_time");
+            return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(),"class_end_time");
         }
         else if(timeTableRequestDto.getClass_grade() == null || timeTableRequestDto.getClass_grade()<1 || timeTableRequestDto.getClass_grade() > 4){
             return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "class_grade");
