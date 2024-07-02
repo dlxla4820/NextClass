@@ -1,9 +1,6 @@
 package com.nextClass.controller;
 
-import com.nextClass.dto.LoginRequestDto;
-import com.nextClass.dto.MemberRequestDto;
-import com.nextClass.dto.MemberSessionDto;
-import com.nextClass.dto.ResponseDto;
+import com.nextClass.dto.*;
 import com.nextClass.enums.Description;
 import com.nextClass.service.MemberService;
 import com.nextClass.utils.CommonUtils;
@@ -45,6 +42,12 @@ public class LoginController {
     public ResponseEntity<ResponseDto<?>> login(@RequestBody LoginRequestDto requestBody){
         return ResponseEntity.ok(memberService.loginMember(requestBody));
     }
+//    @PostMapping(value = "/email_check")
+//    public ResponseEntity<ResponseDto<?>> emailCheck(@RequestBody EmailCheckRequestDto requestBody){
+//
+//    }
+
+
     @PostMapping(value = "/test")
     public ResponseEntity<String> test(){
         MemberSessionDto userSession = getUserSession();

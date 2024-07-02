@@ -96,6 +96,7 @@ public class MemberService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
 
         loginRepository.updateMemberNormalInfo(memberUuid, requestBody);
+
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
