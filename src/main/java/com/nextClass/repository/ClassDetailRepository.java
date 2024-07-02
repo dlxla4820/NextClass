@@ -2,6 +2,7 @@ package com.nextClass.repository;
 
 import com.nextClass.entity.ClassDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 
@@ -16,4 +17,6 @@ public interface ClassDetailRepository extends JpaRepository<ClassDetail, UUID> 
             Integer score,
             String school
     );
+    @Query("DELETE FROM ClassDetail c WHERE c.uuid in :uuidLists AND c.uuid NOT IN (SELECT t.uuid FROM TimeTable t WHERE t.classDetail.uuid IN :uuidLists)")
+    void DeleteAllWhichIsNotForeignKeyInTimeTable(List<String> uuidLists);
 }

@@ -16,15 +16,12 @@ import java.util.UUID;
 
 public interface TimeTableRepository extends JpaRepository<TimeTable, UUID> {
 
-    @Query("SELECT t FROM TimeTable t WHERE t.classDetail.uuid = :classUuid AND t.classTime = :classTime AND t.week = :week AND t.semester = :semester")
-    TimeTable findByClassDetailUuidAndClassTimeAndWeekAndSemester(
-            @Param("classUuid") UUID classUuid,
-            @Param("classTime") int classTime,
-            @Param("week") String week,
-            @Param("semester") String semester);
     //나중에 학생까지 포함해서 찾기
-    List<TimeTable> findAllBySemesterIs(String semester);
+    List<TimeTable> findAllBySemesterAndMember_Id(String semester, String memberUuid);
     void deleteAllBySemesterIs(String semester);
+
+    @Query("DELETE from TimeTable t where t.uuid in :timeTableUuidList")
+    void deleteAllByUuid(List<String> timeTableUuidList);
 
     List<TimeTable> findAllByClassDetail(ClassDetail classDetail);
 

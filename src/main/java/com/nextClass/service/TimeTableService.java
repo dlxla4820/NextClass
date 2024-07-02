@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,42 +29,44 @@ public class TimeTableService {
     @Autowired
     public TimeTableService(TimeTableDetailRepository timeTableRepository){this.timeTableRepository = timeTableRepository;}
 
-    public ResponseDto deleteAllTimeTableOnSemester(String semester){
+    public ResponseDto deleteAllTimeTableOnSemester(TimeTableDto timeTableDto ){
         //repository에서 해당 학기 데이터 삭제
         //false되면 삭제 실패했다고 보내기
-        boolean isDeleteSuccess = timeTableRepository.deleteAllTimeTableOnSemester(semester);
-        if(!isDeleteSuccess){
-            return new ResponseDto<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Description.FAIL, ErrorCode.DATA_ALREADY_EXIST.getErrorCode(), ErrorCode.DATA_ALREADY_EXIST.getErrorDescription());
-        }
+        List<TimeTable> timeTableList = timeTableRepository.getTimeTableListOnSemesterFromUser(timeTableDto);
+        List<String> timeTableUuidList = timeTableList.stream().map(TimeTable::getUuid).map(UUID::toString).map(s-> s.replace("-","")).toList();
+        List<String> classDetailId = timeTableList.stream().map(TimeTable::getClassDetail).map(ClassDetail::getUuid).distinct().map(UUID::toString).toList();
+        //삭제
+        timeTableRepository.deleteAllTimeTableSelected(timeTableUuidList);
+        //classDetail 검증 및 삭제
+        timeTableRepository.deleteAllClassDetailSelected(classDetailId);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
-    public ResponseDto getPersonalTimeTableAboutThatSemester(String semester){
-        //해당 학기 값이 전달되지 않으면 error 전달
-//        if(semester == (null)){
-//        }
+    public ResponseDto deleteOneTimeTableOnSemester(TimeTableDto timeTableDto){
+
+    }
+
+    public ResponseDto getPersonalThisSemesterTimeTable(TimeTableDto timeTableDto){
         //member와 semester를 가지고 해당 데이터 가져오기(현재는 semester만)
-        List<TimeTable> timeTableList = timeTableRepository.getTimeTableListOnThisSemester(semester);
+        List<TimeTable> timeTableList = timeTableRepository.getTimeTableListOnThisSemester(timeTableDto.getSemester());
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, timeTableList);
     }
 
-    public ResponseDto makeTimeTable(TimeTableRequestDto timeTableRequestDto){
+    public ResponseDto makeTimeTable(TimeTableDto timeTableDto){
         //DTO의 값이 비어 있으면 해당 값 비어 있다는 error를 담아서 responseDTO return, for문을 통해서 진행
-        String errorDescription = checkTimeTableRequest(timeTableRequestDto);
+        String errorDescription = checkTimeTableRequest(timeTableDto.getTimeTableRequestDto());
         log.info("Check TimeTableReqeustDto");
         if(errorDescription != null){
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
         }
         //동일한 classDetail이 존재하는지 확인
-        ClassDetail classDetail = timeTableRepository.checkClassDetailAlreadyExist(timeTableRequestDto);
+        ClassDetail classDetail = timeTableRepository.checkClassDetailAlreadyExist(timeTableDto.getTimeTableRequestDto());
         if(classDetail == null ){
             //새로 저장
-            classDetail = timeTableRepository.saveClassDetail(timeTableRequestDto);
+            classDetail = timeTableRepository.saveClassDetail(timeTableDto.getTimeTableRequestDto());
         }
         //member 추가하면 현재 추가한 데이터 같이 넣어주기
-        String memberUUID = CommonUtils.getMemberUuidIfAdminOrUser();
-        Member currentUser = timeTableRepository.findMember(memberUUID);
-        TimeTableDto timeTableDto = new TimeTableDto(currentUser, classDetail, timeTableRequestDto);
+        timeTableDto.addClassDetailUuid(classDetail.getUuid().toString().replace("-",""));
         TimeTable isDataSaved = timeTableRepository.findTimeTable(timeTableDto);
         if(isDataSaved != null){
             //해당 수업이 이미 저장되어 있음
