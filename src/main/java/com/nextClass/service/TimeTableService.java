@@ -8,6 +8,7 @@ import com.nextClass.entity.Member;
 import com.nextClass.entity.TimeTable;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
+import com.nextClass.repository.LoginRepository;
 import com.nextClass.repository.TimeTableDetailRepository;
 import com.nextClass.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -25,9 +26,16 @@ import java.util.stream.Collectors;
 @Transactional
 public class TimeTableService {
     private final TimeTableDetailRepository timeTableRepository;
+    private final LoginRepository loginRepository;
 
     @Autowired
-    public TimeTableService(TimeTableDetailRepository timeTableRepository){this.timeTableRepository = timeTableRepository;}
+    public TimeTableService(
+            TimeTableDetailRepository timeTableRepository,
+            LoginRepository loginRepository
+    ){
+        this.timeTableRepository = timeTableRepository;
+        this.loginRepository = loginRepository;
+    }
 
     public ResponseDto deleteAllTimeTableOnSemester(TimeTableDto timeTableDto ){
         //repository에서 해당 학기 데이터 삭제
@@ -73,7 +81,9 @@ public class TimeTableService {
             //해당 수업이 이미 저장되어 있음
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.DATA_ALREADY_EXIST.getErrorCode(), ErrorCode.DATA_ALREADY_EXIST.getErrorDescription());
         }
-        timeTableRepository.findTimeTable(timeTableDto);
+        Member member = loginRepository.getMemberByUuid(timeTableDto.getMemberUUID());
+
+        timeTableRepository.saveTimeTable(timeTableDto, member, classDetail);
         return new ResponseDto<>(HttpStatus.ACCEPTED.value(), Description.SUCCESS);
     }
 

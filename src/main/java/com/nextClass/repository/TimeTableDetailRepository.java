@@ -82,12 +82,16 @@ public class TimeTableDetailRepository {
                 timeTableDto.getTimeTableRequestDto().getClass_end_time()
         );
     }
-    public TimeTable saveTimeTable(TimeTableDto timeTableDto){
+    public TimeTable saveTimeTable(TimeTableDto timeTableDto, Member member, ClassDetail classDetail){
         TimeTable timeTable = TimeTable.builder()
-                .member(timeTableDto.getMemberUUID())
-                .classDetail(timeTableDto.getClassDetailUUID())
+                .member(member)
+                .classDetail(classDetail)
+                .week(timeTableDto.getTimeTableRequestDto().getWeek())
+                .semester(timeTableDto.getTimeTableRequestDto().getSemester())
+                .classStartTime(timeTableDto.getTimeTableRequestDto().getClass_start_time())
+                .classEndTime(timeTableDto.getTimeTableRequestDto().getClass_end_time())
                 .build();
-        timeTableRepository.save()
+        return timeTableRepository.save(timeTable);
     }
 //    public TimeTable findTimeTableByUuid(TimeTableDto timeTableDto){
 //        return timeTableRepository.findById(timeTableDto.)
