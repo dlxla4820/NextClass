@@ -38,4 +38,7 @@ public interface TimeTableRepository extends JpaRepository<TimeTable, UUID> {
             @Param("startTime") int startTime,
             @Param("endTime") int endTime
     );
+
+    @Query(value = "SELECT COUNT(t.classDetail.uuid) FROM TimeTable t WHERE t.classDetail.uuid = (SELECT t2.classDetail.uuid FROM TimeTable t2 WHERE t2.uuid = hex(:timeTableUuid))")
+    boolean countClassDetailUuid(String timeTableUuid);
 }

@@ -93,7 +93,8 @@ public class TimeTableDetailRepository {
                 .build();
         return timeTableRepository.save(timeTable);
     }
-//    public TimeTable findTimeTableByUuid(TimeTableDto timeTableDto){
-//        return timeTableRepository.findById(timeTableDto.)
-//    }
+
+    public boolean countClassDetailAsFkey(String timeTableUuid){
+        return timeTableRepository.countClassDetailUuid(timeTableUuid);
+    }
 }

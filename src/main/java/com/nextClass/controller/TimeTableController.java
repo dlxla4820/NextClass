@@ -23,20 +23,20 @@ public class TimeTableController {
     public ResponseEntity<ResponseDto<?>> getTimeTable(@RequestBody String semester){
         //member_uuid를통해서 해당 member의 timetable 만을 조회
         //semester의 데이터 만을 가져오기
-        TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), semester);
-        return ResponseEntity.ok(timeTableService.getPersonalThisSemesterTimeTable(timeTableDto));
+        return ResponseEntity.ok(timeTableService.getPersonalThisSemesterTimeTable(semester));
     }
 
     @PostMapping(value = "timetable")
     public ResponseEntity<ResponseDto<?>> postTimeTable(@RequestBody TimeTableRequestDto timeTableRequestDto){
-        TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), timeTableRequestDto);
-        return ResponseEntity.ok(timeTableService.makeTimeTable(timeTableDto));
+        return ResponseEntity.ok(timeTableService.makeTimeTable(timeTableRequestDto));
     }
 
-    @DeleteMapping(value="timetable")
+    @DeleteMapping(value="timetable_semster")
     public ResponseEntity<ResponseDto<?>> deleteAllTimeTableOnThisSemester(@RequestBody String semester){
-        //member와 semester 2개를 받아서 삭제
-        TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), semester);
-        return ResponseEntity.ok(timeTableService.deleteAllTimeTableOnSemester(timeTableDto));
+        return ResponseEntity.ok(timeTableService.deleteAllTimeTableOnSemester(semester));
+    }
+    @DeleteMapping(value = "timetable")
+    public ResponseEntity<ResponseDto<?>> deleteOneTimeTable(@RequestBody TimeTableRequestDto timeTableRequestDto){
+        return ResponseEntity.ok(timeTableService.deleteOneTimeTable(timeTableRequestDto));
     }
 }

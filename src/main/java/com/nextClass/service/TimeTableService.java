@@ -37,7 +37,24 @@ public class TimeTableService {
         this.loginRepository = loginRepository;
     }
 
-    public ResponseDto deleteAllTimeTableOnSemester(TimeTableDto timeTableDto ){
+    public ResponseDto deleteOneTimeTable(TimeTableRequestDto timeTableRequestDto){
+        String errorDescription = checkTimeTableRequest(timeTableRequestDto);
+        log.info("Check TimeTableReqeustDto");
+        if(errorDescription != null){
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
+        }
+        TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), timeTableRequestDto);
+        if(timeTableRepository.countClassDetailAsFkey(timeTableRequestDto.))
+
+    }
+
+    public ResponseDto deleteAllTimeTableOnSemester(String  semester ){
+        if(semester == null || semester.isBlank()){
+            String errorMsg = String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "semester");
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), errorMsg);
+        }
+        //member와 semester 2개를 받아서 삭제
+        TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), semester);
         //repository에서 해당 학기 데이터 삭제
         //false되면 삭제 실패했다고 보내기
         List<TimeTable> timeTableList = timeTableRepository.getTimeTableListOnSemesterFromUser(timeTableDto);
@@ -55,19 +72,25 @@ public class TimeTableService {
 //        timeTableRepository.deleteAllTimeTable
 //    }
 
-    public ResponseDto getPersonalThisSemesterTimeTable(TimeTableDto timeTableDto){
+    public ResponseDto getPersonalThisSemesterTimeTable(String semester){
+        if(semester == null || semester.isBlank()){
+            String errorMsg = String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "semester");
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), errorMsg);
+        }
+        TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), semester);
         //member와 semester를 가지고 해당 데이터 가져오기(현재는 semester만)
         List<TimeTable> timeTableList = timeTableRepository.getTimeTableListOnSemesterFromUser(timeTableDto);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, timeTableList);
     }
 
-    public ResponseDto makeTimeTable(TimeTableDto timeTableDto){
+    public ResponseDto makeTimeTable(TimeTableRequestDto timeTableRequestDto){
         //DTO의 값이 비어 있으면 해당 값 비어 있다는 error를 담아서 responseDTO return, for문을 통해서 진행
-        String errorDescription = checkTimeTableRequest(timeTableDto.getTimeTableRequestDto());
+        String errorDescription = checkTimeTableRequest(timeTableRequestDto);
         log.info("Check TimeTableReqeustDto");
         if(errorDescription != null){
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
         }
+        TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), timeTableRequestDto);
         //동일한 classDetail이 존재하는지 확인
         ClassDetail classDetail = timeTableRepository.checkClassDetailAlreadyExist(timeTableDto.getTimeTableRequestDto());
         if(classDetail == null ){
