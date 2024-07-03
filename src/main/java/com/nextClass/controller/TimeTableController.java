@@ -36,7 +36,7 @@ public class TimeTableController {
         return ResponseEntity.ok(timeTableService.deleteAllTimeTableOnSemester(semester));
     }
     @DeleteMapping(value = "timetable")
-    public ResponseEntity<ResponseDto<?>> deleteOneTimeTable(@RequestBody TimeTableRequestDto timeTableRequestDto){
-        return ResponseEntity.ok(timeTableService.deleteOneTimeTable(timeTableRequestDto));
+    public ResponseEntity<ResponseDto<?>> deleteOneTimeTable(@RequestBody String timeTableUuid){
+        return ResponseEntity.ok(timeTableService.deleteOneTimeTable(timeTableUuid));
     }
 }

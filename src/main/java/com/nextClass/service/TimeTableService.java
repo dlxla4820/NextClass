@@ -37,21 +37,26 @@ public class TimeTableService {
         this.loginRepository = loginRepository;
     }
 
-    public ResponseDto deleteOneTimeTable(TimeTableRequestDto timeTableRequestDto){
-        String errorDescription = checkTimeTableRequest(timeTableRequestDto);
-        log.info("Check TimeTableReqeustDto");
-        if(errorDescription != null){
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
+    public ResponseDto deleteOneTimeTable(String timeTableUuid){
+        if(timeTableUuid == null || timeTableUuid.isBlank()){
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "timeTableUuid"));
         }
-        TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), timeTableRequestDto);
-        if(timeTableRepository.countClassDetailAsFkey(timeTableRequestDto.))
+        TimeTableDto timeTableDto = new TimeTableDto(timeTableUuid, CommonUtils.getMemberUuidIfAdminOrUser());
+        if(timeTableRepository.findTimeTableByUuid(timeTableUuid) == null){
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.DATA_ALREADY_DELETED.getErrorCode(), ErrorCode.DATA_ALREADY_DELETED.getErrorDescription());
+        }
+        if(timeTableRepository.checkCurrentUserIsOwnerOfTimeTable(timeTableDto) == null){
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
+        }
+        if(timeTableRepository.countClassDetailAsFkey(timeTableUuid) == 1 ){
+            timeTableRepository.deleteTimeTableAndClassDetail();
+        }
 
     }
 
     public ResponseDto deleteAllTimeTableOnSemester(String  semester ){
         if(semester == null || semester.isBlank()){
-            String errorMsg = String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "semester");
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), errorMsg);
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "semester"));
         }
         //member와 semester 2개를 받아서 삭제
         TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), semester);

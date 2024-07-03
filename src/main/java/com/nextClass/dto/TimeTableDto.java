@@ -14,17 +14,18 @@ public class TimeTableDto {
     private String classDetailUUID;
     private TimeTableRequestDto timeTableRequestDto;
     private String semester;
+    private String timeTableUuid;
 
 
     public TimeTableDto(String memberUUID, TimeTableRequestDto timeTableRequestDto){
         this.memberUUID = memberUUID;
         this.timeTableRequestDto = timeTableRequestDto;
     }
-
-    public TimeTableDto(String memberUUID, String semester){
+    public TimeTableDto(String timeTableUuid, String memberUUID){
         this.memberUUID = memberUUID;
-        this.semester = semester;
+        this.timeTableUuid = timeTableUuid;
     }
+
 
     public TimeTableDto(String memberUUID, String classDetailUUID, TimeTableRequestDto timeTableRequestDto){
         this.memberUUID = memberUUID;

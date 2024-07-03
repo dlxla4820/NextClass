@@ -18,10 +18,14 @@ public interface TimeTableRepository extends JpaRepository<TimeTable, UUID> {
     List<TimeTable> findAllBySemesterAndMember_Id(String semester, String memberUuid);
     void deleteAllBySemesterIs(String semester);
 
+
     @Query("DELETE from TimeTable t where t.uuid in :timeTableUuidList")
-    void deleteAllByUuid(List<String> timeTableUuidList);
+    void deleteAllByUuid(@Param("timeTableUuidList")List<String> timeTableUuidList);
 
     List<TimeTable> findAllByClassDetail(ClassDetail classDetail);
+
+    @Query(value="SELECT t FROM TimeTable t WHERE UNHEX(t.uuid) = :timeTableUuid")
+    TimeTable findByUuid(@Param("timeTableUuid") String timeTableUuid);
 
     @Query(value = "SELECT t FROM TimeTable t WHERE UNHEX(t.classDetail.uuid)= :classUuid AND " +
             "UNHEX(t.member.uuid) = :memberUuid AND " +
@@ -40,5 +44,12 @@ public interface TimeTableRepository extends JpaRepository<TimeTable, UUID> {
     );
 
     @Query(value = "SELECT COUNT(t.classDetail.uuid) FROM TimeTable t WHERE t.classDetail.uuid = (SELECT t2.classDetail.uuid FROM TimeTable t2 WHERE t2.uuid = hex(:timeTableUuid))")
-    boolean countClassDetailUuid(String timeTableUuid);
+    int countClassDetailUuid(@Param("timeTableUuid") String timeTableUuid);
+
+    @Query(value = "SELECT t FROM TimeTable t WHERE (SELECT t2 FROM TimeTable t2 WHERE t2.uuid = :timeTableUuid).member.uuid = :memberUuid")
+    TimeTable checkTimeTableMemberUuid(@Param("timeTableUuid") String timeTableUuid,
+                                       @Param("memberUuid") String memberUuid
+                                       );
+
+    void deleteTimeTableAndClassDetail()
 }

@@ -67,10 +67,8 @@ public class TimeTableDetailRepository {
         return classDetailRepository.save(classDetail);
     }
 
-    public Member findMember(String uuid){
-        return queryFactory.selectFrom(member)
-                .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
-                .fetchOne();
+    public TimeTable findTimeTableByUuid(String uuid){
+        return timeTableRepository.findByUuid(uuid);
     }
     public TimeTable findTimeTable(TimeTableDto timeTableDto){
         return timeTableRepository.findByDetails(
@@ -94,7 +92,10 @@ public class TimeTableDetailRepository {
         return timeTableRepository.save(timeTable);
     }
 
-    public boolean countClassDetailAsFkey(String timeTableUuid){
+    public int countClassDetailAsFkey(String timeTableUuid){
         return timeTableRepository.countClassDetailUuid(timeTableUuid);
+    }
+    public TimeTable checkCurrentUserIsOwnerOfTimeTable(TimeTableDto timeTableDto){
+        return timeTableRepository.checkTimeTableMemberUuid(timeTableDto.getTimeTableUuid(), timeTableDto.getMemberUUID());
     }
 }
