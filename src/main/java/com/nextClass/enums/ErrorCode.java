@@ -16,14 +16,15 @@ public enum ErrorCode {
     JWT_ACCESS_EXPIRED_INVALID("E00106","만료된 Access 토큰입니다."),
     JWT_REFRESH_INVALID("E00107", "유효하지 않은 Refresh 토큰입니다."),
     JWT_REFRESH_EXPIRED_INVALID("E00108","만료된 Refresh 토큰입니다."),
+    PARAMETER_INVALID_SPECIFIC("E00109", "%s이(가) 유효하지 않습니다."),
+    INPUT_DUPLICATED("E00110","%s이(가) 중복되었습니다."),
 
-    PARAMETER_INVALID_SPECIFIC("E00201", "%s이(가) 유효하지 않습니다."),
-    MEMBER_DUPLICATED("E00202","%s이(가) 중복되었습니다."),
-    MEMBER_NOT_EXIST("E00203","Request에 해당하는 회원이 존재하지 않습니다."),
+    MEMBER_NOT_EXIST("E00201","Request에 해당하는 회원이 존재하지 않습니다."),
 
     DATA_ALREADY_EXIST("E00301","해당 수업이 시간표 상에 이미 존재합니다."),
     TIME_TABLE_UNAUTHORIZED("E00302", "해당 수업에 대한 접근 권한이 없습니다."),
     DATA_ALREADY_DELETED("E00303", "해당 수업은 이미 삭제되었습니다");
+
 
     private final String errorCode;
     private final String errorDescription;
