@@ -37,6 +37,15 @@ public class TimeTableService {
         this.loginRepository = loginRepository;
     }
 
+    public ResponseDto caculateScoreOnSemester(String semester){
+        //학점 계산기
+    }
+
+    //수정하기
+    public ResponseDto changeTimeTableData(String semester){
+        //
+    }
+
     public ResponseDto deleteOneTimeTable(String timeTableUuid){
         if(timeTableUuid == null || timeTableUuid.isBlank()){
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "timeTableUuid"));
@@ -50,6 +59,9 @@ public class TimeTableService {
         }
         if(timeTableRepository.countClassDetailAsFkey(timeTableUuid) == 1 ){
             timeTableRepository.deleteTimeTableAndClassDetail();
+        }else if(timeTableRepository.countClassDetailAsFkey(timeTableUuid) > 1){
+            //같은 그거 이므로 동일한 데이터만 삭제한다
+            timeTableRepository.deleteTimeTable();
         }
 
     }
@@ -71,11 +83,6 @@ public class TimeTableService {
         timeTableRepository.deleteAllClassDetailSelected(classDetailId);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
-
-//    public ResponseDto deleteOneTimeTableOnSemester(TimeTableDto timeTableDto){
-//        if(timeTableRepository.findTimeTableByUuid())
-//        timeTableRepository.deleteAllTimeTable
-//    }
 
     public ResponseDto getPersonalThisSemesterTimeTable(String semester){
         if(semester == null || semester.isBlank()){

@@ -98,4 +98,11 @@ public class TimeTableDetailRepository {
     public TimeTable checkCurrentUserIsOwnerOfTimeTable(TimeTableDto timeTableDto){
         return timeTableRepository.checkTimeTableMemberUuid(timeTableDto.getTimeTableUuid(), timeTableDto.getMemberUUID());
     }
+
+    public void deleteTimeTableAndClassDetail(){
+        timeTableRepository.
+    }
+    public void deleteTimeTable(){
+
+    }
 }
