@@ -44,9 +44,9 @@ public class MemberService {
 
         // 중복체크
         if(loginRepository.getMemberByKeyValue("id",requestBody.getId()) != null)
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MEMBER_DUPLICATED.getErrorCode(), String.format(ErrorCode.MEMBER_DUPLICATED.getErrorDescription(),"id"));
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), String.format(ErrorCode.INPUT_DUPLICATED.getErrorDescription(),"id"));
         if(loginRepository.getMemberByKeyValue("email",requestBody.getEmail()) != null)
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MEMBER_DUPLICATED.getErrorCode(), String.format(ErrorCode.MEMBER_DUPLICATED.getErrorDescription(),"email"));
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), String.format(ErrorCode.INPUT_DUPLICATED.getErrorDescription(),"email"));
 
         // 비밀번호 hashing + 저장
         loginRepository.saveMember(requestBody, passwordEncoder.encode(requestBody.getPassword()));
@@ -75,7 +75,7 @@ public class MemberService {
                 if(loginRepository.getMemberByKeyValue(key, data.get(key)) == null)
                     return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
                 else
-                    return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MEMBER_DUPLICATED.getErrorCode(), String.format(ErrorCode.MEMBER_DUPLICATED.getErrorDescription(),key));
+                    return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), String.format(ErrorCode.INPUT_DUPLICATED.getErrorDescription(),key));
             }
         }
         return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), ErrorCode.PARAMETER_INVALID_GENERAL.getErrorDescription());
@@ -148,7 +148,7 @@ public class MemberService {
 
         // 중복체크
         if(loginRepository.getMemberByKeyValue("email",memberRequestDto.getEmail()) != null)
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MEMBER_DUPLICATED.getErrorCode(), String.format(ErrorCode.MEMBER_DUPLICATED.getErrorDescription(),"email"));
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), String.format(ErrorCode.INPUT_DUPLICATED.getErrorDescription(),"email"));
 
         loginRepository.updateMember(memberRequestDto);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
