@@ -8,12 +8,14 @@ import com.nextClass.entity.Member;
 import com.nextClass.entity.TimeTable;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
+import com.nextClass.repository.ClassDetailRepository;
 import com.nextClass.repository.LoginRepository;
 import com.nextClass.repository.TimeTableDetailRepository;
 import com.nextClass.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,23 +29,43 @@ import java.util.stream.Collectors;
 public class TimeTableService {
     private final TimeTableDetailRepository timeTableRepository;
     private final LoginRepository loginRepository;
+    private final ClassDetailRepository classDetailRepository;
 
     @Autowired
     public TimeTableService(
             TimeTableDetailRepository timeTableRepository,
-            LoginRepository loginRepository
+            LoginRepository loginRepository,
+            ClassDetailRepository classDetailRepository
     ){
         this.timeTableRepository = timeTableRepository;
         this.loginRepository = loginRepository;
+        this. classDetailRepository = classDetailRepository;
     }
 
-    public ResponseDto caculateScoreOnSemester(String semester){
-        //학점 계산기
-    }
+//    public ResponseDto caculateScoreOnSemester(String semester){
+//        //학점 계산기
+//
+//    }
 
     //수정하기
-    public ResponseDto changeTimeTableData(String semester){
+    public ResponseDto changeTimeTableData(TimeTableRequestDto timeTableRequestDto){
         //class_detail의 데이터가 전부 동일할 때, 해당 class_detail의 id와 현재 수정하는 class_detail
+        //if 현재 classDetail의 정보들로 가져온 classDetail의 uuid의 값과 timeTableRequetDto에서 받아온 값이 다르면
+        ClassDetail newClassDetailUuid = timeTableRepository.checkClassDetailAlreadyExist(timeTableRequestDto);
+        if(newClassDetailUuid ==null){
+            //classDetail은 새로 만들고, 해당 데이터를 넣어서 timeTable update
+            timeTableRepository.updateTimeTableWithNewClassDetail();
+        }else{
+            if(newClassDetailUuid.getUuid().toString().replace("-","").equals(timeTableRequestDto.getClass_detail_uuid())){
+                //기존 classDetail과 완전히 동일하므로 timeTable의 내용만 update하면 됨
+                timeTableRepository.updateTimeTableWithOutClassDetail();
+            }
+            else{
+                //현재 timeTable의 classDetail을 해당 classDetail의 uuid값으로 바꿔서 update
+                timeTableRepository.updateTimeTableWith
+            }
+        }
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
     public ResponseDto deleteOneTimeTable(String timeTableUuid){
@@ -58,12 +80,14 @@ public class TimeTableService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
         }
         if(timeTableRepository.countClassDetailAsFkey(timeTableUuid) == 1 ){
-            timeTableRepository.deleteTimeTableAndClassDetail();
+            //나중에 하나의 쿼리문으로 수정
+            TimeTable currentTimeTable = timeTableRepository.findTimeTableByUuid(timeTableUuid);
+            timeTableRepository.deleteTimeTableAndClassDetail(timeTableUuid, currentTimeTable.getClassDetail().getUuid().toString().replace("-",""));
         }else if(timeTableRepository.countClassDetailAsFkey(timeTableUuid) > 1){
             //같은 그거 이므로 동일한 데이터만 삭제한다
-            timeTableRepository.deleteTimeTable();
+            timeTableRepository.deleteTimeTable(timeTableUuid);
         }
-
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
     public ResponseDto deleteAllTimeTableOnSemester(String  semester ){

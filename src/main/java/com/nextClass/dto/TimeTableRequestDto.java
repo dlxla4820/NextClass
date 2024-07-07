@@ -18,6 +18,7 @@ public class TimeTableRequestDto {
     private String title;
     private String semester;
     private String school;
+    private String class_detail_uuid;
 
     public TimeTableRequestDto(String week, Integer class_start_time, Integer class_end_time, Integer class_grade, String teacher_name, Integer score, String title, String semester, String school){
         this.week = week;
@@ -31,8 +32,9 @@ public class TimeTableRequestDto {
         this.school = school;
     }
 
-    public TimeTableRequestDto(String uuid, String week, Integer class_start_time, Integer class_end_time, Integer class_grade, String teacher_name, Integer score, String title, String semester, String school){
+    public TimeTableRequestDto(String uuid,String class_detail_uuid, String week, Integer class_start_time, Integer class_end_time, Integer class_grade, String teacher_name, Integer score, String title, String semester, String school){
         this.uuid = uuid;
+        this.class_detail_uuid = class_detail_uuid;
         this.week = week;
         this.class_start_time = class_start_time;
         this.class_end_time = class_end_time;

@@ -51,7 +51,7 @@ public interface TimeTableRepository extends JpaRepository<TimeTable, UUID> {
                                        @Param("memberUuid") String memberUuid
                                        );
 
-    @Query(value= "SELECT")
+    @Query(value= "DELETE FROM TimeTable t WHERE t.uuid = :timeTableId")
     //uuid 값만을 가지고 timetable과 classDetail2개를 삭제하는 쿼리문 작성
-    void deleteTimeTableAndClassDetail(@Param )
+    void deleteTimeTable(@Param("timeTableId") String timeTableId );
 }

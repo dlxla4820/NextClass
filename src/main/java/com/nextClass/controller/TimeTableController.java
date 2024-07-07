@@ -40,13 +40,13 @@ public class TimeTableController {
         return ResponseEntity.ok(timeTableService.deleteOneTimeTable(timeTableUuid));
     }
 
-    @PostMapping(value = "score")
-    public ResponseEntity<ResponseDto<?>> calculateScore(@RequestBody String semester){
-        return ResponseEntity.ok(timeTableService.caculateScoreOnSemester(semester));
-    }
+//    @PostMapping(value = "score")
+//    public ResponseEntity<ResponseDto<?>> calculateScore(@RequestBody String semester){
+//        return ResponseEntity.ok(timeTableService.caculateScoreOnSemester(semester));
+//    }
 
     @PostMapping(value = "timetable_change")
     public ResponseEntity<ResponseDto<?>> changeTimeTableData(@RequestBody TimeTableRequestDto timeTableRequestDto){
-        return ResponseEntity.ok(timeTableService.)
+        return ResponseEntity.ok(timeTableService.changeTimeTableData(timeTableRequestDto));
     }
 }

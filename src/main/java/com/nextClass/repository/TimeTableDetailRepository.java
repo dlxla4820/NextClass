@@ -99,10 +99,11 @@ public class TimeTableDetailRepository {
         return timeTableRepository.checkTimeTableMemberUuid(timeTableDto.getTimeTableUuid(), timeTableDto.getMemberUUID());
     }
 
-    public void deleteTimeTableAndClassDetail(){
-        timeTableRepository.
+    public void deleteTimeTableAndClassDetail(String timeTableId, String classDetailUuid){
+        timeTableRepository.deleteTimeTable(timeTableId);
+        classDetailRepository.deleteClassDetail(classDetailUuid);
     }
-    public void deleteTimeTable(){
-
+    public void deleteTimeTable(String timeTableUuid){
+        timeTableRepository.deleteTimeTable(timeTableUuid);
     }
 }
