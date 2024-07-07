@@ -6,9 +6,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class TimeTableRequestDto {
     //member uuid : 로그인 시 세션으로 가져옴, class_uuid : 데이터 등록 시에 생성
+    private String uuid;
     private String week;
     private Integer class_start_time;
     private Integer class_end_time;
@@ -18,4 +18,29 @@ public class TimeTableRequestDto {
     private String title;
     private String semester;
     private String school;
+
+    public TimeTableRequestDto(String week, Integer class_start_time, Integer class_end_time, Integer class_grade, String teacher_name, Integer score, String title, String semester, String school){
+        this.week = week;
+        this.class_start_time = class_start_time;
+        this.class_end_time = class_end_time;
+        this.class_grade = class_grade;
+        this.teacher_name = teacher_name;
+        this.score = score;
+        this.title = title;
+        this.semester = semester;
+        this.school = school;
+    }
+
+    public TimeTableRequestDto(String uuid, String week, Integer class_start_time, Integer class_end_time, Integer class_grade, String teacher_name, Integer score, String title, String semester, String school){
+        this.uuid = uuid;
+        this.week = week;
+        this.class_start_time = class_start_time;
+        this.class_end_time = class_end_time;
+        this.class_grade = class_grade;
+        this.teacher_name = teacher_name;
+        this.score = score;
+        this.title = title;
+        this.semester = semester;
+        this.school = school;
+    }
 }

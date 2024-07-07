@@ -43,7 +43,7 @@ public class TimeTableService {
 
     //수정하기
     public ResponseDto changeTimeTableData(String semester){
-        //
+        //class_detail의 데이터가 전부 동일할 때, 해당 class_detail의 id와 현재 수정하는 class_detail
     }
 
     public ResponseDto deleteOneTimeTable(String timeTableUuid){
