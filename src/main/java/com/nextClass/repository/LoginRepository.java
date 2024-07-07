@@ -1,5 +1,8 @@
 package com.nextClass.repository;
 
+import com.nextClass.dto.MemberChangeEmailRequestDto;
+import com.nextClass.dto.MemberChangeNormalInfoRequestDto;
+import com.nextClass.dto.MemberChangePasswordRequestDto;
 import com.nextClass.dto.MemberRequestDto;
 import com.nextClass.entity.Member;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -25,7 +28,6 @@ public class LoginRepository {
     }
     /**
      * DB INSERT : MEMBER
-     * @param MemberRequestDto
      **/
     public void saveMember(MemberRequestDto MemberRequestDto, String encodePassword){
         Member member = Member.builder()
@@ -43,8 +45,6 @@ public class LoginRepository {
 
     /**
      * DB SELECT : MEMBER
-     * @param key
-     * @param value
      **/
     public Member getMemberByKeyValue(String key, String value){
         return queryFactory.selectFrom(member)
@@ -54,7 +54,6 @@ public class LoginRepository {
 
     /**
      * DB SELECT : MEMBER
-     * @Param id
      **/
     public Member getMemberById(String id){
         return queryFactory.selectFrom(member)
@@ -63,18 +62,24 @@ public class LoginRepository {
     }
     /**
      * DB SELECT : MEMBER
-     * @param uuid
      **/
     public Member getMemberByUuid(String uuid){
         return queryFactory.selectFrom(member)
                 .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
                 .fetchOne();
     }
-
+    /**
+     * DB SELECT : MEMBER
+     **/
+    public String getMemberPasswordByUuid(String uuid){
+        return queryFactory.select(member.password)
+                .from(member)
+                .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
+                .fetchOne();
+    }
 
     /**
      * DB UPDATE : MEMBER
-     * @param memberRequestDto
      **/
     public void updateMember(MemberRequestDto memberRequestDto){
         queryFactory.update(member)
@@ -87,14 +92,41 @@ public class LoginRepository {
                 .where(member.id.eq(memberRequestDto.getId()))
                 .execute();
     }
-
+    /**
+     * DB UPDATE : MEMBER
+     **/
+    public void updateMemberNormalInfo(String uuid, MemberChangeNormalInfoRequestDto requestDto){
+        queryFactory.update(member)
+                .set(member.name, requestDto.getName())
+                .set(member.member_school, requestDto.getMember_school())
+                .set(member.member_grade, requestDto.getMember_grade())
+                .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
+                .execute();
+    }
+    /**
+     * DB UPDATE : MEMBER
+     **/
+    public void updateMemberPassword(String uuid, String encodePassword){
+        queryFactory.update(member)
+                .set(member.password, encodePassword)
+                .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
+                .execute();
+    }
+    /**
+     * DB UPDATE : MEMBER
+     **/
+    public void updateMemberEmail(String uuid, String email){
+        queryFactory.update(member)
+                .set(member.email, email)
+                .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
+                .execute();
+    }
 
     private BooleanExpression propertyEqByKeyValue(String key, String value) {
-        if (key.equals("id")) {
+        if ("id".equals(key))
             return member.id.eq(value);
-        } else if (key.equals("email")) {
+        if ("email".equals(key))
             return member.email.eq(value);
-        }
         return null;
     }
 

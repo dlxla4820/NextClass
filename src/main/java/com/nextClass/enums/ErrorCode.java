@@ -18,8 +18,12 @@ public enum ErrorCode {
     JWT_REFRESH_EXPIRED_INVALID("E00108","만료된 Refresh 토큰입니다."),
     PARAMETER_INVALID_SPECIFIC("E00109", "%s이(가) 유효하지 않습니다."),
     INPUT_DUPLICATED("E00110","%s이(가) 중복되었습니다."),
+    TOKEN_MEMBER_NOT_EXIST("E00101","Token에 해당하는 회원이 존재하지 않습니다."),
 
-    MEMBER_NOT_EXIST("E00201","Request에 해당하는 회원이 존재하지 않습니다.");
+    MEMBER_NOT_EXIST("E00201","Request에 해당하는 회원이 존재하지 않습니다."),
+    EXISTING_PASSWORD_NOT_MATCH("E00202","현재 비밀번호가 일치하지 않습니다."),
+    EMAIL_NOT_CHECK("E00203","이메일 인증이 필요합니다.");
+
 
     private final String errorCode;
     private final String errorDescription;
