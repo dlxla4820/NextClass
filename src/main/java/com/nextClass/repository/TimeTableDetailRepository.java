@@ -106,4 +106,8 @@ public class TimeTableDetailRepository {
     public void deleteTimeTable(String timeTableUuid){
         timeTableRepository.deleteTimeTable(timeTableUuid);
     }
+    public void updateTimeTableWithNewClassDetail(ClassDetail classDetail, TimeTable timeTable){
+        classDetailRepository.save(classDetail);
+        timeTableRepository.save(timeTable);
+    }
 }

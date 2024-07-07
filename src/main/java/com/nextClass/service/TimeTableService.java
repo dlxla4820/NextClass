@@ -54,7 +54,23 @@ public class TimeTableService {
         ClassDetail newClassDetailUuid = timeTableRepository.checkClassDetailAlreadyExist(timeTableRequestDto);
         if(newClassDetailUuid ==null){
             //classDetail은 새로 만들고, 해당 데이터를 넣어서 timeTable update
-            timeTableRepository.updateTimeTableWithNewClassDetail();
+            ClassDetail newClassDetail = ClassDetail.builder()
+                    .school(timeTableRequestDto.getSchool())
+                    .classGrade(timeTableRequestDto.getClass_grade())
+                    .score(timeTableRequestDto.getScore())
+                    .title(timeTableRequestDto.getTitle())
+                    .teacherName(timeTableRequestDto.getTeacher_name())
+                    .build();
+            TimeTable timeTable = TimeTable.builder()
+                    .uuid(UUID.fromString(timeTableRequestDto.getUuid()))
+                    .classDetail(newClassDetail)
+                    .week(timeTableRequestDto.getWeek())
+                    .classStartTime(timeTableRequestDto.getClass_start_time())
+                    .classEndTime(timeTableRequestDto.getClass_end_time())
+                    .member(loginRepository.getMemberByUuid(CommonUtils.getMemberUuidIfAdminOrUser()))
+                    .semester(timeTableRequestDto.getSemester())
+                    .build();
+            timeTableRepository.updateTimeTableWithNewClassDetail(newClassDetail, timeTable);
         }else{
             if(newClassDetailUuid.getUuid().toString().replace("-","").equals(timeTableRequestDto.getClass_detail_uuid())){
                 //기존 classDetail과 완전히 동일하므로 timeTable의 내용만 update하면 됨
@@ -62,7 +78,7 @@ public class TimeTableService {
             }
             else{
                 //현재 timeTable의 classDetail을 해당 classDetail의 uuid값으로 바꿔서 update
-                timeTableRepository.updateTimeTableWith
+                timeTableRepository.updateTimeTableWithOtherClassDetail();
             }
         }
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
