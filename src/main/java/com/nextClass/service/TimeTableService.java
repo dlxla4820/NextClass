@@ -49,6 +49,9 @@ public class TimeTableService {
 
     //수정하기
     public ResponseDto changeTimeTableData(TimeTableRequestDto timeTableRequestDto){
+        if(!CommonUtils.getMemberUuidIfAdminOrUser().equals(timeTableRepository.findTimeTableByUuid(timeTableRequestDto.getUuid()).toString().replace("-", ""))){
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription())
+        }
         //class_detail의 데이터가 전부 동일할 때, 해당 class_detail의 id와 현재 수정하는 class_detail
         //if 현재 classDetail의 정보들로 가져온 classDetail의 uuid의 값과 timeTableRequetDto에서 받아온 값이 다르면
         ClassDetail newClassDetailUuid = timeTableRepository.checkClassDetailAlreadyExist(timeTableRequestDto);
@@ -74,10 +77,27 @@ public class TimeTableService {
         }else{
             if(newClassDetailUuid.getUuid().toString().replace("-","").equals(timeTableRequestDto.getClass_detail_uuid())){
                 //기존 classDetail과 완전히 동일하므로 timeTable의 내용만 update하면 됨
-                timeTableRepository.updateTimeTableWithOutClassDetail();
+                TimeTable timeTable = TimeTable.builder()
+                        .uuid(UUID.fromString(timeTableRequestDto.getUuid()))
+                        .classDetail(timeTableRepository.checkClassDetailAlreadyExist(timeTableRequestDto))
+                        .week(timeTableRequestDto.getWeek())
+                        .classStartTime(timeTableRequestDto.getClass_start_time())
+                        .classEndTime(timeTableRequestDto.getClass_end_time())
+                        .member(loginRepository.getMemberByUuid(CommonUtils.getMemberUuidIfAdminOrUser()))
+                        .semester(timeTableRequestDto.getSemester())
+                        .build();
+                timeTableRepository.updateTimeTableWithOutClassDetail(timeTable);
             }
             else{
                 //현재 timeTable의 classDetail을 해당 classDetail의 uuid값으로 바꿔서 update
+                TimeTable timeTable = TimeTable.builder()
+                        .classDetail(timeTableRepository.findClassDetailByUuid())
+                        .week(timeTableRequestDto.getWeek())
+                        .classStartTime(timeTableRequestDto.getClass_start_time())
+                        .classEndTime(timeTableRequestDto.getClass_end_time())
+                        .member(loginRepository.getMemberByUuid(CommonUtils.getMemberUuidIfAdminOrUser()))
+                        .semester(timeTableRequestDto.getSemester())
+                        .build();
                 timeTableRepository.updateTimeTableWithOtherClassDetail();
             }
         }

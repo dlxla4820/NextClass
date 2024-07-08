@@ -110,4 +110,7 @@ public class TimeTableDetailRepository {
         classDetailRepository.save(classDetail);
         timeTableRepository.save(timeTable);
     }
+    public void updateTimeTableWithOutClassDetail(TimeTable timeTable){
+        timeTableRepository.save(timeTable);
+    }
 }
