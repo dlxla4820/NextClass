@@ -2,6 +2,8 @@ package com.nextClass.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
 
@@ -13,20 +15,27 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class TimeTable {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Builder.Default
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @JdbcTypeCode(SqlTypes.BINARY)
+    @Column(columnDefinition = "binary(16)")
     private UUID uuid = UUID.randomUUID();
+
     @ManyToOne
     @JoinColumn(name = "member_uuid", referencedColumnName = "uuid", nullable = false)
     private Member member;
+
     @ManyToOne
     @JoinColumn(name = "class_uuid", referencedColumnName = "uuid", nullable = false)
     private ClassDetail classDetail;
+
     private String week;
-    //일단 int로 해놓고, 나중에 대한이가 된다고 하면 String으로 수정해서 enum타입 설정
+
     @Column(name = "start_time")
     private int classStartTime;
+
     @Column(name = "end_time")
     private int classEndTime;
+
     private String semester;
 }
+

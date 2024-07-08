@@ -31,6 +31,7 @@ public interface TimeTableRepository extends JpaRepository<TimeTable, UUID> {
             "UNHEX(t.member.uuid) = :memberUuid AND " +
             "t.week = :week AND " +
             "t.semester = :semester AND " +
+
             "t.classEndTime = :endTime AND " +
             "t.classStartTime = :startTime"
             )
@@ -43,13 +44,20 @@ public interface TimeTableRepository extends JpaRepository<TimeTable, UUID> {
             @Param("endTime") int endTime
     );
 
-    @Query(value = "SELECT COUNT(t.classDetail.uuid) FROM TimeTable t WHERE t.classDetail.uuid = (SELECT t2.classDetail.uuid FROM TimeTable t2 WHERE t2.uuid = hex(:timeTableUuid))")
-    int countClassDetailUuid(@Param("timeTableUuid") String timeTableUuid);
+    @Query("SELECT COUNT(t) " +
+            "FROM TimeTable t " +
+            "JOIN t.member m " +
+            "WHERE REPLACE(t.uuid, '-', '') = :timeTableUuid " +
+            "AND REPLACE(m.uuid, '-', '') = :memberUuid")
+    int countClassDetailUuid(@Param("timeTableUuid") String timeTableUuid, @Param("memberUuid") String memberUuid);
 
-    @Query(value = "SELECT t FROM TimeTable t WHERE (SELECT t2 FROM TimeTable t2 WHERE t2.uuid = :timeTableUuid).member.uuid = :memberUuid")
+
+
+
+    @Query("SELECT t FROM TimeTable t WHERE REPLACE(t.uuid, '-', '') = :timeTableUuid AND REPLACE(t.member.uuid, '-', '') = :memberUuid")
     TimeTable checkTimeTableMemberUuid(@Param("timeTableUuid") String timeTableUuid,
-                                       @Param("memberUuid") String memberUuid
-                                       );
+                                       @Param("memberUuid") String memberUuid);
+
 
     @Query(value= "DELETE FROM TimeTable t WHERE t.uuid = :timeTableId")
     //uuid 값만을 가지고 timetable과 classDetail2개를 삭제하는 쿼리문 작성

@@ -19,7 +19,7 @@ public class TimeTableController {
     @Autowired
     public TimeTableController(TimeTableService timeTableService){this.timeTableService = timeTableService;}
 
-    @PostMapping(value="timetable_semester")
+    @PostMapping(value="timetable/semester")
     public ResponseEntity<ResponseDto<?>> getTimeTable(@RequestBody String semester){
         //member_uuid를통해서 해당 member의 timetable 만을 조회
         //semester의 데이터 만을 가져오기

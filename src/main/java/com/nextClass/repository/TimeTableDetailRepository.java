@@ -80,7 +80,7 @@ public class TimeTableDetailRepository {
                 timeTableDto.getTimeTableRequestDto().getClass_end_time()
         );
     }
-    public TimeTable saveTimeTable(TimeTableDto timeTableDto, Member member, ClassDetail classDetail){
+    public TimeTable saveTimeTable(TimeTableDto timeTableDto, Member member, ClassDetail classDetail) {
         TimeTable timeTable = TimeTable.builder()
                 .member(member)
                 .classDetail(classDetail)
@@ -92,11 +92,12 @@ public class TimeTableDetailRepository {
         return timeTableRepository.save(timeTable);
     }
 
-    public int countClassDetailAsFkey(String timeTableUuid){
-        return timeTableRepository.countClassDetailUuid(timeTableUuid);
+
+    public int countClassDetailAsFkey(String timeTableUuid, String memberUUID){
+        return timeTableRepository.countClassDetailUuid(timeTableUuid, memberUUID);
     }
-    public TimeTable checkCurrentUserIsOwnerOfTimeTable(TimeTableDto timeTableDto){
-        return timeTableRepository.checkTimeTableMemberUuid(timeTableDto.getTimeTableUuid(), timeTableDto.getMemberUUID());
+    public TimeTable checkCurrentUserIsOwnerOfTimeTable(String timeTableUuid, String memberUUID){
+        return timeTableRepository.checkTimeTableMemberUuid(timeTableUuid, memberUUID);
     }
 
     public void deleteTimeTableAndClassDetail(String timeTableId, String classDetailUuid){
@@ -110,7 +111,8 @@ public class TimeTableDetailRepository {
         classDetailRepository.save(classDetail);
         timeTableRepository.save(timeTable);
     }
-    public void updateTimeTableWithOutClassDetail(TimeTable timeTable){
+    public void updateTimeTable(TimeTable timeTable){
         timeTableRepository.save(timeTable);
     }
+
 }
