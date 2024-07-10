@@ -150,7 +150,14 @@ public class MemberService {
 
     }
 
+    public ResponseDto<?> getMyInfo(){
+        String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+        if(memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
 
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, loginRepository.getMyInfoByUuid(memberUuid));
+
+    }
 
     private String checkMemberData(MemberRequestDto requestDto){
         String errorDescription;

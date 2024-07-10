@@ -32,4 +32,9 @@ public class MemberController {
     public ResponseEntity<ResponseDto<?>> changeEmail(@RequestBody MemberChangeEmailRequestDto requestBody){
         return ResponseEntity.ok(memberService.changeEmail(requestBody));
     }
+
+    @PostMapping(value = "/my_info")
+    public ResponseEntity<ResponseDto<?>> getMyInfo(){
+        return ResponseEntity.ok(memberService.getMyInfo());
+    }
 }

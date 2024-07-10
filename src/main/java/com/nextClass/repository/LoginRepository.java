@@ -1,10 +1,8 @@
 package com.nextClass.repository;
 
-import com.nextClass.dto.MemberChangeEmailRequestDto;
-import com.nextClass.dto.MemberChangeNormalInfoRequestDto;
-import com.nextClass.dto.MemberChangePasswordRequestDto;
-import com.nextClass.dto.MemberRequestDto;
+import com.nextClass.dto.*;
 import com.nextClass.entity.Member;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -73,6 +71,15 @@ public class LoginRepository {
      **/
     public String getMemberPasswordByUuid(String uuid){
         return queryFactory.select(member.password)
+                .from(member)
+                .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
+                .fetchOne();
+    }
+    /**
+     * DB SELECT : MEMBER
+     **/
+    public MemberInfoResponseDto getMyInfoByUuid(String uuid){
+        return queryFactory.select(Projections.fields(MemberInfoResponseDto.class, member.id, member.name, member.email, member.member_grade, member.member_school))
                 .from(member)
                 .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
                 .fetchOne();
