@@ -112,14 +112,14 @@ public class TimeTableService {
         if(timeTableRepository.findTimeTableByUuid(timeTableUuid) == null){
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.DATA_ALREADY_DELETED.getErrorCode(), ErrorCode.DATA_ALREADY_DELETED.getErrorDescription());
         }
-        if(timeTableRepository.checkCurrentUserIsOwnerOfTimeTable(timeTableDto.getTimeTableUuid(), timeTableDto.getMemberUUID()) == null){
+        if(timeTableRepository.checkCurrentUserIsOwnerOfTimeTable(timeTableDto) == null){
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
         }
-        if(timeTableRepository.countClassDetailAsFkey((timeTableUuid), (CommonUtils.getMemberUuidIfAdminOrUser())) == 1 ){
+        if(timeTableRepository.countClassDetailAsFkey(timeTableDto) == 1 ){
             //나중에 하나의 쿼리문으로 수정
             TimeTable currentTimeTable = timeTableRepository.findTimeTableByUuid(timeTableUuid);
             timeTableRepository.deleteTimeTableAndClassDetail(timeTableUuid, currentTimeTable.getClassDetail().getUuid().toString().replace("-",""));
-        }else if(timeTableRepository.countClassDetailAsFkey((timeTableUuid), (CommonUtils.getMemberUuidIfAdminOrUser())) > 1){
+        }else if(timeTableRepository.countClassDetailAsFkey(timeTableDto) > 1){
             //같은 그거 이므로 동일한 데이터만 삭제한다
             timeTableRepository.deleteTimeTable(timeTableUuid);
         }
@@ -178,8 +178,7 @@ public class TimeTableService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.DATA_ALREADY_EXIST.getErrorCode(), ErrorCode.DATA_ALREADY_EXIST.getErrorDescription());
         }
         Member member = loginRepository.getMemberByUuid(timeTableDto.getMemberUUID());
-
-        TimeTable test = timeTableRepository.saveTimeTable(timeTableDto, member, classDetail);
+        TimeTable test = timeTableRepository.saveTimeTable(timeTableDto,member,  classDetail);
         log.info("내용 : ", test);
         return new ResponseDto<>(HttpStatus.ACCEPTED.value(), Description.SUCCESS);
     }

@@ -7,15 +7,12 @@ import com.nextClass.entity.Member;
 import com.nextClass.entity.QTimeTable;
 import com.nextClass.entity.TimeTable;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-
-import static com.nextClass.entity.QMember.member;
-import static com.nextClass.entity.QTimeTable.timeTable;
 
 
 @Slf4j
@@ -67,7 +64,9 @@ public class TimeTableDetailRepository {
                 .score(timeTableRequestDto.getScore())
                 .school(timeTableRequestDto.getSchool())
                 .build();
-        return classDetailRepository.save(classDetail);
+        return classDetailRepository.saveAndFlush(classDetail);
+
+
     }
 
     public TimeTable findTimeTableByUuid(String uuid) {
@@ -84,11 +83,8 @@ public class TimeTableDetailRepository {
                 timeTableDto.getTimeTableRequestDto().getClass_end_time()
         );
     }
-<<<<<<< HEAD
-=======
 
->>>>>>> 535ba5c62abe91954f7303805b6163fab3ac1278
-    public TimeTable saveTimeTable(TimeTableDto timeTableDto, Member member, ClassDetail classDetail) {
+    public TimeTable saveTimeTable(TimeTableDto timeTableDto,Member member, ClassDetail classDetail) {
         TimeTable timeTable = TimeTable.builder()
                 .member(member)
                 .classDetail(classDetail)
@@ -100,16 +96,15 @@ public class TimeTableDetailRepository {
         return timeTableRepository.save(timeTable);
     }
 
-<<<<<<< HEAD
 
-    public int countClassDetailAsFkey(String timeTableUuid, String memberUUID){
-        return timeTableRepository.countClassDetailUuid(timeTableUuid, memberUUID);
-    }
-    public TimeTable checkCurrentUserIsOwnerOfTimeTable(String timeTableUuid, String memberUUID){
-        return timeTableRepository.checkTimeTableMemberUuid(timeTableUuid, memberUUID);
-=======
-    public int countClassDetailAsFkey(String timeTableUuid) {
-        return timeTableRepository.countClassDetailUuid(timeTableUuid);
+
+    public int countClassDetailAsFkey(TimeTableDto timeTableDto) {
+        QTimeTable qTimeTable1 = QTimeTable.timeTable;
+        return queryFactory.selectFrom(qTimeTable1)
+                .where(Expressions.stringTemplate("HEX({0})", qTimeTable1.uuid).eq(timeTableDto.getTimeTableUuid().replace("-","")))
+                .where(Expressions.stringTemplate("HEX({0})", qTimeTable1.member.uuid).eq(timeTableDto.getMemberUUID().replace("-","")))
+                .fetch()
+                .size();
     }
 
     public TimeTable checkCurrentUserIsOwnerOfTimeTable(TimeTableDto timeTableDto) {
@@ -119,16 +114,14 @@ public class TimeTableDetailRepository {
         return queryFactory.select(qTimeTable1)
                 .from(qTimeTable1)
                 .where(
-                        qTimeTable1.uuid.eq(timeTableDto.getTimeTableUuid().replace("-", ""))
+                        Expressions.stringTemplate("HEX({0})", qTimeTable1.uuid).eq(timeTableDto.getTimeTableUuid().replace("-", ""))
                                 .and(
                                         queryFactory.select(qTimeTable2.uuid)
                                                 .from(qTimeTable2)
                                                 .where(Expressions.stringTemplate("HEX({0})", qTimeTable2.member.uuid).eq(timeTableDto.getMemberUUID().replace("-", "")))
                                                 .exists()
                                 )
-                )
-                .fetchOne();
->>>>>>> 535ba5c62abe91954f7303805b6163fab3ac1278
+                ).fetchOne();
     }
 
 
@@ -146,13 +139,6 @@ public class TimeTableDetailRepository {
         classDetailRepository.save(classDetail);
         timeTableRepository.save(timeTable);
     }
-<<<<<<< HEAD
+
     public void updateTimeTable(TimeTable timeTable){
-=======
-
-    public void updateTimeTableWithOutClassDetail(TimeTable timeTable) {
->>>>>>> 535ba5c62abe91954f7303805b6163fab3ac1278
-        timeTableRepository.save(timeTable);
-    }
-
-}
+}}

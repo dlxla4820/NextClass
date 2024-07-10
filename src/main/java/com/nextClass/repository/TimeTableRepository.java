@@ -16,14 +16,10 @@ public interface TimeTableRepository extends JpaRepository<TimeTable, UUID> {
 
     //나중에 학생까지 포함해서 찾기
     List<TimeTable> findAllBySemesterAndMember_Id(String semester, String memberUuid);
-    void deleteAllBySemesterIs(String semester);
 
 
     @Query("DELETE from TimeTable t where t.uuid in :timeTableUuidList")
     void deleteAllByUuid(@Param("timeTableUuidList")List<String> timeTableUuidList);
-
-    List<TimeTable> findAllByClassDetail(ClassDetail classDetail);
-
     @Query(value="SELECT t FROM TimeTable t WHERE UNHEX(t.uuid) = :timeTableUuid")
     TimeTable findByUuid(@Param("timeTableUuid") String timeTableUuid);
 
@@ -43,20 +39,6 @@ public interface TimeTableRepository extends JpaRepository<TimeTable, UUID> {
             @Param("startTime") int startTime,
             @Param("endTime") int endTime
     );
-
-    @Query("SELECT COUNT(t) " +
-            "FROM TimeTable t " +
-            "JOIN t.member m " +
-            "WHERE REPLACE(t.uuid, '-', '') = :timeTableUuid " +
-            "AND REPLACE(m.uuid, '-', '') = :memberUuid")
-    int countClassDetailUuid(@Param("timeTableUuid") String timeTableUuid, @Param("memberUuid") String memberUuid);
-
-
-
-
-    @Query("SELECT t FROM TimeTable t WHERE REPLACE(t.uuid, '-', '') = :timeTableUuid AND REPLACE(t.member.uuid, '-', '') = :memberUuid")
-    TimeTable checkTimeTableMemberUuid(@Param("timeTableUuid") String timeTableUuid,
-                                       @Param("memberUuid") String memberUuid);
 
 
     @Query(value= "DELETE FROM TimeTable t WHERE t.uuid = :timeTableId")
