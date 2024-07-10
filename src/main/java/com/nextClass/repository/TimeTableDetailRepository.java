@@ -84,15 +84,7 @@ public class TimeTableDetailRepository {
         );
     }
 
-    public TimeTable saveTimeTable(TimeTableDto timeTableDto,Member member, ClassDetail classDetail) {
-        TimeTable timeTable = TimeTable.builder()
-                .member(member)
-                .classDetail(classDetail)
-                .week(timeTableDto.getTimeTableRequestDto().getWeek())
-                .semester(timeTableDto.getTimeTableRequestDto().getSemester())
-                .classStartTime(timeTableDto.getTimeTableRequestDto().getClass_start_time())
-                .classEndTime(timeTableDto.getTimeTableRequestDto().getClass_end_time())
-                .build();
+    public TimeTable saveTimeTable(TimeTable timeTable) {
         return timeTableRepository.save(timeTable);
     }
 

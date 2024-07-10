@@ -31,6 +31,10 @@ public class TimeTableController {
         return ResponseEntity.ok(timeTableService.makeTimeTable(timeTableRequestDto));
     }
 
+    @PostMapping(value = "class_detail")
+    public ResponseEntity<ResponseDto<?>> postClassTime(@RequestBody TimeTableRequestDto timeTableRequestDto){
+        return ResponseEntity.ok(timeTableService.makeClassDetail(timeTableRequestDto));
+    }
     @DeleteMapping(value="timetable_semster")
     public ResponseEntity<ResponseDto<?>> deleteAllTimeTableOnThisSemester(@RequestBody String semester){
         return ResponseEntity.ok(timeTableService.deleteAllTimeTableOnSemester(semester));

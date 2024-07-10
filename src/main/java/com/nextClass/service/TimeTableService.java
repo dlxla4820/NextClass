@@ -178,8 +178,32 @@ public class TimeTableService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.DATA_ALREADY_EXIST.getErrorCode(), ErrorCode.DATA_ALREADY_EXIST.getErrorDescription());
         }
         Member member = loginRepository.getMemberByUuid(timeTableDto.getMemberUUID());
-        TimeTable test = timeTableRepository.saveTimeTable(timeTableDto,member,  classDetail);
+        TimeTable timeTable =  TimeTable.builder()
+                .member(member)
+                .classDetail(classDetail)
+                .week(timeTableDto.getTimeTableRequestDto().getWeek())
+                .semester(timeTableDto.getTimeTableRequestDto().getSemester())
+                .classStartTime(timeTableDto.getTimeTableRequestDto().getClass_start_time())
+                .classEndTime(timeTableDto.getTimeTableRequestDto().getClass_end_time())
+                .build();
+        TimeTable test = timeTableRepository.saveTimeTable(timeTable);
         log.info("내용 : ", test);
+        return new ResponseDto<>(HttpStatus.ACCEPTED.value(), Description.SUCCESS);
+    }
+
+    public ResponseDto makeClassDetail(TimeTableRequestDto timeTableRequestDto){
+        String errorDescription = checkTimeTableRequest(timeTableRequestDto);
+        log.info("Check TimeTableReqeustDto");
+        if(errorDescription != null){
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
+        }
+        TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), timeTableRequestDto);
+        //동일한 classDetail이 존재하는지 확인
+        ClassDetail classDetail = timeTableRepository.checkClassDetailAlreadyExist(timeTableDto.getTimeTableRequestDto());
+        if(classDetail == null ){
+            //새로 저장
+            classDetail = timeTableRepository.saveClassDetail(timeTableDto.getTimeTableRequestDto());
+        }
         return new ResponseDto<>(HttpStatus.ACCEPTED.value(), Description.SUCCESS);
     }
 
