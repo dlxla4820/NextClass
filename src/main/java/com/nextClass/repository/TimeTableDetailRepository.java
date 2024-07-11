@@ -55,7 +55,6 @@ public class TimeTableDetailRepository {
                 timeTableRequestDto.getSchool()
         );
     }
-
     public ClassDetail saveClassDetail(TimeTableRequestDto timeTableRequestDto) {
         ClassDetail classDetail = ClassDetail.builder()
                 .title(timeTableRequestDto.getTitle())
@@ -65,10 +64,7 @@ public class TimeTableDetailRepository {
                 .school(timeTableRequestDto.getSchool())
                 .build();
         return classDetailRepository.saveAndFlush(classDetail);
-
-
     }
-
     public TimeTable findTimeTableByUuid(String uuid) {
         return timeTableRepository.findByUuid(uuid);
     }
@@ -83,13 +79,9 @@ public class TimeTableDetailRepository {
                 timeTableDto.getTimeTableRequestDto().getClass_end_time()
         );
     }
-
     public TimeTable saveTimeTable(TimeTable timeTable) {
         return timeTableRepository.save(timeTable);
     }
-
-
-
     public int countClassDetailAsFkey(TimeTableDto timeTableDto) {
         QTimeTable qTimeTable1 = QTimeTable.timeTable;
         return queryFactory.selectFrom(qTimeTable1)
