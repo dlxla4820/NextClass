@@ -24,10 +24,6 @@ public class TimeTable {
     @JoinColumn(name = "member_uuid", referencedColumnName = "uuid", nullable = false)
     private Member member;
 
-    @ManyToOne
-    @JoinColumn(name = "class_uuid", referencedColumnName = "uuid", nullable = false)
-    private ClassDetail classDetail;
-
     private String week;
 
     @Column(name = "start_time")
@@ -37,5 +33,22 @@ public class TimeTable {
     private int classEndTime;
 
     private String semester;
+    @Column(name="class_uuid")
+    private UUID classDetailUuid;
+    @Column(length = 50, nullable = false)
+    private String title;
+
+    @Column(name = "grade", nullable = false)
+    private Integer classGrade;
+
+    @Column(name = "teacher_name", length = 160, nullable = false)
+    private String teacherName;
+
+    @Column(nullable = false)
+    private Integer score;
+
+    @Column(length = 21, nullable = false)
+    private String school;
+
 }
 

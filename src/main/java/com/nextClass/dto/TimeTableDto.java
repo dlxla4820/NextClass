@@ -27,13 +27,7 @@ public class TimeTableDto {
     }
 
 
-    public TimeTableDto(String memberUUID, String classDetailUUID, TimeTableRequestDto timeTableRequestDto){
-        this.memberUUID = memberUUID;
-        this.classDetailUUID = classDetailUUID;
-        this.timeTableRequestDto = timeTableRequestDto;
-    }
-
-    public void addClassDetailUuid(String classDetailUUID){
+    public void addAditionalInfo(String classDetailUUID){
         this.classDetailUUID = classDetailUUID;
     }
 }

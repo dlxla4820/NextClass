@@ -20,10 +20,10 @@ public class TimeTableController {
     public TimeTableController(TimeTableService timeTableService){this.timeTableService = timeTableService;}
 
     @PostMapping(value="timetable/semester")
-    public ResponseEntity<ResponseDto<?>> getTimeTable(@RequestBody String semester){
+    public ResponseEntity<ResponseDto<?>> getTimeTable(@RequestBody TimeTableRequestDto timeTableRequestDto){
         //member_uuid를통해서 해당 member의 timetable 만을 조회
         //semester의 데이터 만을 가져오기
-        return ResponseEntity.ok(timeTableService.getPersonalThisSemesterTimeTable(semester));
+        return ResponseEntity.ok(timeTableService.getPersonalThisSemesterTimeTable(timeTableRequestDto));
     }
 
     @PostMapping(value = "timetable")
@@ -31,10 +31,6 @@ public class TimeTableController {
         return ResponseEntity.ok(timeTableService.makeTimeTable(timeTableRequestDto));
     }
 
-    @PostMapping(value = "class_detail")
-    public ResponseEntity<ResponseDto<?>> postClassTime(@RequestBody TimeTableRequestDto timeTableRequestDto){
-        return ResponseEntity.ok(timeTableService.makeClassDetail(timeTableRequestDto));
-    }
     @DeleteMapping(value="timetable_semster")
     public ResponseEntity<ResponseDto<?>> deleteAllTimeTableOnThisSemester(@RequestBody String semester){
         return ResponseEntity.ok(timeTableService.deleteAllTimeTableOnSemester(semester));

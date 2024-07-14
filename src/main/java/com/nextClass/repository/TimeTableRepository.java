@@ -20,25 +20,8 @@ public interface TimeTableRepository extends JpaRepository<TimeTable, UUID> {
 
     @Query("DELETE from TimeTable t where t.uuid in :timeTableUuidList")
     void deleteAllByUuid(@Param("timeTableUuidList")List<String> timeTableUuidList);
-    @Query(value="SELECT t FROM TimeTable t WHERE UNHEX(t.uuid) = :timeTableUuid")
-    TimeTable findByUuid(@Param("timeTableUuid") String timeTableUuid);
 
-    @Query(value = "SELECT t FROM TimeTable t WHERE UNHEX(t.classDetail.uuid)= :classUuid AND " +
-            "UNHEX(t.member.uuid) = :memberUuid AND " +
-            "t.week = :week AND " +
-            "t.semester = :semester AND " +
 
-            "t.classEndTime = :endTime AND " +
-            "t.classStartTime = :startTime"
-            )
-    TimeTable findByDetails(
-            @Param("classUuid") String classUuid,
-            @Param("memberUuid") String memberUuid,
-            @Param("week") String week,
-            @Param("semester") String semester,
-            @Param("startTime") int startTime,
-            @Param("endTime") int endTime
-    );
 
 
     @Query(value= "DELETE FROM TimeTable t WHERE t.uuid = :timeTableId")

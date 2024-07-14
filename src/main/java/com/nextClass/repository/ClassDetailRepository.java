@@ -18,9 +18,4 @@ public interface ClassDetailRepository extends JpaRepository<ClassDetail, UUID> 
             Integer score,
             String school
     );
-    @Query("DELETE FROM ClassDetail c WHERE c.uuid in :uuidLists AND c.uuid NOT IN (SELECT t.uuid FROM TimeTable t WHERE t.classDetail.uuid IN :uuidLists)")
-    void DeleteAllWhichIsNotForeignKeyInTimeTable(List<String> uuidLists);
-
-    @Query(value="DELETE FROM ClassDetail c where c.uuid = :uuid")
-    void deleteClassDetail(@Param("uuid") String uuid);
 }

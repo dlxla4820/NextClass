@@ -45,4 +45,8 @@ public class TimeTableRequestDto {
         this.semester = semester;
         this.school = school;
     }
+
+    public TimeTableRequestDto(String semester){
+        this.semester = semester;
+    }
 }

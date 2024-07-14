@@ -12,6 +12,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import static com.nextClass.entity.QTimeTable.timeTable;
+
 import java.util.*;
 
 
@@ -35,16 +37,16 @@ public class TimeTableDetailRepository {
     }
 
     public List<TimeTable> getTimeTableListOnSemesterFromUser(TimeTableDto timeTableDto) {
-        return timeTableRepository.findAllBySemesterAndMember_Id(timeTableDto.getTimeTableRequestDto().getSemester(), timeTableDto.getMemberUUID());
+        return queryFactory.selectFrom(timeTable)
+                .where(Expressions.stringTemplate("HEX({0})", timeTable.member.uuid).eq(timeTableDto.getMemberUUID().replace("-","")))
+                .where(timeTable.semester.eq(timeTableDto.getTimeTableRequestDto().getSemester()))
+                .fetch();
     }
 
     public void deleteAllTimeTableSelected(List<String> timeTableUuidList) {
         timeTableRepository.deleteAllByUuid(timeTableUuidList);
     }
 
-    public void deleteAllClassDetailSelected(List<String> classDetailUuidList) {
-        classDetailRepository.DeleteAllWhichIsNotForeignKeyInTimeTable(classDetailUuidList);
-    }
 
     public ClassDetail checkClassDetailAlreadyExist(TimeTableRequestDto timeTableRequestDto) {
         return classDetailRepository.findByTitleAndClassGradeAndTeacherNameAndScoreAndSchool(
@@ -63,36 +65,38 @@ public class TimeTableDetailRepository {
                 .score(timeTableRequestDto.getScore())
                 .school(timeTableRequestDto.getSchool())
                 .build();
-        return classDetailRepository.saveAndFlush(classDetail);
+        return classDetailRepository.save(classDetail);
     }
     public TimeTable findTimeTableByUuid(String uuid) {
-        return timeTableRepository.findByUuid(uuid);
+        return queryFactory.selectFrom(timeTable)
+                .where(Expressions.stringTemplate("HEX({0})", timeTable.uuid).eq(uuid.replace("-","")))
+                .fetchOne();
     }
 
     public TimeTable findTimeTable(TimeTableDto timeTableDto) {
-        return timeTableRepository.findByDetails(
-                timeTableDto.getClassDetailUUID(),
-                timeTableDto.getMemberUUID(),
-                timeTableDto.getTimeTableRequestDto().getWeek(),
-                timeTableDto.getTimeTableRequestDto().getSemester(),
-                timeTableDto.getTimeTableRequestDto().getClass_start_time(),
-                timeTableDto.getTimeTableRequestDto().getClass_end_time()
-        );
+        return queryFactory
+                .selectFrom(timeTable)
+                .where(
+                        timeTable.week.eq(timeTableDto.getTimeTableRequestDto().getWeek()),
+                        timeTable.classStartTime.eq(timeTableDto.getTimeTableRequestDto().getClass_start_time()),
+                        timeTable.classEndTime.eq(timeTableDto.getTimeTableRequestDto().getClass_end_time()),
+                        timeTable.semester.eq(timeTableDto.getTimeTableRequestDto().getSemester()),
+                        timeTable.title.eq(timeTableDto.getTimeTableRequestDto().getTitle()),
+                        timeTable.classGrade.eq(timeTableDto.getTimeTableRequestDto().getClass_grade()),
+                        timeTable.teacherName.eq(timeTableDto.getTimeTableRequestDto().getTeacher_name()),
+                        timeTable.score.eq(timeTableDto.getTimeTableRequestDto().getScore()),
+                        timeTable.school.eq(timeTableDto.getTimeTableRequestDto().getSchool())
+                )
+                .where(Expressions.stringTemplate("HEX({0})", timeTable.classDetailUuid).eq(timeTableDto.getClassDetailUUID().replace("-","")))
+                .where(Expressions.stringTemplate("HEX({0})", timeTable.member.uuid).eq(timeTableDto.getMemberUUID().replace("-","")))
+                .fetchOne();
     }
     public TimeTable saveTimeTable(TimeTable timeTable) {
         return timeTableRepository.save(timeTable);
     }
-    public int countClassDetailAsFkey(TimeTableDto timeTableDto) {
-        QTimeTable qTimeTable1 = QTimeTable.timeTable;
-        return queryFactory.selectFrom(qTimeTable1)
-                .where(Expressions.stringTemplate("HEX({0})", qTimeTable1.uuid).eq(timeTableDto.getTimeTableUuid().replace("-","")))
-                .where(Expressions.stringTemplate("HEX({0})", qTimeTable1.member.uuid).eq(timeTableDto.getMemberUUID().replace("-","")))
-                .fetch()
-                .size();
-    }
 
     public TimeTable checkCurrentUserIsOwnerOfTimeTable(TimeTableDto timeTableDto) {
-        QTimeTable qTimeTable1 = QTimeTable.timeTable;
+        QTimeTable qTimeTable1 = timeTable;
         QTimeTable qTimeTable2 = new QTimeTable("timeTable2");
 
         return queryFactory.select(qTimeTable1)
@@ -108,13 +112,6 @@ public class TimeTableDetailRepository {
                 ).fetchOne();
     }
 
-
-
-    public void deleteTimeTableAndClassDetail(String timeTableId, String classDetailUuid) {
-        timeTableRepository.deleteTimeTable(timeTableId);
-        classDetailRepository.deleteClassDetail(classDetailUuid);
-    }
-
     public void deleteTimeTable(String timeTableUuid) {
         timeTableRepository.deleteTimeTable(timeTableUuid);
     }
@@ -125,4 +122,6 @@ public class TimeTableDetailRepository {
     }
 
     public void updateTimeTable(TimeTable timeTable){
-}}
+
+    }
+}
