@@ -15,9 +15,8 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class TimeTable {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @JdbcTypeCode(SqlTypes.BINARY)
-    @Column(columnDefinition = "binary(16)")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Builder.Default
     private UUID uuid = UUID.randomUUID();
 
     @ManyToOne
