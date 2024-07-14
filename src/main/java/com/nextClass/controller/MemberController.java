@@ -1,7 +1,6 @@
 package com.nextClass.controller;
 
-import com.nextClass.dto.MemberRequestDto;
-import com.nextClass.dto.ResponseDto;
+import com.nextClass.dto.*;
 import com.nextClass.service.MemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +18,23 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    @PostMapping(value = "/changeInfo")
-    public ResponseEntity<ResponseDto<?>> login(@RequestBody MemberRequestDto requestBody){
-        return ResponseEntity.ok(memberService.changeInfo(requestBody));
+    @PostMapping(value = "/change_info")
+    public ResponseEntity<ResponseDto<?>> changeInfo(@RequestBody MemberChangeNormalInfoRequestDto requestBody){
+        return ResponseEntity.ok(memberService.changeNormalInfo(requestBody));
+    }
+
+    @PostMapping(value = "/change_password")
+    public ResponseEntity<ResponseDto<?>> changePassword(@RequestBody MemberChangePasswordRequestDto requestBody){
+        return ResponseEntity.ok(memberService.changePassword(requestBody));
+    }
+
+    @PostMapping(value = "/change_email")
+    public ResponseEntity<ResponseDto<?>> changeEmail(@RequestBody MemberChangeEmailRequestDto requestBody){
+        return ResponseEntity.ok(memberService.changeEmail(requestBody));
+    }
+
+    @PostMapping(value = "/my_info")
+    public ResponseEntity<ResponseDto<?>> getMyInfo(){
+        return ResponseEntity.ok(memberService.getMyInfo());
     }
 }
