@@ -56,8 +56,9 @@ public class TimeTableDetailRepository {
                 .fetch();
     }
 
-    public void deleteAllTimeTableSelected(List<String> timeTableUuidList) {
-        timeTableRepository.deleteAllByUuid(timeTableUuidList);
+    public long deleteAllTimeTableSelected(List<String> timeTableUuidList) {
+        //execute : 총 몇행이 sql문에 걸렸는지 알려줌
+        return queryFactory.delete(timeTable).where(Expressions.stringTemplate("HEX({0})",timeTable.uuid).in(timeTableUuidList)).execute();
     }
 
 
@@ -125,8 +126,10 @@ public class TimeTableDetailRepository {
                 ).fetchOne();
     }
 
-    public void deleteTimeTable(String timeTableUuid) {
-        timeTableRepository.deleteTimeTable(timeTableUuid);
+    public long deleteTimeTable(String timeTableUuid) {
+        return queryFactory.delete(timeTable)
+                .where(Expressions.stringTemplate("HEX({0})", timeTable.uuid).eq(timeTableUuid.replace("-",""))).execute();
+
     }
 
     public void updateTimeTableWithNewClassDetail(ClassDetail classDetail, TimeTable timeTable) {

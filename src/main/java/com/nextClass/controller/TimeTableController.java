@@ -19,7 +19,7 @@ public class TimeTableController {
     @Autowired
     public TimeTableController(TimeTableService timeTableService){this.timeTableService = timeTableService;}
 
-    @PostMapping(value="timetable/semester")
+    @PostMapping(value="timetable_semester")
     public ResponseEntity<ResponseDto<?>> getTimeTable(@RequestBody TimeTableRequestDto timeTableRequestDto){
         //member_uuid를통해서 해당 member의 timetable 만을 조회
         //semester의 데이터 만을 가져오기
@@ -31,13 +31,13 @@ public class TimeTableController {
         return ResponseEntity.ok(timeTableService.makeTimeTable(timeTableRequestDto));
     }
 
-    @DeleteMapping(value="timetable_semster")
-    public ResponseEntity<ResponseDto<?>> deleteAllTimeTableOnThisSemester(@RequestBody String semester){
-        return ResponseEntity.ok(timeTableService.deleteAllTimeTableOnSemester(semester));
+    @PostMapping(value="timetable_semester_delete")
+    public ResponseEntity<ResponseDto<?>> deleteAllTimeTableOnThisSemester(@RequestBody TimeTableRequestDto timeTableRequestDto){
+        return ResponseEntity.ok(timeTableService.deleteAllTimeTableOnSemester(timeTableRequestDto));
     }
-    @DeleteMapping(value = "timetable")
-    public ResponseEntity<ResponseDto<?>> deleteOneTimeTable(@RequestBody String timeTableUuid){
-        return ResponseEntity.ok(timeTableService.deleteOneTimeTable(timeTableUuid));
+    @PostMapping(value = "timetable_delete")
+    public ResponseEntity<ResponseDto<?>> deleteOneTimeTable(@RequestBody TimeTableRequestDto timeTableRequestDto){
+        return ResponseEntity.ok(timeTableService.deleteOneTimeTable(timeTableRequestDto));
     }
 
 //    @PostMapping(value = "score")

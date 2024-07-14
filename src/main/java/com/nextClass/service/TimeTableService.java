@@ -121,29 +121,29 @@ public class TimeTableService {
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
-    public ResponseDto deleteOneTimeTable(String timeTableUuid){
-        if(timeTableUuid == null || timeTableUuid.isBlank()){
+    public ResponseDto deleteOneTimeTable(TimeTableRequestDto timeTableRequestDto){
+        if(timeTableRequestDto.getUuid() == null || timeTableRequestDto.getUuid().isBlank()){
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "timeTableUuid"));
         }
-        TimeTableDto timeTableDto = new TimeTableDto(timeTableUuid, CommonUtils.getMemberUuidIfAdminOrUser());
-        if(timeTableRepository.findTimeTableByUuid(timeTableUuid) == null){
+        TimeTableDto timeTableDto = new TimeTableDto(timeTableRequestDto.getUuid(), CommonUtils.getMemberUuidIfAdminOrUser());
+        if(timeTableRepository.findTimeTableByUuid(timeTableDto.getTimeTableUuid()) == null){
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.DATA_ALREADY_DELETED.getErrorCode(), ErrorCode.DATA_ALREADY_DELETED.getErrorDescription());
         }
         if(timeTableRepository.checkCurrentUserIsOwnerOfTimeTable(timeTableDto) == null){
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
         }
-            //같은 그거 이므로 동일한 데이터만 삭제한다
-        timeTableRepository.deleteTimeTable(timeTableUuid);
-
+        //같은 그거 이므로 동일한 데이터만 삭제한다
+        long howManyDelete = timeTableRepository.deleteTimeTable(timeTableRequestDto.getUuid());
+        log.info("TimeTable Delete One");
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
-    public ResponseDto deleteAllTimeTableOnSemester(String  semester ){
-        if(semester == null || semester.isBlank()){
+    public ResponseDto deleteAllTimeTableOnSemester(TimeTableRequestDto  timeTableRequestDto ){
+        if(timeTableRequestDto.getSemester() == null || timeTableRequestDto.getSemester().isBlank()){
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "semester"));
         }
         //member와 semester 2개를 받아서 삭제
-        TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), semester);
+        TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), timeTableRequestDto);
         //repository에서 해당 학기 데이터 삭제
         //false되면 삭제 실패했다고 보내기
         List<Tuple> timeTableList = timeTableRepository.getTimeTableListOnSemesterFromUser(timeTableDto);
@@ -151,7 +151,8 @@ public class TimeTableService {
                 .map(t -> t.get(0, UUID.class).toString().replace("-", ""))
                 .toList();
         //삭제
-        timeTableRepository.deleteAllTimeTableSelected(timeTableUuidList);
+        long howManyDelete = timeTableRepository.deleteAllTimeTableSelected(timeTableUuidList);
+        log.info("TimeTable Delete Semester : ", howManyDelete);
         //classDetail 검증 및 삭제
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }

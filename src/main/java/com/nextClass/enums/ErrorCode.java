@@ -27,7 +27,7 @@ public enum ErrorCode {
 
     DATA_ALREADY_EXIST("E00301","해당 수업이 시간표 상에 이미 존재합니다."),
     TIME_TABLE_UNAUTHORIZED("E00302", "해당 수업에 대한 접근 권한이 없습니다."),
-    DATA_ALREADY_DELETED("E00303", "해당 수업은 이미 삭제되었습니다");
+    DATA_ALREADY_DELETED("E00303", "해당 수업은 존재하지 않습니다");
 
 
     private final String errorCode;
