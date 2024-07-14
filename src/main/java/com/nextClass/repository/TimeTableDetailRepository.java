@@ -6,6 +6,7 @@ import com.nextClass.entity.ClassDetail;
 import com.nextClass.entity.Member;
 import com.nextClass.entity.QTimeTable;
 import com.nextClass.entity.TimeTable;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -36,8 +37,20 @@ public class TimeTableDetailRepository {
         this.queryFactory = queryFactory;
     }
 
-    public List<TimeTable> getTimeTableListOnSemesterFromUser(TimeTableDto timeTableDto) {
-        return queryFactory.selectFrom(timeTable)
+    public List<Tuple> getTimeTableListOnSemesterFromUser(TimeTableDto timeTableDto) {
+        return queryFactory.select(
+                timeTable.uuid,
+                timeTable.week,
+                timeTable.classStartTime,
+                timeTable.classEndTime,
+                timeTable.semester,
+                timeTable.title,
+                timeTable.classGrade,
+                timeTable.teacherName,
+                timeTable.score,
+                timeTable.school
+                )
+                .from(timeTable)
                 .where(Expressions.stringTemplate("HEX({0})", timeTable.member.uuid).eq(timeTableDto.getMemberUUID().replace("-","")))
                 .where(timeTable.semester.eq(timeTableDto.getTimeTableRequestDto().getSemester()))
                 .fetch();
