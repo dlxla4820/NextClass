@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EmailCheckRequestDto {
     private String email;
-    private String validationNumber;
+    private String code;
 }

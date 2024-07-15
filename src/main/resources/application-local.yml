@@ -8,8 +8,6 @@ spring:
     username: ENC(VUOo12PZP2hnYDXUiNxdYJWEFn4a4T8vCBmUZPXvL/cI2iC7fYkC+8NJP+CY+oZ5)
     password: ENC(BJwhYvHcokxk/pawHgE6zGqRjdCFq1tQ4njYvmHsW8ffjGAIpkUoi2CNwcViaYRB)
     driver-class-name: com.mysql.cj.jdbc.Driver
-
-
   jpa:
     open-in-view: false
     database: mysql
@@ -35,16 +33,7 @@ spring:
           timeout: 5000
           starttls:
             enable: true
-
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${mail.username}
-    password: ${mail.password}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          timeout: 5000
-          starttls:
-            enable: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
