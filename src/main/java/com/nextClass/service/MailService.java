@@ -7,8 +7,10 @@ import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.LoginRepository;
 import com.nextClass.repository.MailRepository;
+import com.nextClass.utils.CommonUtils;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -18,6 +20,7 @@ import java.util.Map;
 import java.util.Random;
 
 @Service
+@Slf4j
 public class MailService {
     private final LoginRepository loginRepository;
 
@@ -36,7 +39,8 @@ public class MailService {
 
 
     public ResponseDto<?> checkEmailCode(EmailCheckRequestDto requestBody){
-
+        //TODO : 에러코드 추가, 로그 입력
+        log.info("MailService <checkEmailCode> requestBody : {}", requestBody);
         if(requestBody.getEmail() == null)
             return new ResponseDto<>(HttpStatus.OK.value(), Description.FAIL);
         if(requestBody.getCode() == null)
@@ -48,14 +52,47 @@ public class MailService {
         if(!requestBody.getCode().equals(mailValidation.getCode()))
             return new ResponseDto<>(HttpStatus.OK.value(), Description.FAIL);
 
-        lo
-
-
+        MailValidation updateMailValidation = MailValidation.builder()
+                .mail(mailValidation.getMail())
+                .code(mailValidation.getCode())
+                .checked(true)
+                .build();
+        mailRepository.saveRedisEmail(updateMailValidation);
 
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
-    private ResponseDto<?> sendEmailCode(String email){
+    public ResponseDto<?> sendEmailCode(String email){
+        log.info("MailService <sendEmailCode> requestBody : {}", email);
+        String code = generateRandomCode();
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+            mimeMessageHelper.setTo(email);
+            mimeMessageHelper.setSubject(subject);
+            mimeMessageHelper.setText(code + context);
+
+            javaMailSender.send(mimeMessage);
+            System.out.println("mimeMessageHelper = " + mimeMessageHelper);
+            //TODO : 로그 입력
+        } catch (MessagingException e){
+            //TODO : 로그 입ㄴ력
+            System.out.println("e = " + e);
+            return new ResponseDto<>(HttpStatus.OK.value(), Description.FAIL);
+        }
+        MailValidation mailValidation = MailValidation.builder()
+                .code(code)
+                .mail(email)
+                .checked(false)
+                .failCount(0)
+                .build();
+        mailRepository.saveRedisEmail(mailValidation);
+
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+    }
+
+    public ResponseDto<?> sendEmailRandomPassword(String email){
+        log.info("MailService <sendEmailCode> requestBody : {}", email);
         String code = generateRandomCode();
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
@@ -68,12 +105,14 @@ public class MailService {
             //TODO : 로그 입력
         } catch (MessagingException e){
             //TODO : 로그 입ㄴ력
+            log.error("MessagingException : {}", e.getMessage());
             return new ResponseDto<>(HttpStatus.OK.value(), Description.FAIL);
         }
         MailValidation mailValidation = MailValidation.builder()
                 .code(code)
                 .mail(email)
                 .checked(false)
+                .failCount(0)
                 .build();
         mailRepository.saveRedisEmail(mailValidation);
 
@@ -87,4 +126,6 @@ public class MailService {
         int randomNumber = random.nextInt(10000);
         return String.format("%04d", randomNumber);
     }
+
+
 }

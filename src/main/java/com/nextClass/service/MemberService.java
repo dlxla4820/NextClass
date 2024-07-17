@@ -2,11 +2,14 @@ package com.nextClass.service;
 
 import com.nextClass.auth.TokenProvider;
 import com.nextClass.dto.*;
+import com.nextClass.entity.MailValidation;
 import com.nextClass.entity.Member;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.enums.GradeType;
 import com.nextClass.repository.LoginRepository;
+import com.nextClass.repository.MailRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,20 +23,23 @@ import static com.nextClass.enums.ErrorCode.MEMBER_NOT_EXIST;
 import static com.nextClass.enums.ErrorCode.TOKEN_UNAUTHORIZED;
 
 @Service
+@Slf4j
 public class MemberService {
 
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final LoginRepository loginRepository;
+    private final MailRepository mailRepository;
     private final String[] duplicatedKey= {"id","email"};
 
     private HashMap<String, Boolean> isMemberEmailChangeCodeCheck; // true : 코드 입력 성공, false : 코드 입력 실패
 
     @Autowired
-    public MemberService(PasswordEncoder passwordEncoder, TokenProvider tokenProvider, LoginRepository loginRepository) {
+    public MemberService(PasswordEncoder passwordEncoder, TokenProvider tokenProvider, LoginRepository loginRepository, MailRepository mailRepository) {
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
         this.loginRepository = loginRepository;
+        this.mailRepository = mailRepository;
     }
 
     public ResponseDto<?> saveMember(MemberRequestDto requestBody){
@@ -41,12 +47,17 @@ public class MemberService {
         String errorDescription = checkMemberData(requestBody);
         if(errorDescription != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
-
+        //메일 인증 TODO: 에러코드 추가
+        MailValidation mailValidation = mailRepository.getMailValidationByEmail(requestBody.getEmail());
+        if(mailValidation == null || !mailValidation.getChecked())
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL);
         // 중복체크
         if(loginRepository.getMemberByKeyValue("id",requestBody.getId()) != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), String.format(ErrorCode.INPUT_DUPLICATED.getErrorDescription(),"id"));
         if(loginRepository.getMemberByKeyValue("email",requestBody.getEmail()) != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), String.format(ErrorCode.INPUT_DUPLICATED.getErrorDescription(),"email"));
+
+
 
         // 비밀번호 hashing + 저장
         loginRepository.saveMember(requestBody, passwordEncoder.encode(requestBody.getPassword()));
