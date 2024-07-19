@@ -5,8 +5,8 @@ server:
 spring:
   datasource:
     url: ENC(bbwMSBT+KpAPmpE30IjXoLj1N2EobGXZaNr/pgUQd0syGw+/Pse47Ez5lQjEwX6ajtjrkJUnFgnbHAv720/Jm0ygECQl4k7wF/HX3XtHxw9HpW92qSML71j9TcVu9vH8pIc/QZ0SyVc4zSpxjTY3AQ==)
-    username: ENC(VUOo12PZP2hnYDXUiNxdYJWEFn4a4T8vCBmUZPXvL/cI2iC7fYkC+8NJP+CY+oZ5)
-    password: ENC(BJwhYvHcokxk/pawHgE6zGqRjdCFq1tQ4njYvmHsW8ffjGAIpkUoi2CNwcViaYRB)
+    username: ENC(5K9Tdve7PrMGC/iAtXo/+uuQ+m01qdFKGjZ+DNXGkFofS/JI/5RhB8Cyerxt3KdR)
+    password: ENC(MZYFe0eXXOQIJKzWAYqXrnTEj1sYIZH1JKAOgwQqmOdwhn8q+FN/poyj6BE+qC/w)
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     open-in-view: false
@@ -18,9 +18,10 @@ spring:
       hibernate:
         format_sql: true
         show_sql: true
-  jasypt:
-    encryptor:
-      bean: jasyptEncryptor
+  data:
+    redis:
+      host: localhost
+      port: 6379
   mail:
     host: smtp.gmail.com
     port: 587
@@ -33,7 +34,7 @@ spring:
           timeout: 5000
           starttls:
             enable: true
-  data:
-    redis:
-      host: localhost
-      port: 6379
+jasypt:
+  encryptor:
+    bean: jasyptEncryptor
+
