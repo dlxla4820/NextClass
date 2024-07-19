@@ -2,6 +2,7 @@ package com.nextClass.controller;
 
 import com.nextClass.dto.*;
 import com.nextClass.enums.Description;
+import com.nextClass.service.MailService;
 import com.nextClass.service.MemberService;
 import com.nextClass.utils.CommonUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,9 +24,11 @@ import static com.nextClass.utils.CommonUtils.getUserSession;
 @Slf4j
 public class LoginController {
 
+    private final MailService mailService;
     private final MemberService memberService;
     @Autowired
-    public LoginController(MemberService memberService) {
+    public LoginController(MailService mailService, MemberService memberService) {
+        this.mailService = mailService;
         this.memberService = memberService;
     }
 
@@ -42,12 +45,14 @@ public class LoginController {
     public ResponseEntity<ResponseDto<?>> login(@RequestBody LoginRequestDto requestBody){
         return ResponseEntity.ok(memberService.loginMember(requestBody));
     }
-//    @PostMapping(value = "/email_check")
-//    public ResponseEntity<ResponseDto<?>> emailCheck(@RequestBody EmailCheckRequestDto requestBody){
-//
-//    }
-
-
+    @PostMapping(value = "/mail_check")
+    public ResponseEntity<ResponseDto<?>> checkMail(@RequestBody EmailCheckRequestDto requestBody){
+        return ResponseEntity.ok(mailService.checkEmailCreateCode(requestBody));
+    }
+    @PostMapping(value = "/mail_send")
+    public ResponseEntity<ResponseDto<?>> sendMail(@RequestBody EmailSendCodeRequestDto requestBody){
+        return ResponseEntity.ok(mailService.sendEmailCreateCode(requestBody));
+    }
     @PostMapping(value = "/test")
     public ResponseEntity<String> test(){
         MemberSessionDto userSession = getUserSession();

@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 @Builder
@@ -44,6 +45,23 @@ public class Member {
 
     private LocalDateTime mod_date;
 
+
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Member.class.getSimpleName() + "[", "]")
+                .add("uuid='" + uuid + "'")
+                .add("id='" + id + "'")
+                .add("name='" + name + "'")
+                .add("password='" + password + "'")
+                .add("email='" + email + "'")
+                .add("member_grade='" + member_grade + "'")
+                .add("member_school='" + member_school + "'")
+                .add("roleType='" + roleType + "'")
+                .add("reg_date='" + reg_date + "'")
+                .add("mod_date='" + mod_date + "'")
+                .toString();
+    }
     public enum RoleType {
         ADMIN, USER, ANONYMOUS
     }

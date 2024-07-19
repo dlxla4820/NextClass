@@ -22,5 +22,8 @@ public class MailRepository {
         return mailRedisRepository.findById(email).orElse(null);
     }
 
+    public void deleteRedisEmail(MailValidation mailValidation){
+        mailRedisRepository.delete(mailValidation);
+    }
 
 }

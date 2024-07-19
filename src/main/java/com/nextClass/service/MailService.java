@@ -1,8 +1,8 @@
 package com.nextClass.service;
 
-import com.nextClass.dto.EmailCheckRequestDto;
-import com.nextClass.dto.ResponseDto;
+import com.nextClass.dto.*;
 import com.nextClass.entity.MailValidation;
+import com.nextClass.entity.Member;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.LoginRepository;
@@ -14,8 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Random;
 
@@ -23,109 +25,167 @@ import java.util.Random;
 @Slf4j
 public class MailService {
     private final LoginRepository loginRepository;
-
+    private final PasswordEncoder passwordEncoder;
     private final JavaMailSender javaMailSender;
 
     private final MailRepository mailRepository;
-    private static final String subject = "다음 수업 : 계정 인증";
-    private static final String context = " 코드를 입력하여 계정이 본인 소유임을 인증하여 주시기 바랍니다.\n" +
-            "\n" +
+    private static final String code_subject = "[다음 수업] : 계정 인증";
+    private static final String code_context = " 코드를 입력하여 계정이 본인 소유임을 인증하여 주시기 바랍니다.\n" +
             "중요: 인증번호는 3분후에 만료됩니다. 3분 내로 입력하여 주시기 바랍니다.";
-    public MailService(LoginRepository loginRepository, JavaMailSender javaMailSender, MailRepository mailRepository) {
+    private static final String id_subject = "[다음 수업] : 아이디 찾기";
+
+    private static final String id_context = " 님의 아이디 : ";
+
+    private static final String password_subject = "[다음 수업] : 임시 비밀번호 생성";
+    private static final String password_context = " 님의 임시 비밀번호가 생성되었습니다.\n" +
+            "임시 비밀번호 : ";
+
+
+    public MailService(LoginRepository loginRepository, PasswordEncoder passwordEncoder, JavaMailSender javaMailSender, MailRepository mailRepository) {
         this.loginRepository = loginRepository;
+        this.passwordEncoder = passwordEncoder;
         this.javaMailSender = javaMailSender;
         this.mailRepository = mailRepository;
     }
 
 
-    public ResponseDto<?> checkEmailCode(EmailCheckRequestDto requestBody){
-        //TODO : 에러코드 추가, 로그 입력
-        log.info("MailService <checkEmailCode> requestBody : {}", requestBody);
+    public ResponseDto<?> checkEmailCreateCode(EmailCheckRequestDto requestBody){
+        log.info("MailService << checkEmailCode >> | requestBody : {}", requestBody);
         if(requestBody.getEmail() == null)
-            return new ResponseDto<>(HttpStatus.OK.value(), Description.FAIL);
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "email"));
         if(requestBody.getCode() == null)
-            return new ResponseDto<>(HttpStatus.OK.value(), Description.FAIL);
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "code"));
 
         MailValidation mailValidation = mailRepository.getMailValidationByEmail(requestBody.getEmail());
+        MailValidation updateMailValidation;
+        // 메일 존재 X
         if(mailValidation == null)
-            return new ResponseDto<>(HttpStatus.OK.value(), Description.FAIL);
-        if(!requestBody.getCode().equals(mailValidation.getCode()))
-            return new ResponseDto<>(HttpStatus.OK.value(), Description.FAIL);
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MAIL_NOT_EXIST.getErrorCode(), ErrorCode.MAIL_NOT_EXIST.getErrorDescription());
+        // 5회 이상 FAIL
+        if(mailValidation.getFailCount() == 5) {
+            mailRepository.deleteRedisEmail(mailValidation);
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MAIL_CODE_FIVE_FAIL.getErrorCode(), ErrorCode.MAIL_CODE_FIVE_FAIL.getErrorDescription());
+        }
+        // 인증코드 미 일치
+        if(!requestBody.getCode().equals(mailValidation.getCode())) {
+            updateMailValidation = MailValidation.builder()
+                    .mail(mailValidation.getMail())
+                    .code(mailValidation.getCode())
+                    .checked(false)
+                    .failCount(mailValidation.getFailCount() + 1)
+                    .build();
+            mailRepository.saveRedisEmail(updateMailValidation);
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MAIL_CODE_INVALID.getErrorCode(), ErrorCode.MAIL_CODE_INVALID.getErrorDescription());
+        }
 
-        MailValidation updateMailValidation = MailValidation.builder()
+        updateMailValidation = MailValidation.builder()
                 .mail(mailValidation.getMail())
                 .code(mailValidation.getCode())
                 .checked(true)
                 .build();
         mailRepository.saveRedisEmail(updateMailValidation);
-
+        log.info("MailService << checkEmailCode >> | updateMailValidation : {}", mailValidation);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
-    public ResponseDto<?> sendEmailCode(String email){
-        log.info("MailService <sendEmailCode> requestBody : {}", email);
+    public ResponseDto<?> sendEmailCreateCode(EmailSendCodeRequestDto requestBody){
+        log.info("MailService << sendEmailCode >> | requestBody : {}", requestBody);
+        // 유효성 검사
+        if(requestBody.getEmail() == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "email"));
+        // 인증 코드 발급
         String code = generateRandomCode();
+        // 메일 send
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-            mimeMessageHelper.setTo(email);
-            mimeMessageHelper.setSubject(subject);
-            mimeMessageHelper.setText(code + context);
+            mimeMessageHelper.setTo(requestBody.getEmail());
+            mimeMessageHelper.setSubject(code_subject);
+            mimeMessageHelper.setText(code + code_context);
 
             javaMailSender.send(mimeMessage);
-            System.out.println("mimeMessageHelper = " + mimeMessageHelper);
-            //TODO : 로그 입력
         } catch (MessagingException e){
-            //TODO : 로그 입ㄴ력
-            System.out.println("e = " + e);
-            return new ResponseDto<>(HttpStatus.OK.value(), Description.FAIL);
+            log.error("MailService << sendEmailCode >> | MessagingException e : {}" , e.getMessage(), e);
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),  Description.FAIL, ErrorCode.MAIL_SEND_FAIL.getErrorCode(), ErrorCode.MAIL_SEND_FAIL.getErrorDescription());
         }
+        // redis 저장
         MailValidation mailValidation = MailValidation.builder()
                 .code(code)
-                .mail(email)
+                .mail(requestBody.getEmail())
                 .checked(false)
                 .failCount(0)
                 .build();
         mailRepository.saveRedisEmail(mailValidation);
-
+        log.info("MailService << sendEmailCode >> | mailValidation : {}", mailValidation);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
-    public ResponseDto<?> sendEmailRandomPassword(String email){
-        log.info("MailService <sendEmailCode> requestBody : {}", email);
-        String code = generateRandomCode();
+    public ResponseDto<?> sendEmailRandomPassword(EmailSendPasswordDto requestBody){
+        log.info("MailService << sendEmailRandomPassword >> | requestBody : {}", requestBody);
+        // 유효성 검사
+        if(requestBody.getId() == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "id"));
+        // id check
+        Member member = loginRepository.getMemberById(requestBody.getId());
+        if(member == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.MAIL_MEMBER_NOT_EXIST.getErrorCode(), ErrorCode.MAIL_MEMBER_NOT_EXIST.getErrorDescription());
+
+        String password = generateRandomPassword();
+        String encodePassword = passwordEncoder.encode(password);
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-            mimeMessageHelper.setTo(email);
-            mimeMessageHelper.setSubject(subject);
-            mimeMessageHelper.setText(code + context);
-
+            mimeMessageHelper.setTo(member.getEmail());
+            mimeMessageHelper.setSubject(password_subject);
+            mimeMessageHelper.setText(member.getName() + password_context + password) ;
             javaMailSender.send(mimeMessage);
-            //TODO : 로그 입력
-        } catch (MessagingException e){
-            //TODO : 로그 입ㄴ력
-            log.error("MessagingException : {}", e.getMessage());
-            return new ResponseDto<>(HttpStatus.OK.value(), Description.FAIL);
-        }
-        MailValidation mailValidation = MailValidation.builder()
-                .code(code)
-                .mail(email)
-                .checked(false)
-                .failCount(0)
-                .build();
-        mailRepository.saveRedisEmail(mailValidation);
 
+        } catch (MessagingException e){
+            log.error("MailService << sendEmailRandomPassword >> | MessagingException e : {}" , e.getMessage(), e);
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),  Description.FAIL, ErrorCode.MAIL_SEND_FAIL.getErrorCode(), ErrorCode.MAIL_SEND_FAIL.getErrorDescription());
+        }
+
+        loginRepository.updateMemberPassword(member.getUuid().toString(), encodePassword);
+        log.info("MailService << sendEmailRandomPassword >> | password : {}", encodePassword);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
+    public ResponseDto<?> sendEmailMemberId(EmailSendMemberIdDto requestBody) {
+        log.info("MailService << sendEmailMemberId >> | requestBody : {}", requestBody);
+        if(requestBody.getEmail() == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "email"));
+        // email check
+        Member member = loginRepository.getMemberByEmail(requestBody.getEmail());
+        if(member == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.MAIL_MEMBER_NOT_EXIST.getErrorCode(), ErrorCode.MAIL_MEMBER_NOT_EXIST.getErrorDescription());
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+            mimeMessageHelper.setTo(member.getEmail());
+            mimeMessageHelper.setSubject(id_subject);
+            mimeMessageHelper.setText(member.getName() + id_context + member.getId()) ;
+            javaMailSender.send(mimeMessage);
+
+        } catch (MessagingException e){
+            log.error("MailService << sendEmailMemberId >> | MessagingException e : {}" , e.getMessage(), e);
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),  Description.FAIL, ErrorCode.MAIL_SEND_FAIL.getErrorCode(), ErrorCode.MAIL_SEND_FAIL.getErrorDescription());
+        }
+        log.info("MailService << sendEmailMemberId >> | member : {}", member);
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+    }
 
     private String generateRandomCode(){
-        Random random = new Random();
-        random.setSeed(System.currentTimeMillis());
+        SecureRandom random = new SecureRandom();
         int randomNumber = random.nextInt(10000);
         return String.format("%04d", randomNumber);
     }
 
-
+    private String generateRandomPassword(){
+        SecureRandom random = new SecureRandom();
+        // 9 ~ 18자리
+        int min = 9;
+        int max = 18;
+        int randomNumber = random.nextInt(max - min + 1) + min;
+        return CommonUtils.getRandomPassword(randomNumber);
+    }
 }
