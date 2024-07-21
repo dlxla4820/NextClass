@@ -50,7 +50,7 @@ public class MemberService {
         String errorDescription = checkMemberData(requestBody);
         if(errorDescription != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
-        //메일 인증 TODO: 에러코드 추가
+        //메일 인증
         MailValidation mailValidation = mailRepository.getMailValidationByEmail(requestBody.getEmail());
         if(mailValidation == null || !mailValidation.getChecked())
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.EMAIL_NOT_CHECK.getErrorCode(), ErrorCode.EMAIL_NOT_CHECK.getErrorDescription());
