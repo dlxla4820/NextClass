@@ -76,11 +76,12 @@ public class TimeTableService {
                     .classEndTime(timeTableRequestDto.getClass_end_time())
                     .member(loginRepository.getMemberByUuid(CommonUtils.getMemberUuidIfAdminOrUser()))
                     .semester(timeTableRequestDto.getSemester())
-                    .classDetailUuid(newClassDetailUuid.getUuid())
-                    .classGrade(newClassDetailUuid.getClassGrade())
-                    .teacherName(newClassDetailUuid.getTeacherName())
-                    .score(newClassDetailUuid.getScore())
-                    .school(newClassDetailUuid.getSchool())
+                    .classDetailUuid(newClassDetail.getUuid())
+                    .classGrade(newClassDetail.getClassGrade())
+                    .teacherName(newClassDetail.getTeacherName())
+                    .score(newClassDetail.getScore())
+                    .school(newClassDetail.getSchool())
+                    .title(newClassDetail.getTitle())
                     .build();
             timeTableRepository.updateTimeTableWithNewClassDetail(newClassDetail, timeTable);
         }else{
@@ -98,6 +99,7 @@ public class TimeTableService {
                         .teacherName(newClassDetailUuid.getTeacherName())
                         .score(newClassDetailUuid.getScore())
                         .school(newClassDetailUuid.getSchool())
+                        .title(newClassDetailUuid.getTitle())
                         .build();
                 timeTableRepository.updateTimeTable(timeTable);
             }
