@@ -162,6 +162,9 @@ public class MemberService {
         MailValidation mailValidation = mailRepository.getMailValidationByEmail(requestBody.getEmail());
         if(mailValidation == null || !mailValidation.getChecked())
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.EMAIL_NOT_CHECK.getErrorCode(), ErrorCode.EMAIL_NOT_CHECK.getErrorDescription());
+        //중복 체크
+        if(loginRepository.getMemberByKeyValue("email",requestBody.getEmail()) != null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), String.format(ErrorCode.INPUT_DUPLICATED.getErrorDescription(),"email"));
 
         loginRepository.updateMemberEmail(memberUuid, requestBody.getEmail());
 

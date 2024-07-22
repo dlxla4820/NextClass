@@ -40,6 +40,10 @@ public class MemberController {
         return ResponseEntity.ok(memberService.getMyInfo());
     }
 
+    @PostMapping(value = "/send_changed_mail")
+    public ResponseEntity<ResponseDto<?>> sendChangeEmail(@RequestBody EmailSendCodeRequestDto requestBody){
+        return ResponseEntity.ok(mailService.sendChangeEmailCreateCode(requestBody));
+    }
     @PostMapping(value = "/find_id")
     public ResponseEntity<ResponseDto<?>> findMemberId(@RequestBody EmailSendMemberIdDto requestBody){
         return ResponseEntity.ok(mailService.sendEmailMemberId(requestBody));

@@ -22,6 +22,8 @@ import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Random;
 
+import static com.nextClass.enums.ErrorCode.TOKEN_UNAUTHORIZED;
+
 @Service
 @Slf4j
 @Transactional
@@ -77,7 +79,7 @@ public class MailService {
                     .failCount(mailValidation.getFailCount() + 1)
                     .build();
             mailRepository.saveRedisEmail(updateMailValidation);
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MAIL_CODE_INVALID.getErrorCode(), ErrorCode.MAIL_CODE_INVALID.getErrorDescription());
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MAIL_CODE_INVALID.getErrorCode(), ErrorCode.MAIL_CODE_INVALID.getErrorDescription(), mailValidation.getFailCount());
         }
 
         updateMailValidation = MailValidation.builder()
@@ -121,6 +123,48 @@ public class MailService {
         log.info("MailService << sendEmailCode >> | mailValidation : {}", mailValidation);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
+    public ResponseDto<?> sendChangeEmailCreateCode(EmailSendCodeRequestDto requestBody){
+        String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+        log.info("MailService << sendChangeEmailCreateCode >> | memberUuid : {}, requestBody : {}",memberUuid, requestBody);
+        // 유효성 검사
+        if(memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
+        if(requestBody.getEmail() == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "email"));
+        // uuid 체크
+        if(loginRepository.getMyInfoByUuid(memberUuid) == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.MAIL_MEMBER_NOT_EXIST.getErrorCode(), ErrorCode.MAIL_MEMBER_NOT_EXIST.getErrorDescription());
+        // email 중복 체크
+        if(loginRepository.getMemberByEmail(requestBody.getEmail()) != null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.INPUT_DUPLICATED.getErrorCode(), String.format(ErrorCode.INPUT_DUPLICATED.getErrorDescription(), "email"));
+
+        // 인증 코드 발급
+        String code = generateRandomCode();
+        // 메일 send
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+            mimeMessageHelper.setTo(requestBody.getEmail());
+            mimeMessageHelper.setSubject(code_subject);
+            mimeMessageHelper.setText(code + code_context);
+
+            javaMailSender.send(mimeMessage);
+        } catch (MessagingException e){
+            log.error("MailService << sendChangeEmailCreateCode >> | MessagingException e : {}" , e.getMessage(), e);
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),  Description.FAIL, ErrorCode.MAIL_SEND_FAIL.getErrorCode(), ErrorCode.MAIL_SEND_FAIL.getErrorDescription());
+        }
+        // redis 저장
+        MailValidation mailValidation = MailValidation.builder()
+                .code(code)
+                .mail(requestBody.getEmail())
+                .checked(false)
+                .failCount(0)
+                .build();
+        mailRepository.saveRedisEmail(mailValidation);
+        log.info("MailService << sendChangeEmailCreateCode >> | mailValidation : {}", mailValidation);
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+    }
+
 
     public ResponseDto<?> sendEmailRandomPassword(EmailSendPasswordDto requestBody){
         log.info("MailService << sendEmailRandomPassword >> | requestBody : {}", requestBody);
