@@ -41,6 +41,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private RoleType roleType = RoleType.USER;
 
+    private String appToken;
     private LocalDateTime reg_date;
 
     private LocalDateTime mod_date;
@@ -58,6 +59,7 @@ public class Member {
                 .add("member_grade='" + member_grade + "'")
                 .add("member_school='" + member_school + "'")
                 .add("roleType='" + roleType + "'")
+                .add("appToken='" + appToken + "'")
                 .add("reg_date='" + reg_date + "'")
                 .add("mod_date='" + mod_date + "'")
                 .toString();
