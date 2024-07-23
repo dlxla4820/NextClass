@@ -33,7 +33,7 @@ public class MailService {
     private final JavaMailSender javaMailSender;
 
     private final MailRepository mailRepository;
-    private static final String code_subject = "[다음 수업] : 계정 인증";
+    private static final String code_subject = "[다음 수업] : 이메일 인증";
     private static final String code_context = " 코드를 입력하여 계정이 본인 소유임을 인증하여 주시기 바랍니다.\n" +
             "중요: 인증번호는 3분후에 만료됩니다. 3분 내로 입력하여 주시기 바랍니다.";
     private static final String id_subject = "[다음 수업] : 아이디 찾기";
@@ -79,7 +79,7 @@ public class MailService {
                     .failCount(mailValidation.getFailCount() + 1)
                     .build();
             mailRepository.saveRedisEmail(updateMailValidation);
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MAIL_CODE_INVALID.getErrorCode(), ErrorCode.MAIL_CODE_INVALID.getErrorDescription(), mailValidation.getFailCount());
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.MAIL_CODE_INVALID.getErrorCode(), ErrorCode.MAIL_CODE_INVALID.getErrorDescription(), null, mailValidation.getFailCount());
         }
 
         updateMailValidation = MailValidation.builder()
