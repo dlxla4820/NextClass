@@ -9,15 +9,13 @@ import java.util.StringJoiner;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequestDto {
-    private String id;
-    private String password;
+public class EmailSendMemberIdDto {
 
+    private String email;
     @Override
     public String toString() {
-        return new StringJoiner(", ", LoginRequestDto.class.getSimpleName() + "[", "]")
-                .add("id='" + id + "'")
-                .add("password='" + password + "'")
+        return new StringJoiner(", ", EmailSendMemberIdDto.class.getSimpleName() + "[", "]")
+                .add("email='" + email + "'")
                 .toString();
     }
 }

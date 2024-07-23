@@ -2,16 +2,21 @@ package com.nextClass.service;
 
 import com.nextClass.auth.TokenProvider;
 import com.nextClass.dto.*;
+import com.nextClass.entity.MailValidation;
 import com.nextClass.entity.Member;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.enums.GradeType;
 import com.nextClass.repository.LoginRepository;
+import com.nextClass.repository.MailRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.nextClass.utils.CommonUtils;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -20,28 +25,35 @@ import static com.nextClass.enums.ErrorCode.MEMBER_NOT_EXIST;
 import static com.nextClass.enums.ErrorCode.TOKEN_UNAUTHORIZED;
 
 @Service
+@Transactional
+@Slf4j
 public class MemberService {
 
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final LoginRepository loginRepository;
+    private final MailRepository mailRepository;
     private final String[] duplicatedKey= {"id","email"};
 
-    private HashMap<String, Boolean> isMemberEmailChangeCodeCheck; // true : 코드 입력 성공, false : 코드 입력 실패
 
     @Autowired
-    public MemberService(PasswordEncoder passwordEncoder, TokenProvider tokenProvider, LoginRepository loginRepository) {
+    public MemberService(PasswordEncoder passwordEncoder, TokenProvider tokenProvider, LoginRepository loginRepository, MailRepository mailRepository) {
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
         this.loginRepository = loginRepository;
+        this.mailRepository = mailRepository;
     }
 
     public ResponseDto<?> saveMember(MemberRequestDto requestBody){
+        log.info("MemberService << saveMember >> | requestBody : {}", requestBody);
         //유효성 체크
         String errorDescription = checkMemberData(requestBody);
         if(errorDescription != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
-
+        //메일 인증
+        MailValidation mailValidation = mailRepository.getMailValidationByEmail(requestBody.getEmail());
+        if(mailValidation == null || !mailValidation.getChecked())
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.EMAIL_NOT_CHECK.getErrorCode(), ErrorCode.EMAIL_NOT_CHECK.getErrorDescription());
         // 중복체크
         if(loginRepository.getMemberByKeyValue("id",requestBody.getId()) != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), String.format(ErrorCode.INPUT_DUPLICATED.getErrorDescription(),"id"));
@@ -50,10 +62,10 @@ public class MemberService {
 
         // 비밀번호 hashing + 저장
         loginRepository.saveMember(requestBody, passwordEncoder.encode(requestBody.getPassword()));
-
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
     public ResponseDto<?> loginMember(LoginRequestDto requestBody) {
+        log.info("MemberService << loginMember >> | requestBody : {}", requestBody);
         Member member = loginRepository.getMemberById(requestBody.getId());
         if(member == null)
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
@@ -63,13 +75,15 @@ public class MemberService {
         Map<String, String> token = new HashMap<>();
         token.put("accessToken",tokenProvider.createAccessToken(tokenSubject));
         token.put("refreshToken", tokenProvider.createRefreshToken(tokenSubject));
+
+        log.info("MemberService << loginMember >> | token : {}", token);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, token);
     }
 
 
 
     public ResponseDto<?> checkDuplicatedMemberData(Map<String, String> data){
-
+        log.info("MemberService << checkDuplicatedMemberData >> | data : {}", data);
         for (String key : duplicatedKey){
             if(data.containsKey(key)){
                 if(loginRepository.getMemberByKeyValue(key, data.get(key)) == null)
@@ -87,6 +101,7 @@ public class MemberService {
 
 
     public ResponseDto<?> changeNormalInfo(MemberChangeNormalInfoRequestDto requestBody) {
+        log.info("MemberService << changeNormalInfo >> | requestBody : {}", requestBody);
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
         if(memberUuid == null)
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
@@ -96,11 +111,13 @@ public class MemberService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
 
         loginRepository.updateMemberNormalInfo(memberUuid, requestBody);
+
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
     public ResponseDto<?> changePassword(MemberChangePasswordRequestDto requestBody){
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+        log.info("MemberService << changeNormalInfo >> | memberUuid : {} requestBody : {}", memberUuid , requestBody);
         if(memberUuid == null)
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
         //유효성 검사
@@ -125,6 +142,7 @@ public class MemberService {
 
     public ResponseDto<?> changeEmail(MemberChangeEmailRequestDto requestBody){
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+        log.info("MemberService << changeNormalInfo >> | memberUuid : {} requestBody : {}", memberUuid , requestBody);
         if(memberUuid == null)
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
         //유효성 검사
@@ -141,8 +159,12 @@ public class MemberService {
         if(memberPassword.equals(passwordEncoder.encode(requestBody.getPassword())))
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.EXISTING_PASSWORD_NOT_MATCH.getErrorCode(), ErrorCode.EXISTING_PASSWORD_NOT_MATCH.getErrorDescription());
         // 이메일 체크 검사
-        if(!isMemberEmailChangeCodeCheck.containsKey(memberUuid) || !isMemberEmailChangeCodeCheck.get(memberUuid))
+        MailValidation mailValidation = mailRepository.getMailValidationByEmail(requestBody.getEmail());
+        if(mailValidation == null || !mailValidation.getChecked())
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.EMAIL_NOT_CHECK.getErrorCode(), ErrorCode.EMAIL_NOT_CHECK.getErrorDescription());
+        //중복 체크
+        if(loginRepository.getMemberByKeyValue("email",requestBody.getEmail()) != null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), String.format(ErrorCode.INPUT_DUPLICATED.getErrorDescription(),"email"));
 
         loginRepository.updateMemberEmail(memberUuid, requestBody.getEmail());
 
@@ -152,10 +174,13 @@ public class MemberService {
 
     public ResponseDto<?> getMyInfo(){
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+        log.info("MemberService << changeNormalInfo >> | memberUuid : {}", memberUuid );
         if(memberUuid == null)
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
 
-        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, loginRepository.getMyInfoByUuid(memberUuid));
+        MemberInfoResponseDto memberInfo = loginRepository.getMyInfoByUuid(memberUuid);
+        log.info("MemberService << changeNormalInfo >> | memberInfo : {}", memberInfo );
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, memberInfo);
 
     }
 

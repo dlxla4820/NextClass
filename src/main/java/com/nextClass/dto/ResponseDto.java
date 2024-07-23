@@ -44,6 +44,16 @@ public class ResponseDto<T> {
         this.description = description;
         this.data = data;
     }
+    // Fail + Data
+    public ResponseDto(Integer code, Description description, String errorCode,String errorDescription, String accessToken, T data){
+        this.code = code;
+        this.description = description;
+        this.errorCode = errorCode;
+        this.errorDescription = errorDescription;
+        this.accessToken = accessToken;
+        this.data = data;
+    }
+
     // Fail + accessToken 만료
     public ResponseDto(Integer code, Description description, String errorCode,String errorDescription, String accessToken){
         this.code = code;

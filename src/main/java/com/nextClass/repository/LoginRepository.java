@@ -66,6 +66,15 @@ public class LoginRepository {
                 .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
                 .fetchOne();
     }
+
+    /**
+     * DB SELECT : MEMBER
+     **/
+    public Member getMemberByEmail(String email){
+        return queryFactory.selectFrom(member)
+                .where(member.email.eq(email))
+                .fetchOne();
+    }
     /**
      * DB SELECT : MEMBER
      **/
