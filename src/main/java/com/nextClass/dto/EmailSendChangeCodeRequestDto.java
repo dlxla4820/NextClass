@@ -9,14 +9,14 @@ import java.util.StringJoiner;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberChangeEmailRequestDto {
-
+public class EmailSendChangeCodeRequestDto {
     private String email;
-
+    private String password;
     @Override
     public String toString() {
-        return new StringJoiner(", ", MemberChangeEmailRequestDto.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", EmailSendCodeRequestDto.class.getSimpleName() + "[", "]")
                 .add("email='" + email + "'")
+                .add("password='" + password + "'")
                 .toString();
     }
 }

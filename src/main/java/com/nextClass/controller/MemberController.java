@@ -41,7 +41,7 @@ public class MemberController {
     }
 
     @PostMapping(value = "/send_changed_mail")
-    public ResponseEntity<ResponseDto<?>> sendChangeEmail(@RequestBody EmailSendCodeRequestDto requestBody){
+    public ResponseEntity<ResponseDto<?>> sendChangeEmail(@RequestBody EmailSendChangeCodeRequestDto requestBody){
         return ResponseEntity.ok(mailService.sendChangeEmailCreateCode(requestBody));
     }
     @PostMapping(value = "/find_id")

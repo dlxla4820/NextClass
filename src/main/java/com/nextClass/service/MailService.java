@@ -22,6 +22,7 @@ import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Random;
 
+import static com.nextClass.enums.ErrorCode.MEMBER_NOT_EXIST;
 import static com.nextClass.enums.ErrorCode.TOKEN_UNAUTHORIZED;
 
 @Service
@@ -35,7 +36,7 @@ public class MailService {
     private final MailRepository mailRepository;
     private static final String code_subject = "[다음 수업] : 이메일 인증";
     private static final String code_context = " 코드를 입력하여 계정이 본인 소유임을 인증하여 주시기 바랍니다.\n" +
-            "중요: 인증번호는 3분후에 만료됩니다. 3분 내로 입력하여 주시기 바랍니다.";
+            "중요: 인증번호는 5분후에 만료됩니다. 5분 내로 입력하여 주시기 바랍니다.";
     private static final String id_subject = "[다음 수업] : 아이디 찾기";
 
     private static final String id_context = " 님의 아이디 : ";
@@ -123,7 +124,7 @@ public class MailService {
         log.info("MailService << sendEmailCode >> | mailValidation : {}", mailValidation);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
-    public ResponseDto<?> sendChangeEmailCreateCode(EmailSendCodeRequestDto requestBody){
+    public ResponseDto<?> sendChangeEmailCreateCode(EmailSendChangeCodeRequestDto requestBody){
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
         log.info("MailService << sendChangeEmailCreateCode >> | memberUuid : {}, requestBody : {}",memberUuid, requestBody);
         // 유효성 검사
@@ -131,12 +132,21 @@ public class MailService {
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
         if(requestBody.getEmail() == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "email"));
+        if(requestBody.getPassword() == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "password"));
         // uuid 체크
         if(loginRepository.getMyInfoByUuid(memberUuid) == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.MAIL_MEMBER_NOT_EXIST.getErrorCode(), ErrorCode.MAIL_MEMBER_NOT_EXIST.getErrorDescription());
         // email 중복 체크
         if(loginRepository.getMemberByEmail(requestBody.getEmail()) != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.INPUT_DUPLICATED.getErrorCode(), String.format(ErrorCode.INPUT_DUPLICATED.getErrorDescription(), "email"));
+
+        // 현재 비밀번호 검사
+        String memberPassword = loginRepository.getMemberPasswordByUuid(memberUuid);
+        if(memberPassword == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.TOKEN_MEMBER_NOT_EXIST.getErrorCode(), ErrorCode.TOKEN_MEMBER_NOT_EXIST.getErrorDescription());
+        if(!passwordEncoder.matches(requestBody.getPassword(), memberPassword))
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.EXISTING_PASSWORD_NOT_MATCH.getErrorCode(), ErrorCode.EXISTING_PASSWORD_NOT_MATCH.getErrorDescription());
 
         // 인증 코드 발급
         String code = generateRandomCode();

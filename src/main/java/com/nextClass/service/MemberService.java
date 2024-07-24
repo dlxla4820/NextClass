@@ -146,18 +146,9 @@ public class MemberService {
         if(memberUuid == null)
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
         //유효성 검사
-        String errorDescription = checkMemberPassword(requestBody.getPassword(), "password");
+        String errorDescription = checkMemberEmail(requestBody.getEmail());
         if(errorDescription != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
-        errorDescription = checkMemberEmail(requestBody.getEmail());
-        if(errorDescription != null)
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
-        // 현재 비밀번호 검사
-        String memberPassword = loginRepository.getMemberPasswordByUuid(memberUuid);
-        if(memberPassword == null)
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.TOKEN_MEMBER_NOT_EXIST.getErrorCode(), ErrorCode.TOKEN_MEMBER_NOT_EXIST.getErrorDescription());
-        if(memberPassword.equals(passwordEncoder.encode(requestBody.getPassword())))
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.EXISTING_PASSWORD_NOT_MATCH.getErrorCode(), ErrorCode.EXISTING_PASSWORD_NOT_MATCH.getErrorDescription());
         // 이메일 체크 검사
         MailValidation mailValidation = mailRepository.getMailValidationByEmail(requestBody.getEmail());
         if(mailValidation == null || !mailValidation.getChecked())
