@@ -33,6 +33,6 @@ out/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
 .vscode/
 src/main/resources/next-class-b628b-firebase-adminsdk-hmt06-9553065b92.json
+
