@@ -17,6 +17,7 @@ import com.nextClass.utils.CommonUtils;
 import com.querydsl.core.Tuple;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -44,7 +45,7 @@ public class TimeTableService {
     ){
         this.timeTableRepository = timeTableRepository;
         this.loginRepository = loginRepository;
-        this. classDetailRepository = classDetailRepository;
+        this.classDetailRepository = classDetailRepository;
     }
 
 //    public ResponseDto caculateScoreOnSemester(String semester){
@@ -54,6 +55,12 @@ public class TimeTableService {
 
     //수정하기
     public ResponseDto changeTimeTableData(TimeTableRequestDto timeTableRequestDto){
+        log.info("TimeTableService << changeTimeTableData >> | requestBody : {}", timeTableRequestDto);
+        //해당 부분에 uuid값의 검증도 추가해야 함
+        String errorDescription = checkTimeTableRequest(timeTableRequestDto);
+        if(errorDescription != null){
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
+        }
         if(!CommonUtils.getMemberUuidIfAdminOrUser().equals(timeTableRepository.findTimeTableByUuid(timeTableRequestDto.getUuid()).getMember().getUuid().toString())){
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
         }
@@ -135,7 +142,12 @@ public class TimeTableService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
         }
         //같은 그거 이므로 동일한 데이터만 삭제한다
+        try{
         long howManyDelete = timeTableRepository.deleteTimeTable(timeTableRequestDto.getUuid());
+        } catch(DataAccessException e){
+            log.error("TimeTableService << deleteOneTimeTable >> | DataAccessException e : {}" , e.getMessage(), e);
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SYSTEM_ERROR.getErrorCode(), String.format(ErrorCode.SYSTEM_ERROR.getErrorDescription()));
+        }
         log.info("TimeTable Delete One");
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
