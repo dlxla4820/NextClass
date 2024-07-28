@@ -21,6 +21,13 @@ public class ScoreController {
     public ResponseEntity<ResponseDto<?>> addScore(@RequestBody ScoreRequestDto scoreRequestDto){
         return ResponseEntity.ok(scoreService.addScoreOnSemester(scoreRequestDto));
     }
+<<<<<<< HEAD
+=======
+    @PostMapping(value="score_semester")
+    public ResponseEntity<ResponseDto<?>> getSemesterScore(@RequestBody ScoreRequestDto scoreRequestDto){
+        return ResponseEntity.ok(scoreService.getSemesterScore(scoreRequestDto));
+    }
+>>>>>>> 2299716 (학점 계산기 초안)
     @PostMapping(value="score_all")
     public ResponseEntity<ResponseDto<?>> getAllScore(@RequestBody ScoreRequestDto scoreRequestDto){
         return ResponseEntity.ok(scoreService.getAllScore(scoreRequestDto));
