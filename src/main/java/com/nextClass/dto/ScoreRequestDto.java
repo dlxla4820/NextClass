@@ -4,10 +4,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+
+
 @Getter
 @NoArgsConstructor
-public class ScoreRequestDto {   //entity 생성 필요
-    //
+public class ScoreRequestDto {
 
     private List<String> semester_list;
     private String timeTable_uuid;
@@ -17,4 +18,5 @@ public class ScoreRequestDto {   //entity 생성 필요
         this.timeTable_uuid = timeTable_uuid;
         this.student_score = student_score;
     }
+
 }
