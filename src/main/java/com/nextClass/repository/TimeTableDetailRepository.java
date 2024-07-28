@@ -37,6 +37,7 @@ public class TimeTableDetailRepository {
         this.queryFactory = queryFactory;
     }
 
+
     public List<Tuple> getTimeTableListOnSemesterFromUser(TimeTableDto timeTableDto) {
         return queryFactory.select(
                 timeTable.uuid,
@@ -139,5 +140,15 @@ public class TimeTableDetailRepository {
 
     public void updateTimeTable(TimeTable timeTable){
 
+    }
+
+    public TimeTable isClassExistOnSameTime(TimeTableRequestDto timeTableRequestDto, String memberUuid){
+        return queryFactory.selectFrom(timeTable)
+                .where(
+                        Expressions.stringTemplate("HEX({0})", timeTable.member.uuid).eq(memberUuid.replace("-","")),
+                        timeTable.classStartTime.between(timeTableRequestDto.getClass_start_time(), timeTableRequestDto.getClass_end_time()),
+                        timeTable.classEndTime.between(timeTableRequestDto.getClass_start_time(), timeTableRequestDto.getClass_end_time())
+                        )
+                .fetchFirst();
     }
 }

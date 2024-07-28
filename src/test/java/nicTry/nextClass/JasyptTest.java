@@ -17,12 +17,12 @@ public class JasyptTest {
 
     @Test
     void custom_jasypt_test_user() {
-        String encrypted = jasyptEncryptor.encrypt("dev_user");
+        String encrypted = jasyptEncryptor.encrypt("root");
         System.out.println("encrypted: " + encrypted);
 
         String decrypted = jasyptEncryptor.decrypt(encrypted);
         System.out.println("decrypted: " + decrypted);
-        Assertions.assertThat(decrypted).isEqualTo("dev_user");
+        Assertions.assertThat(decrypted).isEqualTo("root");
     }
     @Test
     void custom_jasypt_test_pw() {
