@@ -54,11 +54,14 @@ public class TimeTableService {
 
     //수정하기
     public ResponseDto changeTimeTableData(TimeTableRequestDto timeTableRequestDto){
+        log.info("TimeTableService << changeTimeTableData >> | requestBody : {}", timeTableRequestDto);
         if(!CommonUtils.getMemberUuidIfAdminOrUser().equals(timeTableRepository.findTimeTableByUuid(timeTableRequestDto.getUuid()).getMember().getUuid().toString())){
+            log.error("TimeTableService << changeTimeTableData >> | TIME_TABLE_UNAUTHORIZED");
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
         }
         //요청받은 시간에 해당 회원이 수업이 등록되어 있는지 확인
         if(timeTableRepository.isClassExistOnSameTime(timeTableRequestDto, CommonUtils.getMemberUuidIfAdminOrUser()) != null){
+            log.error("TimeTableService << changeTimeTableData >> | CLASS_ALREADY_EXIST_ON_SAME_TIME");
             //null 값이 반환되지 않으면 error response
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.CLASS_ALREADY_EXIST_ON_SAME_TIME.getErrorCode(), ErrorCode.CLASS_ALREADY_EXIST_ON_SAME_TIME.getErrorDescription());
         }
@@ -89,6 +92,7 @@ public class TimeTableService {
                     .title(newClassDetail.getTitle())
                     .build();
             timeTableRepository.updateTimeTableWithNewClassDetail(newClassDetail, timeTable);
+            log.info("TimeTableService << changeTimeTableData >> | timeTable : {}", timeTable);
         }else{
             if(newClassDetailUuid.getUuid().toString().replace("-","").equals(timeTableRequestDto.getClass_detail_uuid())){
                 //기존 classDetail과 완전히 동일하므로 timeTable의 내용만 update하면 됨
@@ -107,6 +111,7 @@ public class TimeTableService {
                         .title(newClassDetailUuid.getTitle())
                         .build();
                 timeTableRepository.updateTimeTable(timeTable);
+                log.info("TimeTableService << changeTimeTableData >> | timeTable : {}", timeTable);
             }
             else{
                 //현재 timeTable의 classDetail을 해당 classDetail의 uuid값으로 바꿔서 update
@@ -123,34 +128,45 @@ public class TimeTableService {
                         .school(newClassDetailUuid.getSchool())
                         .build();
                 timeTableRepository.updateTimeTable(timeTable);
+                log.info("TimeTableService << changeTimeTableData >> | timeTable : {}", timeTable);
             }
         }
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
     public ResponseDto deleteOneTimeTable(TimeTableRequestDto timeTableRequestDto){
+        log.info("TimeTableService << deleteOneTimeTable >> | requestBody : {}", timeTableRequestDto);
         if(timeTableRequestDto.getUuid() == null || timeTableRequestDto.getUuid().isBlank()){
+            log.error("TimeTableService << deleteOneTimeTable >> | PARAMETER_INVALID_SPECIFIC");
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "timeTableUuid"));
         }
         TimeTableDto timeTableDto = new TimeTableDto(timeTableRequestDto.getUuid(), CommonUtils.getMemberUuidIfAdminOrUser());
         if(timeTableRepository.findTimeTableByUuid(timeTableDto.getTimeTableUuid()) == null){
+            log.error("TimeTableService << deleteOneTimeTable >> | DATA_ALREADY_DELETED");
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.DATA_ALREADY_DELETED.getErrorCode(), ErrorCode.DATA_ALREADY_DELETED.getErrorDescription());
         }
         if(timeTableRepository.checkCurrentUserIsOwnerOfTimeTable(timeTableDto) == null){
+            log.error("TimeTableService << deleteOneTimeTable >> | TIME_TABLE_UNAUTHORIZED");
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
         }
         //같은 그거 이므로 동일한 데이터만 삭제한다
         long howManyDelete = timeTableRepository.deleteTimeTable(timeTableRequestDto.getUuid());
-        log.info("TimeTable Delete One");
+        log.info("TimeTableService << deleteOneTimeTable >> | howManyDelete : {}", howManyDelete);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
     public ResponseDto deleteAllTimeTableOnSemester(TimeTableRequestDto  timeTableRequestDto ){
+        log.info("TimeTableService << deleteAllTimeTableOnSemester >> | requestBody : {}", timeTableRequestDto);
         if(timeTableRequestDto.getSemester() == null || timeTableRequestDto.getSemester().isBlank()){
+            log.error("TimeTableService << deleteAllTimeTableOnSemester >> | PARAMETER_INVALID_SPECIFIC");
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "semester"));
         }
         //member와 semester 2개를 받아서 삭제
         TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), timeTableRequestDto);
+        if(timeTableRepository.checkCurrentUserIsOwnerOfTimeTable(timeTableDto) == null){
+            log.error("TimeTableService << deleteAllTimeTableOnSemester >> | TIME_TABLE_UNAUTHORIZED");
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
+        }
         //repository에서 해당 학기 데이터 삭제
         //false되면 삭제 실패했다고 보내기
         List<Tuple> timeTableList = timeTableRepository.getTimeTableListOnSemesterFromUser(timeTableDto);
@@ -159,28 +175,31 @@ public class TimeTableService {
                 .toList();
         //삭제
         long howManyDelete = timeTableRepository.deleteAllTimeTableSelected(timeTableUuidList);
-        log.info("TimeTable Delete Semester : ", howManyDelete);
+        log.info("TimeTableService << deleteAllTimeTableOnSemester >> | howManyDelete : {}", howManyDelete);
         //classDetail 검증 및 삭제
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
     public ResponseDto getPersonalThisSemesterTimeTable(TimeTableRequestDto timeTableRequestDto){
-        System.out.println("getTimeTable service");
+        log.info("TimeTableService << getPersonalThisSemesterTimeTable >> | requestBody : {}", timeTableRequestDto);
         if(timeTableRequestDto.getSemester() == null || timeTableRequestDto.getSemester().isBlank()){
+            log.error("TimeTableService << getPersonalThisSemesterTimeTable >> | PARAMETER_INVALID_SPECIFIC");
             String errorMsg = String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "semester");
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), errorMsg);
         }
         TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), timeTableRequestDto);
         //member와 semester를 가지고 해당 데이터 가져오기(현재는 semester만)
         List<TimeTableReponseDto> timeTableList = timeTableRepository.getTimeTableListOnSemesterFromUser(timeTableDto).stream().map(this::convertTupleToDto).collect(Collectors.toList());
+        log.info("TimeTableService << getPersonalThisSemesterTimeTable >> | timeTableList : {}", timeTableList);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, timeTableList);
     }
 
     public ResponseDto makeTimeTable(TimeTableRequestDto timeTableRequestDto){
+        log.info("TimeTableService << makeTimeTable >> | requestBody : {}", timeTableRequestDto);
         //DTO의 값이 비어 있으면 해당 값 비어 있다는 error를 담아서 responseDTO return, for문을 통해서 진행
         String errorDescription = checkTimeTableRequest(timeTableRequestDto);
-        log.info("Check TimeTableReqeustDto");
         if(errorDescription != null){
+            log.error("TimeTableService << makeTimeTable >> | PARAMETER_INVALID_SPECIFIC");
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
         }
         TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), timeTableRequestDto);
@@ -190,10 +209,12 @@ public class TimeTableService {
             //새로 저장
             classDetail = timeTableRepository.saveClassDetail(timeTableDto.getTimeTableRequestDto());
         }
+        log.info("TimeTableService << makeTimeTable >> | classDetail : {}", classDetail);
         //member 추가하면 현재 추가한 데이터 같이 넣어주기
         timeTableDto.addAditionalInfo(classDetail.getUuid().toString().replace("-",""));
         TimeTable isDataSaved = timeTableRepository.findTimeTable(timeTableDto);
         if(isDataSaved != null){
+            log.error("TimeTableService << makeTimeTable >> | DATA_ALREADY_EXIST");
             //해당 수업이 이미 저장되어 있음
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.DATA_ALREADY_EXIST.getErrorCode(), ErrorCode.DATA_ALREADY_EXIST.getErrorDescription());
         }
@@ -211,8 +232,8 @@ public class TimeTableService {
                 .score(classDetail.getScore())
                 .school(classDetail.getSchool())
                 .build();
-        TimeTable test = timeTableRepository.saveTimeTable(timeTable);
-        log.info("내용 : ", test);
+        timeTableRepository.saveTimeTable(timeTable);
+        log.info("TimeTableService << makeTimeTable >> | timeTable : {}", timeTable);
         return new ResponseDto<>(HttpStatus.ACCEPTED.value(), Description.SUCCESS);
     }
 
