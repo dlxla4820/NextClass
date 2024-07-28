@@ -202,6 +202,12 @@ public class TimeTableService {
             log.error("TimeTableService << makeTimeTable >> | PARAMETER_INVALID_SPECIFIC");
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
         }
+        //요청받은 시간에 해당 회원이 수업이 등록되어 있는지 확인
+        if(timeTableRepository.isClassExistOnSameTime(timeTableRequestDto, CommonUtils.getMemberUuidIfAdminOrUser()) != null){
+            log.error("TimeTableService << makeTimeTable >> | CLASS_ALREADY_EXIST_ON_SAME_TIME");
+            //null 값이 반환되지 않으면 error response
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.CLASS_ALREADY_EXIST_ON_SAME_TIME.getErrorCode(), ErrorCode.CLASS_ALREADY_EXIST_ON_SAME_TIME.getErrorDescription());
+        }
         TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), timeTableRequestDto);
         //동일한 classDetail이 존재하는지 확인
         ClassDetail classDetail = timeTableRepository.checkClassDetailAlreadyExist(timeTableDto.getTimeTableRequestDto());
