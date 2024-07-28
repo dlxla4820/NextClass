@@ -28,6 +28,7 @@ public class TimeTableController {
 
     @PostMapping(value = "timetable")
     public ResponseEntity<ResponseDto<?>> postTimeTable(@RequestBody TimeTableRequestDto timeTableRequestDto){
+        //생성 시에는 student_score는 필요 없음
         return ResponseEntity.ok(timeTableService.makeTimeTable(timeTableRequestDto));
     }
 
@@ -39,11 +40,6 @@ public class TimeTableController {
     public ResponseEntity<ResponseDto<?>> deleteOneTimeTable(@RequestBody TimeTableRequestDto timeTableRequestDto){
         return ResponseEntity.ok(timeTableService.deleteOneTimeTable(timeTableRequestDto));
     }
-
-//    @PostMapping(value = "score")
-//    public ResponseEntity<ResponseDto<?>> calculateScore(@RequestBody String semester){
-//        return ResponseEntity.ok(timeTableService.caculateScoreOnSemester(semester));
-//    }
 
     @PostMapping(value = "timetable_change")
     public ResponseEntity<ResponseDto<?>> changeTimeTableData(@RequestBody TimeTableRequestDto timeTableRequestDto){
