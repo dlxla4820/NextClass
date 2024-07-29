@@ -143,7 +143,7 @@ public class LoginRepository {
      **/
     public void updateMemberAppToken(String uuid, String appToken){
         queryFactory.update(member)
-                .set(member.appToken, appToken)
+                .set(member.app_token, appToken)
                 .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
                 .execute();
     }
