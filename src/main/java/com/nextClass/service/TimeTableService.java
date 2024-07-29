@@ -57,7 +57,7 @@ public class TimeTableService {
         if (errorDescription != null) {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
         }
-        if (!CommonUtils.getMemberUuidIfAdminOrUser().equals(timeTableRepository.findTimeTableByUuid(timeTableRequestDto.getUuid()).getMember().getUuid().toString())) {
+        if (!CommonUtils.getMemberUuidIfAdminOrUser().equals(timeTableRepository.findTimeTableByUuid(timeTableRequestDto.getUuid()).getMemberUuid().toString())) {
             log.error("TimeTableService << changeTimeTableData >> | TIME_TABLE_UNAUTHORIZED");
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
         }
@@ -84,7 +84,7 @@ public class TimeTableService {
                     .week(timeTableRequestDto.getWeek())
                     .classStartTime(timeTableRequestDto.getClass_start_time())
                     .classEndTime(timeTableRequestDto.getClass_end_time())
-                    .member(loginRepository.getMemberByUuid(CommonUtils.getMemberUuidIfAdminOrUser()))
+                    .memberUuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()))
                     .semester(timeTableRequestDto.getSemester())
                     .classDetailUuid(newClassDetail.getUuid())
                     .classGrade(newClassDetail.getClassGrade())
@@ -103,7 +103,7 @@ public class TimeTableService {
                         .week(timeTableRequestDto.getWeek())
                         .classStartTime(timeTableRequestDto.getClass_start_time())
                         .classEndTime(timeTableRequestDto.getClass_end_time())
-                        .member(loginRepository.getMemberByUuid(CommonUtils.getMemberUuidIfAdminOrUser()))
+                        .memberUuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()))
                         .semester(timeTableRequestDto.getSemester())
                         .classDetailUuid(newClassDetailUuid.getUuid())
                         .classGrade(newClassDetailUuid.getClassGrade())
@@ -120,7 +120,7 @@ public class TimeTableService {
                         .week(timeTableRequestDto.getWeek())
                         .classStartTime(timeTableRequestDto.getClass_start_time())
                         .classEndTime(timeTableRequestDto.getClass_end_time())
-                        .member(loginRepository.getMemberByUuid(CommonUtils.getMemberUuidIfAdminOrUser()))
+                        .memberUuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()))
                         .semester(timeTableRequestDto.getSemester())
                         .classDetailUuid(newClassDetailUuid.getUuid())
                         .classGrade(newClassDetailUuid.getClassGrade())
@@ -233,9 +233,8 @@ public class TimeTableService {
             //해당 수업이 이미 저장되어 있음
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.DATA_ALREADY_EXIST.getErrorCode(), ErrorCode.DATA_ALREADY_EXIST.getErrorDescription());
         }
-        Member member = loginRepository.getMemberByUuid(timeTableDto.getMemberUUID());
         TimeTable timeTable = TimeTable.builder()
-                .member(member)
+                .memberUuid(convertToUUID(timeTableDto.getMemberUUID()))
                 .week(timeTableDto.getTimeTableRequestDto().getWeek())
                 .semester(timeTableDto.getTimeTableRequestDto().getSemester())
                 .classStartTime(timeTableDto.getTimeTableRequestDto().getClass_start_time())

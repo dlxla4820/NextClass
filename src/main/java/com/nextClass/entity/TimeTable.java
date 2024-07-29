@@ -19,9 +19,8 @@ public class TimeTable {
     @Builder.Default
     private UUID uuid = UUID.randomUUID();
 
-    @ManyToOne
-    @JoinColumn(name = "member_uuid", referencedColumnName = "uuid", nullable = false)
-    private Member member;
+    @Column(name = "member_uuid")
+    private UUID memberUuid;
 
     private String week;
 

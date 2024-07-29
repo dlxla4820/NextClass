@@ -37,7 +37,6 @@ public class TimeTableDetailRepository {
         this.queryFactory = queryFactory;
     }
 
-
     public List<Tuple> getTimeTableListOnSemesterFromUser(TimeTableDto timeTableDto) {
         return queryFactory.select(
                 timeTable.uuid,
@@ -52,7 +51,7 @@ public class TimeTableDetailRepository {
                 timeTable.school
                 )
                 .from(timeTable)
-                .where(Expressions.stringTemplate("HEX({0})", timeTable.member.uuid).eq(timeTableDto.getMemberUUID().replace("-","")))
+//                .where(Expressions.stringTemplate("HEX({0})", timeTable.member.uuid).eq(timeTableDto.getMemberUUID().replace("-","")))
                 .where(timeTable.semester.eq(timeTableDto.getTimeTableRequestDto().getSemester()))
                 .fetch();
     }
@@ -103,7 +102,7 @@ public class TimeTableDetailRepository {
                         timeTable.school.eq(timeTableDto.getTimeTableRequestDto().getSchool())
                 )
                 .where(Expressions.stringTemplate("HEX({0})", timeTable.classDetailUuid).eq(timeTableDto.getClassDetailUUID().replace("-","")))
-                .where(Expressions.stringTemplate("HEX({0})", timeTable.member.uuid).eq(timeTableDto.getMemberUUID().replace("-","")))
+//                .where(Expressions.stringTemplate("HEX({0})", timeTable.member.uuid).eq(timeTableDto.getMemberUUID().replace("-","")))
                 .fetchOne();
     }
     public TimeTable saveTimeTable(TimeTable timeTable) {
@@ -121,7 +120,7 @@ public class TimeTableDetailRepository {
                                 .and(
                                         queryFactory.select(qTimeTable2.uuid)
                                                 .from(qTimeTable2)
-                                                .where(Expressions.stringTemplate("HEX({0})", qTimeTable2.member.uuid).eq(timeTableDto.getMemberUUID().replace("-", "")))
+//                                                .where(Expressions.stringTemplate("HEX({0})", qTimeTable2.member.uuid).eq(timeTableDto.getMemberUUID().replace("-", "")))
                                                 .exists()
                                 )
                 ).fetchOne();
@@ -145,7 +144,7 @@ public class TimeTableDetailRepository {
     public TimeTable isClassExistOnSameTime(TimeTableRequestDto timeTableRequestDto, String memberUuid){
         return queryFactory.selectFrom(timeTable)
                 .where(
-                        Expressions.stringTemplate("HEX({0})", timeTable.member.uuid).eq(memberUuid.replace("-","")),
+//                        Expressions.stringTemplate("HEX({0})", timeTable.member.uuid).eq(memberUuid.replace("-","")),
                         timeTable.classStartTime.between(timeTableRequestDto.getClass_start_time(), timeTableRequestDto.getClass_end_time()),
                         timeTable.classEndTime.between(timeTableRequestDto.getClass_start_time(), timeTableRequestDto.getClass_end_time())
                         )
