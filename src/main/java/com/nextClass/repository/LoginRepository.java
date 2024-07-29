@@ -138,6 +138,14 @@ public class LoginRepository {
                 .execute();
     }
 
+    /**
+     * DB DELETE : MEMBER
+     **/
+
+    public void deleteMember(Member member){
+        memberRepository.delete(member);
+    }
+
     private BooleanExpression propertyEqByKeyValue(String key, String value) {
         if ("id".equals(key))
             return member.id.eq(value);
@@ -145,5 +153,7 @@ public class LoginRepository {
             return member.email.eq(value);
         return null;
     }
+
+
 
 }

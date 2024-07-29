@@ -40,6 +40,11 @@ public class MemberController {
         return ResponseEntity.ok(memberService.getMyInfo());
     }
 
+    @PostMapping(value = "/delete_id")
+    public ResponseEntity<ResponseDto<?>> deleteMember(@RequestBody MemberDeleteRequestDto requestBody){
+        return ResponseEntity.ok(memberService.deleteMember(requestBody));
+    }
+
     @PostMapping(value = "/send_changed_mail")
     public ResponseEntity<ResponseDto<?>> sendChangeEmail(@RequestBody EmailSendChangeCodeRequestDto requestBody){
         return ResponseEntity.ok(mailService.sendChangeEmailCreateCode(requestBody));

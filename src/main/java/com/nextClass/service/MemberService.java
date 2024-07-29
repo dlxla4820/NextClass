@@ -80,7 +80,20 @@ public class MemberService {
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, token);
     }
 
+    public ResponseDto<?> deleteMember(MemberDeleteRequestDto requestBody){
+        log.info("MemberService << deleteMember >> | requestBody : {}", requestBody);
+        String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+        if(memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
+        Member member = loginRepository.getMemberByUuid(memberUuid);
+        if(member == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
+        if(!passwordEncoder.matches(requestBody.getPassword(), member.getPassword()))
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
+        loginRepository.deleteMember(member);
 
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+    }
 
     public ResponseDto<?> checkDuplicatedMemberData(Map<String, String> data){
         log.info("MemberService << checkDuplicatedMemberData >> | data : {}", data);
