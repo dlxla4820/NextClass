@@ -139,6 +139,16 @@ public class LoginRepository {
     }
 
     /**
+     * DB UPDATE : MEMBER
+     **/
+    public void updateMemberAppToken(String uuid, String appToken){
+        queryFactory.update(member)
+                .set(member.appToken, appToken)
+                .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
+                .execute();
+    }
+
+    /**
      * DB DELETE : MEMBER
      **/
 
