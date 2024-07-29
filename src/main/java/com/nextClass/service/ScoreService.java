@@ -16,7 +16,9 @@ public class ScoreService {
     }
 
     public ResponseDto<?> addScoreOnSemester(ScoreRequestDto scoreRequestDto){
-
+        log.info("ScoreService << addScoreOnSemester >> | requestBody : {}", scoreRequestDto);
+        if(scoreRequestDto.)
+        //동일 제목, 학점, 학기를가지고 있는 수업이 해당 테이블에 존재하는지 확인
     }
 
 }

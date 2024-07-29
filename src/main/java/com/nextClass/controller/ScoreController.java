@@ -21,7 +21,8 @@ public class ScoreController {
     public ResponseEntity<ResponseDto<?>> addScore(@RequestBody ScoreRequestDto scoreRequestDto){
         return ResponseEntity.ok(scoreService.addScoreOnSemester(scoreRequestDto));
     }
-    @PostMapping(value="score_all")
+
+    @PostMapping(value="score")
     public ResponseEntity<ResponseDto<?>> getAllScore(@RequestBody ScoreRequestDto scoreRequestDto){
         return ResponseEntity.ok(scoreService.getAllScore(scoreRequestDto));
     }
