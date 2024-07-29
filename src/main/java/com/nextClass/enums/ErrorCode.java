@@ -28,6 +28,7 @@ public enum ErrorCode {
     DATA_ALREADY_EXIST("E00301","해당 수업이 시간표 상에 이미 존재합니다."),
     TIME_TABLE_UNAUTHORIZED("E00302", "해당 수업에 대한 접근 권한이 없습니다."),
     DATA_ALREADY_DELETED("E00303", "해당 수업은 존재하지 않습니다"),
+    CLASS_ALREADY_EXIST_ON_SAME_TIME("E00304", "해당 시간에 이미 수업이 존재합니다."),
 
     MAIL_SEND_FAIL("E00501","메일 발송에 실패하였습니다."),
     MAIL_NOT_EXIST("E00502","해당 인증건에 대한 발송 메일이 존재 하지 않습니다."),
