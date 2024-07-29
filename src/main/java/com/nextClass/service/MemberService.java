@@ -9,6 +9,7 @@ import com.nextClass.enums.ErrorCode;
 import com.nextClass.enums.GradeType;
 import com.nextClass.repository.LoginRepository;
 import com.nextClass.repository.MailRepository;
+import com.nextClass.repository.TimeTableDetailRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,15 +34,17 @@ public class MemberService {
     private final TokenProvider tokenProvider;
     private final LoginRepository loginRepository;
     private final MailRepository mailRepository;
+    private final TimeTableDetailRepository timeTableRepository;
     private final String[] duplicatedKey= {"id","email"};
 
 
     @Autowired
-    public MemberService(PasswordEncoder passwordEncoder, TokenProvider tokenProvider, LoginRepository loginRepository, MailRepository mailRepository) {
+    public MemberService(PasswordEncoder passwordEncoder, TokenProvider tokenProvider, LoginRepository loginRepository, MailRepository mailRepository, TimeTableDetailRepository timeTableRepository) {
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
         this.loginRepository = loginRepository;
         this.mailRepository = mailRepository;
+        this.timeTableRepository = timeTableRepository;
     }
 
     public ResponseDto<?> saveMember(MemberRequestDto requestBody){
@@ -90,6 +93,8 @@ public class MemberService {
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
         if(!passwordEncoder.matches(requestBody.getPassword(), member.getPassword()))
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
+        long howManyDeleted = timeTableRepository.deleteTimeTableAllByMemberUuid(memberUuid);
+        log.info("MemberService << deleteMember >> | deleted timetable : {}", howManyDeleted);
         loginRepository.deleteMember(member);
 
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
