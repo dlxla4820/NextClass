@@ -34,7 +34,9 @@ public enum ErrorCode {
     MAIL_NOT_EXIST("E00502","해당 인증건에 대한 발송 메일이 존재 하지 않습니다."),
     MAIL_CODE_INVALID("E00503","인증코드가 유효하지 않습니다."),
     MAIL_MEMBER_NOT_EXIST("E00504","회원이 존재하지 않습니다."),
-    MAIL_CODE_FIVE_FAIL("E00504","인증코드 입력을 5회 실패하였습니다.");
+    MAIL_CODE_FIVE_FAIL("E00504","인증코드 입력을 5회 실패하였습니다."),
+
+    SCORE_SAVE_FAIL("E00601", "학점 저장에 실패하였습니다.");
 
     private final String errorCode;
     private final String errorDescription;

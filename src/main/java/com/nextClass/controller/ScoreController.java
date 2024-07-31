@@ -9,6 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
+
 @Controller
 public class ScoreController {
     private final ScoreService scoreService;
@@ -18,12 +20,12 @@ public class ScoreController {
     }
 
     @PostMapping(value="score_update")
-    public ResponseEntity<ResponseDto<?>> addScore(@RequestBody ScoreRequestDto scoreRequestDto){
+    public ResponseEntity<ResponseDto<?>> addScore(@RequestBody List<ScoreRequestDto> scoreRequestDto){
         return ResponseEntity.ok(scoreService.addScoreOnSemester(scoreRequestDto));
     }
 
     @PostMapping(value="score")
-    public ResponseEntity<ResponseDto<?>> getAllScore(@RequestBody ScoreRequestDto scoreRequestDto){
-        return ResponseEntity.ok(scoreService.getAllScore(scoreRequestDto));
+    public ResponseEntity<ResponseDto<?>> getAllScore(){
+        return ResponseEntity.ok(scoreService.getAllScore());
     }
 }

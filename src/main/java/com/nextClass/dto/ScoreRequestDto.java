@@ -1,5 +1,6 @@
 package com.nextClass.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,15 +10,11 @@ import java.util.Objects;
 
 @Getter
 @NoArgsConstructor
-
+@AllArgsConstructor
 public class ScoreRequestDto {   //entity 생성 필요
-    private List<String> semester_list;
-    private String timeTable_uuid;
-    private String student_score;
-
-    public ScoreRequestDto(String timeTable_uuid, String student_score) {
-        this.timeTable_uuid = timeTable_uuid;
-        this.student_score = student_score;
-    }
+    private String title;
+    private Integer score;
+    private Integer member_score;
+    private String semester;
 }
 
