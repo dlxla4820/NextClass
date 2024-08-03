@@ -1,11 +1,10 @@
 package com.nextClass.dto;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScoreResponseDto {
@@ -13,6 +12,7 @@ public class ScoreResponseDto {
     private SemesterDto semester;
 
     @Getter
+    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SemesterDto {
@@ -21,6 +21,7 @@ public class ScoreResponseDto {
         private List<SubjectDto> dataList;
 
         @Getter
+        @Setter
         @NoArgsConstructor
         @AllArgsConstructor
         public static class SubjectDto {

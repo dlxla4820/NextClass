@@ -10,8 +10,7 @@ import com.nextClass.entity.QScore;
 
 //Score Table has a score column
 import java.util.List;
-
-import static com.nextClass.entity.QScore.score1;
+import static com.nextClass.entity.QScore.score;
 import static com.nextClass.entity.QTimeTable.timeTable;
 
 @Repository
@@ -24,12 +23,19 @@ public class ScoreDetailRepository {
         this.queryFactory = queryFactory;
     }
 
-    public Score scoreDuplicateCheck(ScoreRequestDto score, String currentUser){
-        return queryFactory.selectFrom(score1)
-                .where(score1.title.eq(score.getTitle()))
-                .where(Expressions.stringTemplate("HEX({0})", score1.memberUuid).eq(currentUser.replace("-","")))
-                .where(score1.score.eq(score.getScore()))
-                .where(score1.semester.eq(score.getSemester()))
+    public List<Score> findSemesterScores(String semester, String currentUser) {
+        return queryFactory.selectFrom(score)
+                .where(score.semester.eq(semester))
+                .where(Expressions.stringTemplate("HEX({0})", score.memberUuid).eq(currentUser.replace("-", "")))
+                .fetch();
+    }
+
+    public Score scoreDuplicateCheck(ScoreRequestDto scoreInfo, String currentUser){
+        return queryFactory.selectFrom(score)
+                .where(score.category.eq(scoreInfo.getCategory()))
+                .where(score.title.eq(scoreInfo.getTitle()))
+                .where(Expressions.stringTemplate("HEX({0})", score.memberUuid).eq(currentUser.replace("-","")))
+                .where(score.semester.eq(scoreInfo.getSemester()))
                 .fetchOne();
     }
 
@@ -38,9 +44,9 @@ public class ScoreDetailRepository {
     }
 
     public List<String> findSemesterList(String currentUser){
-        return queryFactory.select(score1.semester)
-                .from(score1)
-                .where(Expressions.stringTemplate("HEX({0})", score1.memberUuid).eq(currentUser.replace("-","")))
+        return queryFactory.select(score.semester)
+                .from(score)
+                .where(Expressions.stringTemplate("HEX({0})", score.memberUuid).eq(currentUser.replace("-","")))
                 .distinct()
                 .fetch();
     }
