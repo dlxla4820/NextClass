@@ -20,7 +20,7 @@ public class ScoreController {
     }
 
     @PostMapping(value="score_update")
-    public ResponseEntity<ResponseDto<?>> addScore(@RequestBody List<ScoreRequestDto> scoreRequestDto){
+    public ResponseEntity<ResponseDto<?>> addScore(@RequestBody ScoreRequestDto scoreRequestDto){
         return ResponseEntity.ok(scoreService.addScoreOnSemester(scoreRequestDto));
     }
 

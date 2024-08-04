@@ -81,20 +81,24 @@ public class ScoreService {
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, scoreResponseDto);
     }
 
-    public ResponseDto<?> addScoreOnSemester(List<ScoreRequestDto> scoreRequestDto) {
+    public ResponseDto<?> addScoreOnSemester(ScoreRequestDto scoreRequestDto) {
         log.info("ScoreService << addScoreOnSemester >> | requestBody : {}", scoreRequestDto);
         //대한이가 request body에 대해서 전체적으로 관리해주는거 만들었다고 했었던거 다시 물어보기
         String currentUser = CommonUtils.getMemberUuidIfAdminOrUser();
         UUID duplicateUUID;
+        Score duplicateScore;
         Score score;
         //list 안에 있는 모든 객체에 대해서 행동
-        for (ScoreRequestDto scoreInfo : scoreRequestDto) {
+        for (ScoreRequestDto.ScoreInfo scoreInfo : scoreRequestDto.getData()) {
             //동일 제목, 학점, 학기, 멤버를가지고 있는 수업이 해당 테이블에 존재하는지 확인
             //있으면 해당 값의 점수만 수정해서 저장
             if (scoreInfo.getUuid() == null || scoreInfo.getUuid().isBlank()) {
-                duplicateUUID = scoreRepository.scoreDuplicateCheck(scoreInfo, currentUser).getUuid();
-                if (duplicateUUID.equals(null)) {
+                duplicateScore = scoreRepository.scoreDuplicateCheck(scoreInfo, currentUser);
+                if (duplicateScore==null) {
                     duplicateUUID = UUID.randomUUID();
+                }
+                else{
+                    duplicateUUID = duplicateScore.getUuid();
                 }
             } else {
                 duplicateUUID = convertToUUID(scoreInfo.getUuid());
@@ -105,7 +109,7 @@ public class ScoreService {
                         .title(scoreInfo.getTitle())
                         .credit(scoreInfo.getCredit())
                         .category(scoreInfo.getCategory())
-                        .achievement(scoreInfo.getAchivement())
+                        .achievement(scoreInfo.getAchievement())
                         .grade(scoreInfo.getGrade())
                         .studentScore(null)
                         .averageScore(null)
@@ -121,11 +125,11 @@ public class ScoreService {
                     return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorCode(), ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorDescription());
                 }
                 score = Score.builder()
-                        .uuid(convertToUUID(scoreInfo.getUuid()))
+                        .uuid(duplicateUUID)
                         .title(scoreInfo.getTitle())
                         .credit(scoreInfo.getCredit())
                         .category(scoreInfo.getCategory())
-                        .achievement(scoreInfo.getAchivement())
+                        .achievement(scoreInfo.getAchievement())
                         .grade(scoreInfo.getGrade())
                         .studentScore(scoreInfo.getStudent_score())
                         .averageScore(scoreInfo.getAverage_score())
@@ -140,7 +144,7 @@ public class ScoreService {
                         .title(scoreInfo.getTitle())
                         .credit(scoreInfo.getCredit())
                         .category(scoreInfo.getCategory())
-                        .achievement(scoreInfo.getAchivement())
+                        .achievement(scoreInfo.getAchievement())
                         .grade(scoreInfo.getGrade())
                         .studentScore(null)
                         .averageScore(null)

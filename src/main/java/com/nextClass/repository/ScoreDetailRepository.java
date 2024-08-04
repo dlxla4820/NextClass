@@ -30,7 +30,7 @@ public class ScoreDetailRepository {
                 .fetch();
     }
 
-    public Score scoreDuplicateCheck(ScoreRequestDto scoreInfo, String currentUser){
+    public Score scoreDuplicateCheck(ScoreRequestDto.ScoreInfo scoreInfo, String currentUser){
         return queryFactory.selectFrom(score)
                 .where(score.category.eq(scoreInfo.getCategory()))
                 .where(score.title.eq(scoreInfo.getTitle()))
