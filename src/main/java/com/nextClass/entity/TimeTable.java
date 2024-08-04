@@ -29,6 +29,8 @@ public class TimeTable {
 
     @Column(name = "end_time")
     private int classEndTime;
+    @Column(nullable = false)
+    private String category;
 
     private String semester;
     @Column(name="class_uuid")

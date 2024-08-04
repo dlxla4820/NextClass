@@ -78,6 +78,8 @@ public class ScoreService {
                 .credit_sum(semesterScoreCountAll)
                 .semesterList(semesterList)
                 .build();
+
+        log.info("ScoreService << getAllScore >> | Complete");
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, scoreResponseDto);
     }
 

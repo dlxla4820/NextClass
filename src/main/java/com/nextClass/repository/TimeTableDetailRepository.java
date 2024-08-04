@@ -84,6 +84,7 @@ public class TimeTableDetailRepository {
                 .teacherName(timeTableRequestDto.getTeacher_name())
                 .score(timeTableRequestDto.getScore())
                 .school(timeTableRequestDto.getSchool())
+                .category(timeTableRequestDto.getCategory())
                 .build();
         return classDetailRepository.save(classDetail);
     }

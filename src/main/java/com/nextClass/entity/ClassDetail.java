@@ -33,4 +33,6 @@ public class ClassDetail {
 
     @Column(length = 21, nullable = false)
     private String school;
+    @Column(nullable = false)
+    private String category;
 }

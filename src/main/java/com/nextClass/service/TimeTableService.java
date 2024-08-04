@@ -1,17 +1,12 @@
 package com.nextClass.service;
 
-import com.nextClass.dto.ResponseDto;
-import com.nextClass.dto.TimeTableDto;
-import com.nextClass.dto.TimeTableReponseDto;
-import com.nextClass.dto.TimeTableRequestDto;
-import com.nextClass.entity.ClassDetail;
-import com.nextClass.entity.Member;
-import com.nextClass.entity.QTimeTable;
-import com.nextClass.entity.TimeTable;
+import com.nextClass.dto.*;
+import com.nextClass.entity.*;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.ClassDetailRepository;
 import com.nextClass.repository.LoginRepository;
+import com.nextClass.repository.ScoreDetailRepository;
 import com.nextClass.repository.TimeTableDetailRepository;
 import com.nextClass.utils.CommonUtils;
 import com.querydsl.core.Tuple;
@@ -37,15 +32,19 @@ public class TimeTableService {
     private final LoginRepository loginRepository;
     private final ClassDetailRepository classDetailRepository;
 
+    private final ScoreDetailRepository scoreRepository;
+
     @Autowired
     public TimeTableService(
             TimeTableDetailRepository timeTableRepository,
             LoginRepository loginRepository,
-            ClassDetailRepository classDetailRepository
+            ClassDetailRepository classDetailRepository,
+            ScoreDetailRepository scoreRepository
     ) {
         this.timeTableRepository = timeTableRepository;
         this.loginRepository = loginRepository;
         this.classDetailRepository = classDetailRepository;
+        this.scoreRepository = scoreRepository;
     }
 
     //수정하기
@@ -77,6 +76,7 @@ public class TimeTableService {
                     .classGrade(timeTableRequestDto.getClass_grade())
                     .score(timeTableRequestDto.getScore())
                     .title(timeTableRequestDto.getTitle())
+                    .category(timeTableRequestDto.getCategory())
                     .teacherName(timeTableRequestDto.getTeacher_name())
                     .build();
             TimeTable timeTable = TimeTable.builder()
@@ -88,6 +88,7 @@ public class TimeTableService {
                     .semester(timeTableRequestDto.getSemester())
                     .classDetailUuid(newClassDetail.getUuid())
                     .classGrade(newClassDetail.getClassGrade())
+                    .category(newClassDetail.getCategory())
                     .teacherName(newClassDetail.getTeacherName())
                     .score(newClassDetail.getScore())
                     .school(newClassDetail.getSchool())
@@ -111,6 +112,7 @@ public class TimeTableService {
                         .score(newClassDetailUuid.getScore())
                         .school(newClassDetailUuid.getSchool())
                         .title(newClassDetailUuid.getTitle())
+                        .category(newClassDetailUuid.getCategory())
                         .build();
                 timeTableRepository.updateTimeTable(timeTable);
                 log.info("TimeTableService << changeTimeTableData >> | timeTable : {}", timeTable);
@@ -127,6 +129,7 @@ public class TimeTableService {
                         .teacherName(newClassDetailUuid.getTeacherName())
                         .score(newClassDetailUuid.getScore())
                         .school(newClassDetailUuid.getSchool())
+                        .category(newClassDetailUuid.getCategory())
                         .build();
                 timeTableRepository.updateTimeTable(timeTable);
                 log.info("TimeTableService << changeTimeTableData >> | timeTable : {}", timeTable);
@@ -245,8 +248,24 @@ public class TimeTableService {
                 .teacherName(classDetail.getTeacherName())
                 .score(classDetail.getScore())
                 .school(classDetail.getSchool())
+                .category(classDetail.getCategory())
                 .build();
-        timeTableRepository.saveTimeTable(timeTable);
+        Score score = Score.builder()
+                .title(classDetail.getTitle())
+                .credit(classDetail.getScore())
+                .achievement("N")
+                .grade(0)
+                .category(classDetail.getCategory())
+                .semester(timeTableRequestDto.getSemester())
+                .memberUuid(convertToUUID(timeTableDto.getMemberUUID()))
+                .build();
+        try{
+            timeTableRepository.saveTimeTable(timeTable);
+            scoreRepository.saveScore(score);
+        }catch(DataAccessException e){
+            log.error("TimeTableService << deleteOneTimeTable >> | DataAccessException e : {}", e.getMessage(), e);
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SYSTEM_ERROR.getErrorCode(), String.format(ErrorCode.SYSTEM_ERROR.getErrorDescription()));
+        }
         log.info("TimeTableService << makeTimeTable >> | timeTable : {}", timeTable);
         return new ResponseDto<>(HttpStatus.ACCEPTED.value(), Description.SUCCESS);
     }
