@@ -1,5 +1,6 @@
 package com.nextClass.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,7 @@ import java.util.StringJoiner;
 public class LoginRequestDto {
     private String id;
     private String password;
+    @JsonProperty("app_token")
     private String appToken;
     @Override
     public String toString() {

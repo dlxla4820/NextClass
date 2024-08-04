@@ -33,18 +33,23 @@ public class Member {
 
     private String email;
 
-    private Integer member_grade;
-
-    private String member_school;
+    @Column(name = "member_grade")
+    private Integer memberGrade;
+    @Column(name = "member_school")
+    private String memberSchool;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private RoleType roleType = RoleType.USER;
 
+    @Column(name = "app_token")
     private String appToken;
-    private LocalDateTime reg_date;
 
-    private LocalDateTime mod_date;
+    @Column(name = "reg_date")
+    private LocalDateTime regDate;
+
+    @Column(name = "mod_date")
+    private LocalDateTime modDate;
 
 
 
@@ -56,12 +61,12 @@ public class Member {
                 .add("name='" + name + "'")
                 .add("password='" + password + "'")
                 .add("email='" + email + "'")
-                .add("member_grade='" + member_grade + "'")
-                .add("member_school='" + member_school + "'")
+                .add("memberGrade='" + memberGrade + "'")
+                .add("memberSchool='" + memberSchool + "'")
                 .add("roleType='" + roleType + "'")
                 .add("appToken='" + appToken + "'")
-                .add("reg_date='" + reg_date + "'")
-                .add("mod_date='" + mod_date + "'")
+                .add("regDate='" + regDate + "'")
+                .add("modDate='" + modDate + "'")
                 .toString();
     }
     public enum RoleType {

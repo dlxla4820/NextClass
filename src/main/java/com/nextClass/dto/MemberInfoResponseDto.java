@@ -1,5 +1,6 @@
 package com.nextClass.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,9 +18,11 @@ public class MemberInfoResponseDto {
 
     private String email;
 
-    private Integer member_grade;
+    @JsonProperty("member_grade")
+    private Integer memberGrade;
 
-    private String member_school;
+    @JsonProperty("member_school")
+    private String memberSchool;
 
     @Override
     public String toString() {
@@ -27,8 +30,8 @@ public class MemberInfoResponseDto {
                 .add("id='" + id + "'")
                 .add("name='" + name + "'")
                 .add("email='" + email + "'")
-                .add("member_grade='" + member_grade + "'")
-                .add("member_school='" + member_school + "'")
+                .add("memberGrade='" + memberGrade + "'")
+                .add("memberSchool='" + memberSchool + "'")
                 .toString();
     }
 }

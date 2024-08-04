@@ -1,6 +1,7 @@
 package com.nextClass.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nextClass.enums.GradeType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -26,9 +27,10 @@ public class MemberRequestDto {
 
     private String email;
 
-    private Integer member_grade;
-
-    private String member_school;
+    @JsonProperty("member_grade")
+    private Integer memberGrade;
+    @JsonProperty("member_school")
+    private String memberSchool;
 
     @Override
     public String toString() {
@@ -37,8 +39,8 @@ public class MemberRequestDto {
                 .add("name='" + name + "'")
                 .add("password='" + password + "'")
                 .add("email='" + email + "'")
-                .add("member_grade='" + member_grade + "'")
-                .add("member_school='" + member_school + "'")
+                .add("memberGrade='" + memberGrade + "'")
+                .add("memberSchool='" + memberSchool + "'")
                 .toString();
     }
 

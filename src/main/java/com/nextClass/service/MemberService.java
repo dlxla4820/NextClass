@@ -74,6 +74,8 @@ public class MemberService {
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
         if(!passwordEncoder.matches(requestBody.getPassword(), member.getPassword()))
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
+        if(requestBody.getAppToken() != null)
+            loginRepository.updateMemberAppToken(member.getUuid().toString(), requestBody.getAppToken());
         String tokenSubject = String.format("%s:%s", member.getUuid(), member.getRoleType());
         Map<String, String> token = new HashMap<>();
         token.put("accessToken",tokenProvider.createAccessToken(tokenSubject));
@@ -208,10 +210,10 @@ public class MemberService {
         errorDescription = checkMemberEmail(requestDto.getEmail());
         if(errorDescription != null) return errorDescription;
         // member_grade check
-        errorDescription = checkMemberGrade(requestDto.getMember_grade());
+        errorDescription = checkMemberGrade(requestDto.getMemberGrade());
         if(errorDescription != null) return errorDescription;
         //member_school check
-        errorDescription = checkMemberSchool(requestDto.getMember_school());
+        errorDescription = checkMemberSchool(requestDto.getMemberSchool());
         if(errorDescription != null) return errorDescription;
 
         return null;
@@ -223,10 +225,10 @@ public class MemberService {
         errorDescription = checkMemberName(requestDto.getName());
         if(errorDescription != null) return errorDescription;
         // email check
-        errorDescription = checkMemberGrade(requestDto.getMember_grade());
+        errorDescription = checkMemberGrade(requestDto.getMemberGrade());
         if(errorDescription != null) return errorDescription;
         //member_school check
-        errorDescription = checkMemberSchool(requestDto.getMember_school());
+        errorDescription = checkMemberSchool(requestDto.getMemberSchool());
         if(errorDescription != null) return errorDescription;
 
         return null;
