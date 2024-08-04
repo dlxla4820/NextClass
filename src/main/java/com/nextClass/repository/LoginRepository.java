@@ -33,9 +33,9 @@ public class LoginRepository {
                 .name(MemberRequestDto.getName())
                 .password(encodePassword)
                 .email(MemberRequestDto.getEmail())
-                .member_grade(MemberRequestDto.getMember_grade())
-                .member_school(MemberRequestDto.getMember_school())
-                .reg_date(LocalDateTime.now())
+                .memberGrade(MemberRequestDto.getMemberGrade())
+                .memberSchool(MemberRequestDto.getMemberSchool())
+                .regDate(LocalDateTime.now())
                 .build();
         memberRepository.save(member);
     }
@@ -88,7 +88,7 @@ public class LoginRepository {
      * DB SELECT : MEMBER
      **/
     public MemberInfoResponseDto getMyInfoByUuid(String uuid){
-        return queryFactory.select(Projections.fields(MemberInfoResponseDto.class, member.id, member.name, member.email, member.member_grade, member.member_school))
+        return queryFactory.select(Projections.fields(MemberInfoResponseDto.class, member.id, member.name, member.email, member.memberGrade, member.memberSchool))
                 .from(member)
                 .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
                 .fetchOne();
@@ -102,9 +102,9 @@ public class LoginRepository {
                 .set(member.email, memberRequestDto.getEmail())
                 .set(member.name, memberRequestDto.getName())
                 .set(member.password, memberRequestDto.getPassword())
-                .set(member.member_grade, memberRequestDto.getMember_grade())
-                .set(member.member_school, memberRequestDto.getMember_school())
-                .set(member.mod_date, LocalDateTime.now())
+                .set(member.memberGrade, memberRequestDto.getMemberGrade())
+                .set(member.memberSchool, memberRequestDto.getMemberSchool())
+                .set(member.modDate, LocalDateTime.now())
                 .where(member.id.eq(memberRequestDto.getId()))
                 .execute();
     }
@@ -114,8 +114,8 @@ public class LoginRepository {
     public void updateMemberNormalInfo(String uuid, MemberChangeNormalInfoRequestDto requestDto){
         queryFactory.update(member)
                 .set(member.name, requestDto.getName())
-                .set(member.member_school, requestDto.getMember_school())
-                .set(member.member_grade, requestDto.getMember_grade())
+                .set(member.memberSchool, requestDto.getMemberSchool())
+                .set(member.memberGrade, requestDto.getMemberGrade())
                 .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
                 .execute();
     }
@@ -143,7 +143,7 @@ public class LoginRepository {
      **/
     public void updateMemberAppToken(String uuid, String appToken){
         queryFactory.update(member)
-                .set(member.app_token, appToken)
+                .set(member.appToken, appToken)
                 .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
                 .execute();
     }
