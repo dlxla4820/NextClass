@@ -59,7 +59,7 @@ public class ScoreService {
                         .grade(scoreInfo.getGrade())
                         .build();
                 if (scoreInfo.getCategory().equals("선택")) {
-                    scoreDetail.setStudentScore(scoreInfo.getStudentScore());
+                    scoreDetail.setStudent_score(scoreInfo.getStudentScore());
                     //선택 과목의 경우 평균편차와 원점수, 평균 점수를 통해 등급을 유추해 낸 뒤에 해당 당급을 넣음
                 }
                 semesterScoreSum += scoreInfo.getGrade() * scoreInfo.getCredit();
@@ -68,7 +68,7 @@ public class ScoreService {
             }
             //한 학기 점수 가져오기 종료
             semesterDto.setScore(String.format("%.2f", (semesterScoreSum / semeseterScoreCount)));
-            semesterDto.setDataList(dataList);
+            semesterDto.setData_list(dataList);
             semesterScoreSumAll += semesterScoreSum;
             semesterScoreCountAll += semeseterScoreCount;
             semesterList.add(semesterDto);
@@ -76,7 +76,7 @@ public class ScoreService {
         ScoreResponseDto scoreResponseDto = ScoreResponseDto.builder()
                 .average_grade(String.format("%.2f", (semesterScoreSumAll / semesterScoreCountAll)))
                 .credit_sum(semesterScoreCountAll)
-                .semesterList(semesterList)
+                .semester_list(semesterList)
                 .build();
 
         log.info("ScoreService << getAllScore >> | Complete");

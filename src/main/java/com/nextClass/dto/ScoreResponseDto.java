@@ -12,7 +12,7 @@ public class ScoreResponseDto {
     private String average_grade;
     private Integer credit_sum;
     private final Integer require_credit = 174;
-    private List<SemesterDto> semesterList;
+    private List<SemesterDto> semester_list;
 
     @Getter
     @Builder
@@ -22,7 +22,7 @@ public class ScoreResponseDto {
     public static class SemesterDto {
         private String semester;
         private String score;
-        private List<SubjectDto> dataList;
+        private List<SubjectDto> data_list;
 
         @Getter
         @Setter
@@ -36,7 +36,7 @@ public class ScoreResponseDto {
             private Integer credit;
             private String achievement;
             private Integer grade;
-            private Double studentScore;
+            private Double student_score;
         }
     }
 }
