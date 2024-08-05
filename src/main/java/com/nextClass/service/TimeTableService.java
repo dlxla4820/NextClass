@@ -52,7 +52,6 @@ public class TimeTableService {
         log.info("TimeTableService << changeTimeTableData >> | requestBody : {}", timeTableRequestDto);
         //해당 부분에 uuid값의 검증도 추가해야 함
         String errorDescription = checkTimeTableRequest(timeTableRequestDto);
-
         if (errorDescription != null) {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), errorDescription);
         }
