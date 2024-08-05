@@ -19,9 +19,15 @@ public class ToDoList {
     @Builder.Default
     private UUID uuid = UUID.randomUUID();
 
+    @Column(nullable = false)
     private String content;
+    @Column(nullable = false)
+    private UUID member_uuid;
 
-    @Column(name = "create_time")
+    @Column(name = "fcm_token")
+    private String fcmToken;
+
+    @Column(name = "create_time", nullable = false)
     private LocalDateTime createTime;
 
     @Column(name="update_time")
@@ -30,6 +36,6 @@ public class ToDoList {
     @Column(name="alarm_time")
     private LocalDateTime alarmTime;
 
-    @Column(name="done_time")
-    private LocalDateTime doneTime;
+    @Column(name="goal_time", nullable = false)
+    private LocalDateTime goalTime;
 }

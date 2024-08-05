@@ -3,33 +3,36 @@ package com.nextClass.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 @NoArgsConstructor
 public class ToDoListRequsetDto {
 
     private String uuid;
-    private String memberUuid;
-    private LocalDateTime createdTime;
-    private LocalDateTime updateTime;
-    private LocalDateTime alarmTime;
-    private LocalDateTime doneTime;
+    private String member_uuid;
+    private LocalDateTime created_time;
+    private LocalDateTime update_time;
+    private LocalDateTime alarm_time;
+    private LocalDateTime goal_time;
     private String content;
+    private String fcm_token;
 
-    public ToDoListRequsetDto(String content, LocalDateTime createdTime, LocalDateTime alarmTime, LocalDateTime doneTime){
+    public ToDoListRequsetDto(String content, LocalDateTime alarm_time, LocalDateTime goal_time, String fcm_token){
         this.content = content;
-        this.createdTime = createdTime;
-        this.alarmTime = alarmTime;
-        this.doneTime = doneTime;
+        this.alarm_time = alarm_time;
+        this.goal_time = goal_time;
+        this.fcm_token = fcm_token;
     }
 
-    public ToDoListRequsetDto(String uuid, String content, LocalDateTime updateTime, LocalDateTime alarmTime, LocalDateTime doneTime){
+    public ToDoListRequsetDto(String uuid, String content, LocalDateTime alarm_time, LocalDateTime goal_time, String fcm_token){
         this.uuid = uuid;
         this.content = content;
-        this.alarmTime = alarmTime;
-        this.updateTime = updateTime;
-        this.doneTime = doneTime;
+        this.alarm_time = alarm_time;
+        this.goal_time = goal_time;
+        this.fcm_token = fcm_token;
     }
 }
