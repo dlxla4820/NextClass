@@ -24,8 +24,8 @@ public class ToDoList {
     @Column(nullable = false)
     private UUID member_uuid;
 
-    @Column(name = "fcm_token")
-    private String fcmToken;
+    @Column(name = "app_token")
+    private String appToken;
 
     @Column(name = "create_time", nullable = false)
     private LocalDateTime createTime;

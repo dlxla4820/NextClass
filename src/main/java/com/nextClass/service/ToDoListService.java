@@ -49,7 +49,7 @@ public class ToDoListService {
         if(toDoListRequsetDto.getAlarm_time() == (null)){
             toDoList = ToDoList.builder()
                     .content(toDoListRequsetDto.getContent())
-                    .fcmToken(toDoListRequsetDto.getFcm_token())
+                    .appToken(toDoListRequsetDto.getFcm_token())
                     .createTime(toDoListRequsetDto.getCreated_time())
                     .updateTime(toDoListRequsetDto.getUpdate_time())
                     .goalTime(toDoListRequsetDto.getGoal_time())
@@ -59,7 +59,7 @@ public class ToDoListService {
         else{
             toDoList = ToDoList.builder()
                     .content(toDoListRequsetDto.getContent())
-                    .fcmToken(toDoListRequsetDto.getFcm_token())
+                    .appToken(toDoListRequsetDto.getFcm_token())
                     .createTime(toDoListRequsetDto.getCreated_time())
                     .updateTime(toDoListRequsetDto.getUpdate_time())
                     .goalTime(toDoListRequsetDto.getGoal_time())
