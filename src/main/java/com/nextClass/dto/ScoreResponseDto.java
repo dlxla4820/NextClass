@@ -37,6 +37,7 @@ public class ScoreResponseDto {
             private String achievement;
             private Integer grade;
             private Double studentScore;
+            private String semester;
         }
     }
 }

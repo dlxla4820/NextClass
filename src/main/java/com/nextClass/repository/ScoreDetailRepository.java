@@ -30,13 +30,10 @@ public class ScoreDetailRepository {
                 .fetch();
     }
 
-    public Score scoreDuplicateCheck(ScoreRequestDto.ScoreInfo scoreInfo, String currentUser){
-        return queryFactory.selectFrom(score)
-                .where(score.category.eq(scoreInfo.getCategory()))
-                .where(score.title.eq(scoreInfo.getTitle()))
-                .where(Expressions.stringTemplate("HEX({0})", score.memberUuid).eq(currentUser.replace("-","")))
-                .where(score.semester.eq(scoreInfo.getSemester()))
-                .fetchOne();
+    public long deleteAllDataAboutCurrentUser(String currentUser){
+        return queryFactory.delete(score)
+                .where(Expressions.stringTemplate("HEX({0})", score.memberUuid).eq(currentUser.replace("-", "")))
+                .execute();
     }
 
     public void saveScore(Score score){
