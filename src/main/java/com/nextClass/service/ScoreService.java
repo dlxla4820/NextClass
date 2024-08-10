@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 @Service
 @Slf4j
+@Transactional
 public class ScoreService {
     private ScoreDetailRepository scoreRepository;
 
@@ -48,6 +50,16 @@ public class ScoreService {
                     .build();
             for (Score scoreInfo : semesterScore) {
                 if (scoreInfo.getCategory().equals("창체")) {
+                    ScoreResponseDto.SemesterDto.SubjectDto scoreDetail = ScoreResponseDto.SemesterDto.SubjectDto.builder()
+                            .uuid(scoreInfo.getUuid())
+                            .title(scoreInfo.getTitle())
+                            .category(scoreInfo.getCategory())
+                            .credit(scoreInfo.getCredit())
+                            .achievement(scoreInfo.getAchievement())
+                            .grade(scoreInfo.getGrade())
+                            .semester(scoreInfo.getSemester())
+                            .build();
+                    dataList.add(scoreDetail);
                     continue;
                 }
                 ScoreResponseDto.SemesterDto.SubjectDto scoreDetail = ScoreResponseDto.SemesterDto.SubjectDto.builder()
@@ -57,6 +69,7 @@ public class ScoreService {
                         .credit(scoreInfo.getCredit())
                         .achievement(scoreInfo.getAchievement())
                         .grade(scoreInfo.getGrade())
+                        .semester(scoreInfo.getSemester())
                         .build();
                 if (scoreInfo.getCategory().equals("선택")) {
                     scoreDetail.setStudent_score(scoreInfo.getStudentScore());
@@ -88,20 +101,20 @@ public class ScoreService {
         //대한이가 request body에 대해서 전체적으로 관리해주는거 만들었다고 했었던거 다시 물어보기
         String currentUser = CommonUtils.getMemberUuidIfAdminOrUser();
         UUID duplicateUUID;
-        Score duplicateScore;
         Score score;
+        //db 리셋
+        try{
+            scoreRepository.deleteAllDataAboutCurrentUser(currentUser);
+        }catch(DataAccessException ex){
+            log.error("ScoreService << addScoreOnSemester >> | DataAccessException ex : {}", ex.getMessage(), ex);
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SCORE_SAVE_FAIL.getErrorCode(), ErrorCode.SCORE_SAVE_FAIL.getErrorDescription());
+        }
         //list 안에 있는 모든 객체에 대해서 행동
         for (ScoreRequestDto.ScoreInfo scoreInfo : scoreRequestDto.getData()) {
             //동일 제목, 학점, 학기, 멤버를가지고 있는 수업이 해당 테이블에 존재하는지 확인
             //있으면 해당 값의 점수만 수정해서 저장
             if (scoreInfo.getUuid() == null || scoreInfo.getUuid().isBlank()) {
-                duplicateScore = scoreRepository.scoreDuplicateCheck(scoreInfo, currentUser);
-                if (duplicateScore==null) {
-                    duplicateUUID = UUID.randomUUID();
-                }
-                else{
-                    duplicateUUID = duplicateScore.getUuid();
-                }
+                duplicateUUID = UUID.randomUUID();
             } else {
                 duplicateUUID = convertToUUID(scoreInfo.getUuid());
             }
