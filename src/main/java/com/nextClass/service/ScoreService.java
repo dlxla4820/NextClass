@@ -58,6 +58,9 @@ public class ScoreService {
                             .achievement(scoreInfo.getAchievement())
                             .grade(scoreInfo.getGrade())
                             .semester(scoreInfo.getSemester())
+                            .student_score(null)
+                            .average_score(null)
+                            .standard_deviation(null)
                             .build();
                     dataList.add(scoreDetail);
                     continue;
@@ -73,6 +76,8 @@ public class ScoreService {
                         .build();
                 if (scoreInfo.getCategory().equals("선택")) {
                     scoreDetail.setStudent_score(scoreInfo.getStudentScore());
+                    scoreDetail.setAverage_score(scoreInfo.getAverageScore());
+                    scoreDetail.setStandard_deviation(scoreInfo.getStandardDeviation());
                     //선택 과목의 경우 평균편차와 원점수, 평균 점수를 통해 등급을 유추해 낸 뒤에 해당 당급을 넣음
                 }
                 semesterScoreSum += scoreInfo.getGrade() * scoreInfo.getCredit();
