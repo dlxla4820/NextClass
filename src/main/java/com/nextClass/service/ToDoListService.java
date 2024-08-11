@@ -8,6 +8,11 @@ import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.ToDoListDetailRepository;
 import com.nextClass.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecutionException;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,9 +26,17 @@ import java.util.UUID;
 @Transactional
 public class ToDoListService {
     private ToDoListDetailRepository toDoListRepository;
+    private JobLauncher jobLauncher;
+    private Job job;
 
-    public ToDoListService(ToDoListDetailRepository toDoListDetailRepository){
+    public ToDoListService(
+            ToDoListDetailRepository toDoListDetailRepository,
+            JobLauncher jobLauncher,
+            Job job
+    ){
         this.toDoListRepository = toDoListDetailRepository;
+        this.jobLauncher = jobLauncher;
+        this.job = job;
     }
 
     public ResponseDto<?> createToDoList(ToDoListRequsetDto toDoListRequsetDto){
@@ -49,7 +62,7 @@ public class ToDoListService {
         if(toDoListRequsetDto.getAlarm_time() == (null)){
             toDoList = ToDoList.builder()
                     .content(toDoListRequsetDto.getContent())
-                    .appToken(toDoListRequsetDto.getFcm_token())
+                    .appToken(toDoListRequsetDto.getApp_token())
                     .createTime(toDoListRequsetDto.getCreated_time())
                     .updateTime(toDoListRequsetDto.getUpdate_time())
                     .goalTime(toDoListRequsetDto.getGoal_time())
@@ -59,7 +72,7 @@ public class ToDoListService {
         else{
             toDoList = ToDoList.builder()
                     .content(toDoListRequsetDto.getContent())
-                    .appToken(toDoListRequsetDto.getFcm_token())
+                    .appToken(toDoListRequsetDto.getApp_token())
                     .createTime(toDoListRequsetDto.getCreated_time())
                     .updateTime(toDoListRequsetDto.getUpdate_time())
                     .goalTime(toDoListRequsetDto.getGoal_time())
@@ -73,8 +86,16 @@ public class ToDoListService {
             log.error("ToDoService << createToDoList >> | DataAccessException e : {}", e.getMessage(), e);
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SYSTEM_ERROR.getErrorCode(), String.format(ErrorCode.SYSTEM_ERROR.getErrorDescription()));
         }
-        if(!toDoListRequsetDto.getFcm_token().isBlank())
+        if(!toDoListRequsetDto.getApp_token().isBlank())
         //firebase에 연결해서 알람도 설정 (alarmTime 시간)
+        {
+            try{
+                jobLauncher.run(job, new JobParameters());
+            }catch(JobExecutionException e){
+                log.error("ToDoService << createToDoList >> | JobExecutionException e : {}", e.getMessage(), e);
+                return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SYSTEM_ERROR.getErrorCode(), String.format(ErrorCode.SYSTEM_ERROR.getErrorDescription()));
+            }
+        }
         log.info("ToDoService << createToDoList >> | toDoList : {}", toDoList);
         return new ResponseDto<>(HttpStatus.ACCEPTED.value(), Description.SUCCESS);
     }

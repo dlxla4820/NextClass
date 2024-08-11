@@ -26,7 +26,7 @@ public class ToDoListDetailRepository {
     public ToDoList checkDuplicate(ToDoListRequsetDto toDoListRequsetDto){
         return queryFactory.selectFrom(toDoList)
                 .where(toDoList.content.eq(toDoListRequsetDto.getContent()))
-                .where(toDoList.fcmToken.eq(toDoListRequsetDto.getFcm_token()))
+                .where(toDoList.appToken.eq(toDoListRequsetDto.getApp_token()))
                 .where(Expressions.stringTemplate("HEX({0})", toDoList.member_uuid).eq(toDoListRequsetDto.getMember_uuid().replace("-","")))
                 .fetchOne();
     }
