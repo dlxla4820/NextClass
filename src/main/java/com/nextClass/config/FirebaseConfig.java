@@ -13,20 +13,20 @@ import java.io.IOException;
 @Slf4j
 @Configuration
 public class FirebaseConfig {
-    @Bean   
-    public void connectFireBase() {
+    @Bean
+    public FirebaseApp connectFireBase() {
         try {
-            FileInputStream serviceAccountType = new FileInputStream("/src/main/resources/next-class-b628b-firebase-adminsdk-hmt06-9553065b92.json");
+            FileInputStream serviceAccountType = new FileInputStream("./src/main/resources/next-class-b628b-firebase-adminsdk-hmt06-9553065b92.json");
             FirebaseOptions fireBaseOptions = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccountType))
                     .setDatabaseUrl("https://next-class-b628b.firebaseio.com")
                     .build();
 
-            FirebaseApp.initializeApp(fireBaseOptions);
-        }catch(Exception e){
+            return FirebaseApp.initializeApp(fireBaseOptions);
+        } catch(Exception e) {
             log.error("FirebaseConfig << connectFireBase >> Exception : {}", e.getMessage(), e);
+            return null; // 또는 적절한 예외 처리를 하세요.
         }
     }
-
-
 }
+

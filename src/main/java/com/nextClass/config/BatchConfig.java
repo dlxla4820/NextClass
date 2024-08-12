@@ -12,13 +12,13 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 
-@Configuration
-public class BatchConfig extends DefaultBatchConfiguration{
-    @Bean
-    public Job job(JobRepository jobRepository){
-        return new JobBuilder("job", jobRepository)
-                .preventRestart()
-                .start()
-                .build();
-    }
-}
+//@Configuration
+//public class BatchConfig extends DefaultBatchConfiguration{
+//    @Bean
+//    public Job job(JobRepository jobRepository){
+//        return new JobBuilder("job", jobRepository)
+//                .preventRestart()
+//                .start()
+//                .build();
+//    }
+//}
