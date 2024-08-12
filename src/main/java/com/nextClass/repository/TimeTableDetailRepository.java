@@ -155,6 +155,7 @@ public class TimeTableDetailRepository {
                         timeTable.classStartTime.between(timeTableRequestDto.getClass_start_time(), timeTableRequestDto.getClass_end_time()),
                         timeTable.classEndTime.between(timeTableRequestDto.getClass_start_time(), timeTableRequestDto.getClass_end_time())
                         )
+                .where(timeTable.week.eq(timeTableRequestDto.getWeek()))
                 .fetchFirst();
     }
 }
