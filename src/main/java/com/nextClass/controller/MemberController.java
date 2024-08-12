@@ -20,17 +20,17 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    @PostMapping(value = "/change_info")
+    @PostMapping(value = "/info_change")
     public ResponseEntity<ResponseDto<?>> changeInfo(@RequestBody MemberChangeNormalInfoRequestDto requestBody){
         return ResponseEntity.ok(memberService.changeNormalInfo(requestBody));
     }
 
-    @PostMapping(value = "/change_password")
+    @PostMapping(value = "/password_change")
     public ResponseEntity<ResponseDto<?>> changePassword(@RequestBody MemberChangePasswordRequestDto requestBody){
         return ResponseEntity.ok(memberService.changePassword(requestBody));
     }
 
-    @PostMapping(value = "/change_email")
+    @PostMapping(value = "/email_change")
     public ResponseEntity<ResponseDto<?>> changeEmail(@RequestBody MemberChangeEmailRequestDto requestBody){
         return ResponseEntity.ok(memberService.changeEmail(requestBody));
     }
@@ -40,20 +40,20 @@ public class MemberController {
         return ResponseEntity.ok(memberService.getMyInfo());
     }
 
-    @PostMapping(value = "/delete_id")
+    @PostMapping(value = "/id_delete")
     public ResponseEntity<ResponseDto<?>> deleteMember(@RequestBody MemberDeleteRequestDto requestBody){
         return ResponseEntity.ok(memberService.deleteMember(requestBody));
     }
 
-    @PostMapping(value = "/send_changed_mail")
+    @PostMapping(value = "/changed_mail_send")
     public ResponseEntity<ResponseDto<?>> sendChangeEmail(@RequestBody EmailSendChangeCodeRequestDto requestBody){
         return ResponseEntity.ok(mailService.sendChangeEmailCreateCode(requestBody));
     }
-    @PostMapping(value = "/find_id")
+    @PostMapping(value = "/id_find")
     public ResponseEntity<ResponseDto<?>> findMemberId(@RequestBody EmailSendMemberIdDto requestBody){
         return ResponseEntity.ok(mailService.sendEmailMemberId(requestBody));
     }
-    @PostMapping(value = "/find_password")
+    @PostMapping(value = "/password_find")
     public ResponseEntity<ResponseDto<?>> findPassword(@RequestBody EmailSendPasswordDto requestBody){
         return ResponseEntity.ok(mailService.sendEmailRandomPassword(requestBody));
     }

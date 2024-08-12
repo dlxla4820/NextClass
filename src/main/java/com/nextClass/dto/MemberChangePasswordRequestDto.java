@@ -1,5 +1,6 @@
 package com.nextClass.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,8 +11,9 @@ import java.util.StringJoiner;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MemberChangePasswordRequestDto {
-
+    @JsonProperty("existing_password")
     private String existingPassword;
+    @JsonProperty("new_password")
     private String newPassword;
     @Override
     public String toString() {
