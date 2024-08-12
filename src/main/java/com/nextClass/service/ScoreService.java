@@ -23,7 +23,7 @@ import java.util.UUID;
 @Slf4j
 @Transactional
 public class ScoreService {
-    private ScoreDetailRepository scoreRepository;
+    private final ScoreDetailRepository scoreRepository;
 
     public ScoreService(ScoreDetailRepository scoreRepository) {
         this.scoreRepository = scoreRepository;
@@ -140,7 +140,7 @@ public class ScoreService {
 
             } else if (scoreInfo.getCategory().equals("선택")) {
                 Integer grade = calculateGradeUsingAchievement(scoreInfo.getAverage_score(), scoreInfo.getStudent_score(), scoreInfo.getStandard_deviation());
-                if (grade.equals(null)) {
+                if (grade==(null)) {
                     log.error("ScoreService << getAllScore >> | INPUT_SCORE_OUT_OF_RANGE scoreInfo : {}", scoreInfo);
                     return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorCode(), ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorDescription());
                 }
@@ -193,7 +193,7 @@ public class ScoreService {
     }
 
     private Integer calculateGradeUsingAchievement(Double averageScore, Double studentScore, Double standardDeviation) {
-        Double zScore = (studentScore - averageScore) / standardDeviation;
+        double zScore = (studentScore - averageScore) / standardDeviation;
         if (zScore >= 1.76 && zScore <= 3.00) {
             return 1;
         } else if (zScore >= 1.23 && zScore <= 1.75) {
