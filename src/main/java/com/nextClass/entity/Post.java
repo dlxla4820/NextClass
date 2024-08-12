@@ -10,6 +10,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Getter
+@Setter
 @Table(name = "board")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -28,6 +29,8 @@ public class Post {
     private List<Comment> commentList;
 
     private String subject;
+
+    private String author;
 
     private String content;
 

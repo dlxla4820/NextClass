@@ -9,6 +9,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Getter
+@Setter
 @Table(name = "comment")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -26,6 +27,8 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "post_uuid")
     private Post post;
+
+    private String author;
 
     private String content;
     @Column(name = "reg_date")
