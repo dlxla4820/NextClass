@@ -1,9 +1,6 @@
 package com.nextClass.service;
 
-import com.nextClass.dto.MemberRequestDto;
-import com.nextClass.dto.PostChangeRequestDto;
-import com.nextClass.dto.PostSaveRequestDto;
-import com.nextClass.dto.ResponseDto;
+import com.nextClass.dto.*;
 import com.nextClass.entity.Member;
 import com.nextClass.entity.Post;
 import com.nextClass.enums.Description;
@@ -66,6 +63,57 @@ public class BoardService {
         if(requestBody.getIsSecret() == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "is_secret"));
 
+        Member member = loginRepository.getMemberByUuid(memberUuid);
+        String author = requestBody.getIsSecret() ? ANONYMOUS_NAME : member.getId();
 
+        Post post = boardRepository.selectPostByUuid(requestBody.getPostId());
+        if(post == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.POST_NOT_EXIST.getErrorCode(), ErrorCode.POST_NOT_EXIST.getErrorDescription());
+        if(!memberUuid.equals(post.getMember().getUuid().toString()))
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.POST_NOT_MATCH_MEMBER.getErrorCode(), ErrorCode.POST_NOT_MATCH_MEMBER.getErrorDescription());
+
+        boardRepository.updatePost(requestBody, author);
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+    }
+    public ResponseDto<?> deletePost(PostDeleteRequestDto requestBody) {
+        String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+        log.info("BoardService << deletePost >> | memberUuid : {}, requestBody : {}",memberUuid, requestBody);
+        if(memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
+        //유효성 검사
+        if(requestBody.getPostId() == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "post_id"));
+
+        Post post = boardRepository.selectPostByUuid(requestBody.getPostId());
+        if(post == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.POST_NOT_EXIST.getErrorCode(), ErrorCode.POST_NOT_EXIST.getErrorDescription());
+        if(!memberUuid.equals(post.getMember().getUuid().toString()))
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.POST_NOT_MATCH_MEMBER.getErrorCode(), ErrorCode.POST_NOT_MATCH_MEMBER.getErrorDescription());
+
+        boardRepository.deletePost(requestBody);
+
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+    }
+
+    public ResponseDto<?> getPost(String postId) {
+        String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+        log.info("BoardService << getPost >> | memberUuid : {}, postId : {}",memberUuid, postId);
+        if(memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
+
+        Post post = boardRepository.selectPostByUuid(postId);
+        if(post == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.POST_NOT_EXIST.getErrorCode(), ErrorCode.POST_NOT_EXIST.getErrorDescription());
+        boolean isOwner = memberUuid.equals(post.getMember().getUuid().toString());
+
+        PostSelectResponseDto response = PostSelectResponseDto.builder()
+                .postId(postId)
+                .name(post.getAuthor())
+                .subject(post.getSubject())
+                .content(post.getContent())
+                .isOwner(isOwner)
+                .build();
+        log.info("BoardService << getPost >> | response : {}", response);
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, response);
     }
 }

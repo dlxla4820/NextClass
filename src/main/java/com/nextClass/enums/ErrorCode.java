@@ -18,7 +18,7 @@ public enum ErrorCode {
     JWT_REFRESH_EXPIRED_INVALID("E00108","만료된 Refresh 토큰입니다."),
     PARAMETER_INVALID_SPECIFIC("E00109", "%s이(가) 유효하지 않습니다."),
     INPUT_DUPLICATED("E00110","%s이(가) 중복되었습니다."),
-    TOKEN_MEMBER_NOT_EXIST("E00101","Token에 해당하는 회원이 존재하지 않습니다."),
+    TOKEN_MEMBER_NOT_EXIST("E00111","Token에 해당하는 회원이 존재하지 않습니다."),
 
     MEMBER_NOT_EXIST("E00201","Request에 해당하는 회원이 존재하지 않습니다."),
     EXISTING_PASSWORD_NOT_MATCH("E00202","현재 비밀번호가 일치하지 않습니다."),
@@ -36,10 +36,15 @@ public enum ErrorCode {
     MAIL_NOT_EXIST("E00502","해당 인증건에 대한 발송 메일이 존재 하지 않습니다."),
     MAIL_CODE_INVALID("E00503","인증코드가 유효하지 않습니다."),
     MAIL_MEMBER_NOT_EXIST("E00504","회원이 존재하지 않습니다."),
-    MAIL_CODE_FIVE_FAIL("E00504","인증코드 입력을 5회 실패하였습니다."),
+    MAIL_CODE_FIVE_FAIL("E00505","인증코드 입력을 5회 실패하였습니다."),
 
     SCORE_SAVE_FAIL("E00601", "학점 저장에 실패하였습니다."),
-    INPUT_SCORE_OUT_OF_RANGE("E00602", "입력된 점수, 평균점수, 표준편차 값이 범위를 벗어났습니다.");
+    INPUT_SCORE_OUT_OF_RANGE("E00602", "입력된 점수, 평균점수, 표준편차 값이 범위를 벗어났습니다."),
+
+    POST_NOT_EXIST("E00701", "게시글이 존재하지 않습니다."),
+    POST_NOT_MATCH_MEMBER("E00702", "해당 게시글에 대한 권한이 없습니다.");
+
+
 
     private final String errorCode;
     private final String errorDescription;

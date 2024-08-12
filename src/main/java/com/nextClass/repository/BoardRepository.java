@@ -1,6 +1,7 @@
 package com.nextClass.repository;
 
 import com.nextClass.dto.PostChangeRequestDto;
+import com.nextClass.dto.PostDeleteRequestDto;
 import com.nextClass.dto.PostSaveRequestDto;
 import com.nextClass.entity.Member;
 import com.nextClass.entity.Post;
@@ -45,15 +46,25 @@ public class BoardRepository {
         postRepository.save(post);
     }
 
-    public void updatePost(PostChangeRequestDto postChangeRequestDto){
+    public void updatePost(PostChangeRequestDto postChangeRequestDto, String author){
         queryFactory.update(post)
                 .set(post.subject, postChangeRequestDto.getSubject())
                 .set(post.content, postChangeRequestDto.getContent())
+                .set(post.author, author)
+                .set(post.modDate, LocalDateTime.now())
+                .where(Expressions.stringTemplate("HEX({0})", post.uuid).eq(postChangeRequestDto.getPostId().replace("-","")))
+                .execute();
+    }
+
+    public void deletePost(PostDeleteRequestDto postDeleteRequestDto){
+        queryFactory.delete(post)
+                .where(Expressions.stringTemplate("HEX({0})", post.uuid).eq(postDeleteRequestDto.getPostId().replace("-","")))
+                .execute();
     }
 
 
 
-    public Post selectPost(String uuid){
+    public Post selectPostByUuid(String uuid){
         return queryFactory.selectFrom(post)
                 .where(Expressions.stringTemplate("HEX({0})", post.uuid).eq(uuid.replace("-","")))
                 .fetchOne();
