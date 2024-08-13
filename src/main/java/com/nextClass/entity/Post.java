@@ -11,15 +11,14 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@Table(name = "board")
+@Table(name = "post")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Post {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Builder.Default
-    private UUID uuid = UUID.randomUUID();
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer sequence;
 
     @ManyToOne
     @JoinColumn(name = "member_uuid")

@@ -16,9 +16,9 @@ public class BoardController {
         this.boardService = boardService;
     }
 
-    @GetMapping(value = "/post/{postId}")
-    public ResponseEntity<ResponseDto<?>> getPost(@PathVariable String postId){
-        return ResponseEntity.ok(boardService.getPost(postId));
+    @GetMapping(value = "/post/{postSequence}")
+    public ResponseEntity<ResponseDto<?>> getPost(@PathVariable Integer postSequence){
+        return ResponseEntity.ok(boardService.getPost(postSequence));
     }
 
     @PostMapping(value = "/post_save")

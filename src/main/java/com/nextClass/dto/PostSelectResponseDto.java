@@ -11,15 +11,15 @@ import java.util.StringJoiner;
 @Getter
 @NoArgsConstructor
 public class PostSelectResponseDto {
-    @JsonProperty("post_id")
-    private String postId;
+    @JsonProperty("post_sequence")
+    private Integer postSequence;
     private String subject;
     private String content;
     private String name;
     private boolean isOwner;
     @Builder
-    public PostSelectResponseDto(String postId, String subject, String content, String name, boolean isOwner) {
-        this.postId = postId;
+    public PostSelectResponseDto(Integer postSequence, String subject, String content, String name, boolean isOwner) {
+        this.postSequence = postSequence;
         this.subject = subject;
         this.content = content;
         this.name = name;
@@ -29,7 +29,7 @@ public class PostSelectResponseDto {
     @Override
     public String toString() {
         return new StringJoiner(", ", PostSelectResponseDto.class.getSimpleName() + "[", "]")
-                .add("postId='" + postId + "'")
+                .add("postId='" + postSequence + "'")
                 .add("subject='" + subject + "'")
                 .add("content='" + content + "'")
                 .add("name='" + name + "'")

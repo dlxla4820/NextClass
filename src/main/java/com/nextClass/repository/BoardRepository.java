@@ -3,17 +3,26 @@ package com.nextClass.repository;
 import com.nextClass.dto.PostChangeRequestDto;
 import com.nextClass.dto.PostDeleteRequestDto;
 import com.nextClass.dto.PostSaveRequestDto;
+import com.nextClass.dto.VoteCountDto;
 import com.nextClass.entity.Member;
 import com.nextClass.entity.Post;
+import com.nextClass.entity.Vote;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.expression.spel.ast.Projection;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.nextClass.entity.QMember.member;
 import static com.nextClass.entity.QPost.post;
+import static com.nextClass.entity.QVote.vote;
 
 @Repository
 @Transactional
@@ -52,21 +61,47 @@ public class BoardRepository {
                 .set(post.content, postChangeRequestDto.getContent())
                 .set(post.author, author)
                 .set(post.modDate, LocalDateTime.now())
-                .where(Expressions.stringTemplate("HEX({0})", post.uuid).eq(postChangeRequestDto.getPostId().replace("-","")))
+                .where(post.sequence.eq(postChangeRequestDto.getPostSequence()))
                 .execute();
     }
 
     public void deletePost(PostDeleteRequestDto postDeleteRequestDto){
         queryFactory.delete(post)
-                .where(Expressions.stringTemplate("HEX({0})", post.uuid).eq(postDeleteRequestDto.getPostId().replace("-","")))
+                .where(post.sequence.eq(postDeleteRequestDto.getPostSequence()))
                 .execute();
     }
 
+    public List<Post> selectAllPostList(Integer postSequence, int size){
+        return queryFactory.select(post)
+                .from(post)
+                .where(eqPostSequence(postSequence))
+                .orderBy(post.regDate.desc())
+                .limit(size)
+                .fetch();
+    }
 
+    public List<VoteCountDto> selectVoteCountList(Integer postSequence, int size){
+        if(size == 0)
+            return null;
+        List<Integer> sequenceList = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            sequenceList.add(postSequence - i);
+        }
+        return queryFactory.select(Projections.fields(VoteCountDto.class, vote.boardSequence, vote.count()))
+                .from(vote)
+                .where(vote.boardSequence.in(sequenceList).and(vote.boardType.eq(Vote.BoardType.POST)))
+                .groupBy(vote.boardSequence)
+                .fetch();
+    }
+    private BooleanExpression eqPostSequence(Integer postSequence){
+        if(postSequence == null)
+            return null;
+        return post.sequence.lt(postSequence);
+    }
 
-    public Post selectPostByUuid(String uuid){
+    public Post selectPost(Integer sequence){
         return queryFactory.selectFrom(post)
-                .where(Expressions.stringTemplate("HEX({0})", post.uuid).eq(uuid.replace("-","")))
+                .where(post.sequence.eq(sequence))
                 .fetchOne();
     }
 

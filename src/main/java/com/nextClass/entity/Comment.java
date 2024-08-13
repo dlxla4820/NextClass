@@ -16,16 +16,15 @@ import java.util.UUID;
 public class Comment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Builder.Default
-    private UUID uuid = UUID.randomUUID();
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer sequence;
 
     @ManyToOne
     @JoinColumn(name = "member_uuid")
     private Member member;
 
     @ManyToOne
-    @JoinColumn(name = "post_uuid")
+    @JoinColumn(name = "post_sequence")
     private Post post;
 
     private String author;

@@ -11,8 +11,8 @@ import java.util.StringJoiner;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostChangeRequestDto {
-    @JsonProperty("post_id")
-    private String postId;
+    @JsonProperty("post_sequence")
+    private Integer postSequence;
     private String subject;
     private String content;
     @JsonProperty("is_secret")
@@ -22,7 +22,7 @@ public class PostChangeRequestDto {
     @Override
     public String toString() {
         return new StringJoiner(", ", PostChangeRequestDto.class.getSimpleName() + "[", "]")
-                .add("postId='" + postId + "'")
+                .add("postSequence='" + postSequence + "'")
                 .add("subject='" + subject + "'")
                 .add("content='" + content + "'")
                 .add("isSecret='" + isSecret + "'")

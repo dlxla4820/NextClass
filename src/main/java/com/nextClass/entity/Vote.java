@@ -23,8 +23,8 @@ public class Vote {
     @JoinColumn(name = "member_uuid")
     private Member member;
 
-    @Column(name = "board_id")
-    private String boardId;
+    @Column(name = "board_sequence")
+    private Integer boardSequence;
 
     @Column(name = "board_type")
     private BoardType boardType;
@@ -33,6 +33,6 @@ public class Vote {
     private LocalDateTime regDate;
 
     public enum BoardType {
-        BOARD, COMMENT
+        POST, COMMENT
     }
 }
