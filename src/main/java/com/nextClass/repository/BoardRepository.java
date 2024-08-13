@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.nextClass.entity.QMember.member;
@@ -82,12 +83,12 @@ public class BoardRepository {
 
     public List<VoteCountDto> selectVoteCountList(Integer postSequence, int size){
         if(size == 0)
-            return null;
+            return Collections.emptyList();
         List<Integer> sequenceList = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             sequenceList.add(postSequence - i);
         }
-        return queryFactory.select(Projections.fields(VoteCountDto.class, vote.boardSequence, vote.count()))
+        return queryFactory.select(Projections.fields(VoteCountDto.class, vote.boardSequence, vote.count().as("vote_count")))
                 .from(vote)
                 .where(vote.boardSequence.in(sequenceList).and(vote.boardType.eq(Vote.BoardType.POST)))
                 .groupBy(vote.boardSequence)

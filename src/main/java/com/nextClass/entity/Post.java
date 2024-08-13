@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 @Builder
@@ -38,5 +39,17 @@ public class Post {
 
     @Column(name = "mod_date")
     private LocalDateTime modDate;
-
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Post.class.getSimpleName() + "[", "]")
+                .add("sequence='" + sequence + "'")
+                .add("member='" + member + "'")
+                .add("commentList='" + commentList + "'")
+                .add("subject='" + subject + "'")
+                .add("author='" + author + "'")
+                .add("content='" + content + "'")
+                .add("regDate='" + regDate + "'")
+                .add("modDate='" + modDate + "'")
+                .toString();
+    }
 }

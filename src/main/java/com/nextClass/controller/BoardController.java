@@ -35,4 +35,10 @@ public class BoardController {
         return ResponseEntity.ok(boardService.deletePost(requestBody));
     }
 
+
+    @PostMapping(value = "/post_list")
+    public ResponseEntity<ResponseDto<?>> deletePost(@RequestBody PostListSelectRequestDto requestBody){
+        return ResponseEntity.ok(boardService.getPostList(requestBody));
+    }
+
 }

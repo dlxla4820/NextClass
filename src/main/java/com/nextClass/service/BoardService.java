@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -137,8 +138,10 @@ public class BoardService {
         if(requestBody.getSize() == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "size"));
         List<Post> postList = boardRepository.selectAllPostList(requestBody.getPostSequence(), requestBody.getSize());
+        System.out.println("postList = " + postList);
+        List<PostListSelectResponseDto> responseList = new ArrayList<>();
         if(postList.size() == 0)
-            return null;
+            return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);
         List<VoteCountDto> voteCountDtoList = boardRepository.selectVoteCountList(postList.get(0).getSequence(), postList.size());
         Map<Integer, Long> voteCountMap = voteCountDtoList.stream()
                 .collect(Collectors.toMap(
@@ -146,8 +149,20 @@ public class BoardService {
                         VoteCountDto::getVoteCount     // Value: vote count
                 ));
         for (Post post : postList){
-
+            Integer voteCount = voteCountMap.containsKey(post.getSequence()) ? voteCountMap.get(post.getSequence()).intValue() : 0;
+            PostListSelectResponseDto response = PostListSelectResponseDto.builder()
+                    .postSequence(post.getSequence())
+                    .subject(post.getSubject())
+                    .content(post.getContent())
+                    .name(post.getAuthor())
+                    .voteCount(voteCount)
+                    .commentCount(post.getCommentList().size())
+                    .regDate(post.getRegDate())
+                    .build();
+            responseList.add(response);
         }
+        log.info("BoardService << getPostList >> | responseList : {}", responseList);
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);
     }
 
 
