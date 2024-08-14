@@ -15,14 +15,14 @@ public class PostSelectResponseDto {
     private Integer postSequence;
     private String subject;
     private String content;
-    private String name;
+    private String author;
     private boolean isOwner;
     @Builder
-    public PostSelectResponseDto(Integer postSequence, String subject, String content, String name, boolean isOwner) {
+    public PostSelectResponseDto(Integer postSequence, String subject, String content, String author, boolean isOwner) {
         this.postSequence = postSequence;
         this.subject = subject;
         this.content = content;
-        this.name = name;
+        this.author = author;
         this.isOwner = isOwner;
     }
 
@@ -32,7 +32,7 @@ public class PostSelectResponseDto {
                 .add("postId='" + postSequence + "'")
                 .add("subject='" + subject + "'")
                 .add("content='" + content + "'")
-                .add("name='" + name + "'")
+                .add("author='" + author + "'")
                 .add("isOwner='" + isOwner + "'")
                 .toString();
     }

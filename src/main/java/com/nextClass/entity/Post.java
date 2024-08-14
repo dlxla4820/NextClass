@@ -25,14 +25,19 @@ public class Post {
     @JoinColumn(name = "member_uuid")
     private Member member;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
-    private List<Comment> commentList;
-
     private String subject;
 
     private String author;
 
     private String content;
+
+    @Builder.Default
+    @Column(name = "comment_count")
+    private Integer commentCount = 0;
+
+    @Builder.Default
+    @Column(name = "vote_count")
+    private Integer voteCount = 0;
 
     @Column(name = "reg_date")
     private LocalDateTime regDate;
@@ -44,10 +49,11 @@ public class Post {
         return new StringJoiner(", ", Post.class.getSimpleName() + "[", "]")
                 .add("sequence='" + sequence + "'")
                 .add("member='" + member + "'")
-                .add("commentList='" + commentList + "'")
                 .add("subject='" + subject + "'")
                 .add("author='" + author + "'")
                 .add("content='" + content + "'")
+                .add("commentCount='" + commentCount + "'")
+                .add("voteCount='" + voteCount + "'")
                 .add("regDate='" + regDate + "'")
                 .add("modDate='" + modDate + "'")
                 .toString();

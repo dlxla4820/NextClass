@@ -30,6 +30,11 @@ public class Comment {
     private String author;
 
     private String content;
+
+    @Builder.Default
+    @Column(name = "vote_count")
+    private Integer voteCount = 0;
+
     @Column(name = "reg_date")
     private LocalDateTime regDate;
 

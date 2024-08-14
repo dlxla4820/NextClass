@@ -115,7 +115,7 @@ public class BoardService {
 
         PostSelectResponseDto response = PostSelectResponseDto.builder()
                 .postSequence(postSequence)
-                .name(post.getAuthor())
+                .author(post.getAuthor())
                 .subject(post.getSubject())
                 .content(post.getContent())
                 .isOwner(isOwner)
@@ -137,30 +137,8 @@ public class BoardService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "sort"));
         if(requestBody.getSize() == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "size"));
-        List<Post> postList = boardRepository.selectAllPostList(requestBody.getPostSequence(), requestBody.getSize());
-        System.out.println("postList = " + postList);
-        List<PostListSelectResponseDto> responseList = new ArrayList<>();
-        if(postList.size() == 0)
-            return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);
-        List<VoteCountDto> voteCountDtoList = boardRepository.selectVoteCountList(postList.get(0).getSequence(), postList.size());
-        Map<Integer, Long> voteCountMap = voteCountDtoList.stream()
-                .collect(Collectors.toMap(
-                        VoteCountDto::getBoardSequence, // Key: post sequence
-                        VoteCountDto::getVoteCount     // Value: vote count
-                ));
-        for (Post post : postList){
-            Integer voteCount = voteCountMap.containsKey(post.getSequence()) ? voteCountMap.get(post.getSequence()).intValue() : 0;
-            PostListSelectResponseDto response = PostListSelectResponseDto.builder()
-                    .postSequence(post.getSequence())
-                    .subject(post.getSubject())
-                    .content(post.getContent())
-                    .name(post.getAuthor())
-                    .voteCount(voteCount)
-                    .commentCount(post.getCommentList().size())
-                    .regDate(post.getRegDate())
-                    .build();
-            responseList.add(response);
-        }
+        List<PostListSelectResponseDto> responseList = boardRepository.selectAllPostList(memberUuid, requestBody);
+
         log.info("BoardService << getPostList >> | responseList : {}", responseList);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);
     }

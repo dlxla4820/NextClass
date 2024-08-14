@@ -1,29 +1,22 @@
 package com.nextClass.repository;
 
-import com.nextClass.dto.PostChangeRequestDto;
-import com.nextClass.dto.PostDeleteRequestDto;
-import com.nextClass.dto.PostSaveRequestDto;
-import com.nextClass.dto.VoteCountDto;
+import com.nextClass.dto.*;
 import com.nextClass.entity.Member;
 import com.nextClass.entity.Post;
-import com.nextClass.entity.Vote;
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.springframework.expression.spel.ast.Projection;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static com.nextClass.entity.QMember.member;
 import static com.nextClass.entity.QPost.post;
-import static com.nextClass.entity.QVote.vote;
 
 @Repository
 @Transactional
@@ -35,7 +28,9 @@ public class BoardRepository {
 
     private final VoteRepository voteRepository;
     private final JPAQueryFactory queryFactory;
-
+    private final static int compareVoteCount = 10;
+    private final static String MY_SCHOOL = "my_school";
+    private final static String VOTE = "vote";
 
     public BoardRepository(PostRepository postRepository, CommentRepository commentRepository, VoteRepository voteRepository, JPAQueryFactory queryFactory) {
         this.postRepository = postRepository;
@@ -45,7 +40,7 @@ public class BoardRepository {
     }
 
 
-    public void savePost(PostSaveRequestDto postSaveRequestDto,String uuid, String author){
+    public void savePost(PostSaveRequestDto postSaveRequestDto, String uuid, String author) {
         Post post = Post.builder()
                 .member(selectMember(uuid))
                 .subject(postSaveRequestDto.getSubject())
@@ -56,7 +51,7 @@ public class BoardRepository {
         postRepository.save(post);
     }
 
-    public void updatePost(PostChangeRequestDto postChangeRequestDto, String author){
+    public void updatePost(PostChangeRequestDto postChangeRequestDto, String author) {
         queryFactory.update(post)
                 .set(post.subject, postChangeRequestDto.getSubject())
                 .set(post.content, postChangeRequestDto.getContent())
@@ -66,50 +61,56 @@ public class BoardRepository {
                 .execute();
     }
 
-    public void deletePost(PostDeleteRequestDto postDeleteRequestDto){
+    public void deletePost(PostDeleteRequestDto postDeleteRequestDto) {
         queryFactory.delete(post)
                 .where(post.sequence.eq(postDeleteRequestDto.getPostSequence()))
                 .execute();
     }
 
-    public List<Post> selectAllPostList(Integer postSequence, int size){
-        return queryFactory.select(post)
-                .from(post)
-                .where(eqPostSequence(postSequence))
+    public List<PostListSelectResponseDto> selectAllPostList(String memberUuid, PostListSelectRequestDto postListSelectRequestDto) {
+        JPAQuery<PostListSelectResponseDto> query = queryFactory.select(Projections.fields(PostListSelectResponseDto.class, post.sequence.as("postSequence"), post.subject, post.content, post.author, post.voteCount, post.commentCount, post.regDate)).from(post);
+        if(MY_SCHOOL.equals(postListSelectRequestDto.getSort()))
+            query.join(member).on(member.uuid.eq(post.member.uuid));
+        return query
+                .where(eqPostSequence(postListSelectRequestDto.getPostSequence()))
+                .where(eqMemberSchool(memberUuid, postListSelectRequestDto.getSort()))
+                .where(goeVoteCount(postListSelectRequestDto.getSort()))
                 .orderBy(post.regDate.desc())
-                .limit(size)
+                .limit(postListSelectRequestDto.getSize())
                 .fetch();
     }
 
-    public List<VoteCountDto> selectVoteCountList(Integer postSequence, int size){
-        if(size == 0)
-            return Collections.emptyList();
-        List<Integer> sequenceList = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            sequenceList.add(postSequence - i);
+
+    private BooleanExpression eqMemberSchool(String memberUuid, String sort){
+        if(MY_SCHOOL.equals(sort)){
+            String memberSchool = selectMember(memberUuid).getMemberSchool();
+            return member.memberSchool.eq(memberSchool);
         }
-        return queryFactory.select(Projections.fields(VoteCountDto.class, vote.boardSequence, vote.count().as("vote_count")))
-                .from(vote)
-                .where(vote.boardSequence.in(sequenceList).and(vote.boardType.eq(Vote.BoardType.POST)))
-                .groupBy(vote.boardSequence)
-                .fetch();
+        return null;
     }
-    private BooleanExpression eqPostSequence(Integer postSequence){
-        if(postSequence == null)
+    private BooleanExpression goeVoteCount(String sort) {
+        if (VOTE.equals(sort))
+            return post.voteCount.goe(compareVoteCount).and(post.regDate.goe(LocalDate.now().atStartOfDay()));
+        return null;
+    }
+    private BooleanExpression eqPostSequence(Integer postSequence) {
+        if (postSequence == null)
             return null;
-        return post.sequence.lt(postSequence);
+        return post.sequence.gt(postSequence);
     }
 
-    public Post selectPost(Integer sequence){
+    public Post selectPost(Integer sequence) {
         return queryFactory.selectFrom(post)
                 .where(post.sequence.eq(sequence))
                 .fetchOne();
     }
 
 
-    private Member selectMember(String uuid){
+    private Member selectMember(String uuid) {
+        if(uuid == null)
+            return null;
         return queryFactory.selectFrom(member)
-                .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-","")))
+                .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-", "")))
                 .fetchOne();
     }
 }
