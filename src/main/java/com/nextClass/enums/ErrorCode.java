@@ -42,7 +42,9 @@ public enum ErrorCode {
     INPUT_SCORE_OUT_OF_RANGE("E00602", "입력된 점수, 평균점수, 표준편차 값이 범위를 벗어났습니다."),
 
     POST_NOT_EXIST("E00701", "게시글이 존재하지 않습니다."),
-    POST_NOT_MATCH_MEMBER("E00702", "해당 게시글에 대한 권한이 없습니다.");
+    POST_NOT_MATCH_MEMBER("E00702", "해당 게시글에 대한 권한이 없습니다."),
+    COMMENT_NOT_EXIST("E00703", "댓글이 존재하지 않습니다."),
+    COMMENT_NOT_MATCH_MEMBER("E00704", "해당 댓글에 대한 권한이 없습니다.");
 
 
 

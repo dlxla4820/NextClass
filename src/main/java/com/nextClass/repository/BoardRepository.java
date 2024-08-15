@@ -1,6 +1,7 @@
 package com.nextClass.repository;
 
 import com.nextClass.dto.*;
+import com.nextClass.entity.Comment;
 import com.nextClass.entity.Member;
 import com.nextClass.entity.Post;
 import com.querydsl.core.types.Projections;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.nextClass.entity.QComment.comment;
 import static com.nextClass.entity.QMember.member;
 import static com.nextClass.entity.QPost.post;
 
@@ -40,9 +42,9 @@ public class BoardRepository {
     }
 
 
-    public void savePost(PostSaveRequestDto postSaveRequestDto, String uuid, String author) {
+    public void savePost(PostSaveRequestDto postSaveRequestDto, Member member, String author) {
         Post post = Post.builder()
-                .member(selectMember(uuid))
+                .member(member)
                 .subject(postSaveRequestDto.getSubject())
                 .content(postSaveRequestDto.getContent())
                 .author(author)
@@ -51,6 +53,18 @@ public class BoardRepository {
         postRepository.save(post);
     }
 
+    public void saveComment(CommentSaveRequestDto commentSaveRequestDto,Member member, String author){
+        Comment comment = Comment.builder()
+                .member(member)
+                .post(selectPost(commentSaveRequestDto.getPostSequence()))
+                .author(author)
+                .content(commentSaveRequestDto.getContent())
+                .regDate(LocalDateTime.now())
+                .build();
+        commentRepository.save(comment);
+    }
+
+
     public void updatePost(PostChangeRequestDto postChangeRequestDto, String author) {
         queryFactory.update(post)
                 .set(post.subject, postChangeRequestDto.getSubject())
@@ -58,6 +72,21 @@ public class BoardRepository {
                 .set(post.author, author)
                 .set(post.modDate, LocalDateTime.now())
                 .where(post.sequence.eq(postChangeRequestDto.getPostSequence()))
+                .execute();
+    }
+    public void updateComment(CommentChangeRequestDto commentChangeRequestDto, String author) {
+        queryFactory.update(comment)
+                .set(comment.content, commentChangeRequestDto.getContent())
+                .set(comment.author, author)
+                .set(comment.modDate, LocalDateTime.now())
+                .where(comment.sequence.eq(commentChangeRequestDto.getPostSequence()))
+                .execute();
+    }
+
+    public void updatePostCommentCount(int postSequence){
+        queryFactory.update(post)
+                .set(post.commentCount, post.commentCount.add(1))
+                .where(post.sequence.eq(postSequence))
                 .execute();
     }
 
@@ -100,17 +129,53 @@ public class BoardRepository {
     }
 
     public Post selectPost(Integer sequence) {
+        if(sequence == null)
+            return null;
         return queryFactory.selectFrom(post)
                 .where(post.sequence.eq(sequence))
                 .fetchOne();
     }
 
-
-    private Member selectMember(String uuid) {
-        if(uuid == null)
+    public Comment selectComment(Integer CommentSequence){
+        if(CommentSequence == null)
             return null;
-        return queryFactory.selectFrom(member)
-                .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(uuid.replace("-", "")))
+        return queryFactory.selectFrom(comment)
+                .where(comment.sequence.eq(CommentSequence))
                 .fetchOne();
     }
+    public Comment selectCommentByMemberUuidAndPostSequence(int postSequence, String memberUuid){
+        if(memberUuid == null)
+            return null;
+        return queryFactory.selectFrom(comment)
+                .where(Expressions.stringTemplate("HEX({0})", comment.member.uuid).eq(memberUuid.replace("-", "")))
+                .where(comment.post.sequence.eq(postSequence).and(comment.author.startsWith("익명")))
+                .fetchOne();
+    }
+    public Comment selectLastCommentByPostSequence(int postSequence){
+        return queryFactory.selectFrom(comment)
+                .where(comment.sequence.eq(postSequence)
+                        .and(comment.author.startsWith("익명")))
+                .orderBy(comment.regDate.desc())
+                .fetchFirst();
+    }
+
+    public List<Comment> selectCommentList(int postSequence, int size){
+        return queryFactory.select(comment)
+                .where(comment.sequence.eq(postSequence))
+                .orderBy(comment.regDate.asc())
+                .limit(size)
+                .fetch();
+    }
+
+
+    private Member selectMember(String memberUuid) {
+        if(memberUuid == null)
+            return null;
+        return queryFactory.selectFrom(member)
+                .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(memberUuid.replace("-", "")))
+                .fetchOne();
+    }
+
+
+
 }

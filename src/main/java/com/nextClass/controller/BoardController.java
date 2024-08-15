@@ -41,4 +41,12 @@ public class BoardController {
         return ResponseEntity.ok(boardService.getPostList(requestBody));
     }
 
+    @PostMapping(value = "/comment_save")
+    public ResponseEntity<ResponseDto<?>> saveComment(@RequestBody CommentSaveRequestDto requestBody){
+        return ResponseEntity.ok(boardService.saveComment(requestBody));
+    }
+    @PostMapping(value = "/comment_change")
+    public ResponseEntity<ResponseDto<?>> changeComment(@RequestBody CommentChangeRequestDto requestBody){
+        return ResponseEntity.ok(boardService.changeComment(requestBody));
+    }
 }
