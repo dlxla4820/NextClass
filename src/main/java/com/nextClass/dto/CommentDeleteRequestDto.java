@@ -10,19 +10,13 @@ import java.util.StringJoiner;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentListSelectRequestDto {
-    @JsonProperty("post_sequence")
-    private Integer postSequence;
+public class CommentDeleteRequestDto {
     @JsonProperty("comment_sequence")
     private Integer commentSequence;
-    private Integer size;
-
     @Override
     public String toString() {
-        return new StringJoiner(", ", CommentListSelectRequestDto.class.getSimpleName() + "[", "]")
-                .add("postSequence='" + postSequence + "'")
+        return new StringJoiner(", ", CommentDeleteRequestDto.class.getSimpleName() + "[", "]")
                 .add("commentSequence='" + commentSequence + "'")
-                .add("size='" + size + "'")
                 .toString();
     }
 }

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.StringJoiner;
 
 @Getter
 @NoArgsConstructor
@@ -29,5 +30,17 @@ public class CommentListSelectResponseDto {
         this.isOwner = isOwner;
         this.voteCount = voteCount;
         this.regDate = regDate;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", CommentListSelectResponseDto.class.getSimpleName() + "[", "]")
+                .add("commentSequence='" + commentSequence + "'")
+                .add("content='" + content + "'")
+                .add("author='" + author + "'")
+                .add("isOwner='" + isOwner + "'")
+                .add("voteCount='" + voteCount + "'")
+                .add("regDate='" + regDate + "'")
+                .toString();
     }
 }

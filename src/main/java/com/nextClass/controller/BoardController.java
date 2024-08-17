@@ -37,7 +37,7 @@ public class BoardController {
 
 
     @PostMapping(value = "/post_list")
-    public ResponseEntity<ResponseDto<?>> deletePost(@RequestBody PostListSelectRequestDto requestBody){
+    public ResponseEntity<ResponseDto<?>> getPostList(@RequestBody PostListSelectRequestDto requestBody){
         return ResponseEntity.ok(boardService.getPostList(requestBody));
     }
 
@@ -49,4 +49,16 @@ public class BoardController {
     public ResponseEntity<ResponseDto<?>> changeComment(@RequestBody CommentChangeRequestDto requestBody){
         return ResponseEntity.ok(boardService.changeComment(requestBody));
     }
+
+    @PostMapping(value = "/comment_delete")
+    public ResponseEntity<ResponseDto<?>> deleteComment(@RequestBody CommentDeleteRequestDto requestBody){
+        return ResponseEntity.ok(boardService.deleteComment(requestBody));
+    }
+    @PostMapping(value = "/comment_list")
+    public ResponseEntity<ResponseDto<?>> getCommentList(@RequestBody CommentListSelectRequestDto requestBody){
+        return ResponseEntity.ok(boardService.getCommentList(requestBody));
+    }
+
+
+
 }

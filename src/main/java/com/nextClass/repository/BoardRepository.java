@@ -96,6 +96,18 @@ public class BoardRepository {
                 .execute();
     }
 
+    public void deleteComment(CommentDeleteRequestDto commentDeleteRequestDto){
+        queryFactory.delete(comment)
+                .where(comment.sequence.eq(commentDeleteRequestDto.getCommentSequence()))
+                .execute();
+
+    }
+    public void deleteCommentByPost(PostDeleteRequestDto postDeleteRequestDto){
+        queryFactory.delete(comment)
+                .where(comment.post.sequence.eq(postDeleteRequestDto.getPostSequence()))
+                .execute();
+    }
+
     public List<PostListSelectResponseDto> selectAllPostList(String memberUuid, PostListSelectRequestDto postListSelectRequestDto) {
         JPAQuery<PostListSelectResponseDto> query = queryFactory.select(Projections.fields(PostListSelectResponseDto.class, post.sequence.as("postSequence"), post.subject, post.content, post.author, post.voteCount, post.commentCount, post.regDate)).from(post);
         if(MY_SCHOOL.equals(postListSelectRequestDto.getSort()))
@@ -124,8 +136,8 @@ public class BoardRepository {
     }
     private BooleanExpression eqPostSequence(Integer postSequence) {
         if (postSequence == null)
-            return null;
-        return post.sequence.gt(postSequence);
+            return post.sequence.gt(0);
+        return post.sequence.lt(postSequence);
     }
 
     public Post selectPost(Integer sequence) {
@@ -175,7 +187,6 @@ public class BoardRepository {
                 .where(Expressions.stringTemplate("HEX({0})", member.uuid).eq(memberUuid.replace("-", "")))
                 .fetchOne();
     }
-
 
 
 }

@@ -98,6 +98,7 @@ public class BoardService {
         if(!memberUuid.equals(post.getMember().getUuid().toString()))
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.POST_NOT_MATCH_MEMBER.getErrorCode(), ErrorCode.POST_NOT_MATCH_MEMBER.getErrorDescription());
 
+        boardRepository.deleteCommentByPost(requestBody);
         boardRepository.deletePost(requestBody);
 
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
@@ -193,6 +194,25 @@ public class BoardService {
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
+    public ResponseDto<?> deleteComment(CommentDeleteRequestDto requestBody){
+        String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+        log.info("BoardService << deleteComment >> | memberUuid : {}, requestBody : {}",memberUuid, requestBody);
+
+        if(memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
+        //유효성 검사
+        if(requestBody.getCommentSequence() == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "comment_sequence"));
+
+        Comment comment = boardRepository.selectComment(requestBody.getCommentSequence());
+        if(comment == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.COMMENT_NOT_EXIST.getErrorCode(), ErrorCode.COMMENT_NOT_EXIST.getErrorDescription());
+        if(!memberUuid.equals(comment.getMember().getUuid().toString()))
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.COMMENT_NOT_MATCH_MEMBER.getErrorCode(), ErrorCode.COMMENT_NOT_MATCH_MEMBER.getErrorDescription());
+
+        boardRepository.deleteComment(requestBody);
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+    }
 
     public ResponseDto<?> getPostList(PostListSelectRequestDto requestBody){
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
@@ -201,8 +221,6 @@ public class BoardService {
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
 
         //유효성 검사
-        if(requestBody.getPostSequence() == null)
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "post_sequence"));
         if(requestBody.getSort() == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "sort"));
         if(requestBody.getSize() == null)
@@ -241,6 +259,7 @@ public class BoardService {
         log.info("BoardService << getCommentList >> | responseList : {}", responseList);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);
     }
+
 
 
 }
