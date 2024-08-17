@@ -19,6 +19,7 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,7 +97,6 @@ public class ToDoListService {
         //firebase에 연결해서 알람도 설정 (alarmTime 시간)
         {
             sendToDoListNotification(toDoListRequsetDto.getContent(), loginRepository.getMemberByUuid(toDoListRequsetDto.getMember_uuid()).getAppToken());
-            
         }
         log.info("ToDoService << createToDoList >> | toDoList : {}", toDoList);
         return new ResponseDto<>(HttpStatus.ACCEPTED.value(), Description.SUCCESS);
