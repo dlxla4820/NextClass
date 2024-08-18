@@ -50,7 +50,12 @@ public class ScoreRequestDto {   //entity 생성 필요
             this.standard_deviation = standard_deviation;
             this.semester = semester;
         }
-    }
 
+    }
+    public boolean checkDuplicateList(String uuid) {
+        return this.data.stream()
+                .filter(scoreInfo -> scoreInfo.getUuid() != null) // uuid가 null이 아닌 경우만 필터링
+                .anyMatch(scoreInfo -> scoreInfo.getUuid().equals(uuid));
+    }
 }
 

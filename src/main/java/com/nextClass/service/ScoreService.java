@@ -14,10 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -48,6 +45,7 @@ public class ScoreService {
             ScoreResponseDto.SemesterDto semesterDto = ScoreResponseDto.SemesterDto.builder()
                     .semester(semester)
                     .build();
+            dataList.clear();
             for (Score scoreInfo : semesterScore) {
                 if (scoreInfo.getCategory().equals("창체")) {
                     ScoreResponseDto.SemesterDto.SubjectDto scoreDetail = ScoreResponseDto.SemesterDto.SubjectDto.builder()
@@ -115,7 +113,12 @@ public class ScoreService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SCORE_SAVE_FAIL.getErrorCode(), ErrorCode.SCORE_SAVE_FAIL.getErrorDescription());
         }
         //list 안에 있는 모든 객체에 대해서 행동
-        for (ScoreRequestDto.ScoreInfo scoreInfo : scoreRequestDto.getData()) {
+//        for (ScoreRequestDto.ScoreInfo scoreInfo : scoreRequestDto.getData()) {
+        ScoreRequestDto.ScoreInfo scoreInfo;
+        Iterator<ScoreRequestDto.ScoreInfo> iteratorDataList = scoreRequestDto.getData().iterator();
+        while(iteratorDataList.hasNext()){
+            //iterator를 통해서 해당 리스트를 순차적으로 하나씩 꺼냄
+            scoreInfo = iteratorDataList.next();
             //동일 제목, 학점, 학기, 멤버를가지고 있는 수업이 해당 테이블에 존재하는지 확인
             //있으면 해당 값의 점수만 수정해서 저장
             if (scoreInfo.getUuid() == null || scoreInfo.getUuid().isBlank()) {
@@ -177,6 +180,13 @@ public class ScoreService {
                         .memberUuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()))
                         .build();
             }
+            //해당 부분에서 score 객체를 만드는데 scoreInfo를 사용했으므로 이제 scoreInfo는 제거해도 괜찮음
+            //그래서 해당 부분에서 uuid 검증을 함
+            iteratorDataList.remove();
+            if(scoreRequestDto.checkDuplicateList(duplicateUUID.toString())){
+                log.error("ScoreService << addScoreOnSemester >> | Uuid Duplicate");
+                return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), String.format(ErrorCode.INPUT_DUPLICATED.getErrorDescription(), "uuid"));
+            }
             try {
                 scoreRepository.saveScore(score);
             } catch (DataAccessException ex) {
@@ -201,7 +211,7 @@ public class ScoreService {
         try{
             zScore = (studentScore - averageScore) / standardDeviation;
         }catch(Exception e){
-            log.error("ScoreService << calculateGradeUsingAchievement >> | Exception e : {}", e.getMessage(), e);
+            log.error("ScoreService << calculateGradeUsingAchievement >> | Exception e : {}", e.getMessage());
             return 10;
         }
         if (zScore >= 1.76 && zScore <= 3.00) {
@@ -224,6 +234,7 @@ public class ScoreService {
             return 9;
         }
         //조건문안에서 처리되지 않으면 범위를 벗어난 것이므로 null 값 반환
+        log.error("ScoreService << calculateGradeUsingAchievement >> | zScore Out Of Range");
         return null;
     }
 
