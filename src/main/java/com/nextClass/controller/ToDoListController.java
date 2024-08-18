@@ -22,4 +22,9 @@ public class ToDoListController {
     public ResponseEntity<ResponseDto<?>> createToDoList(@RequestBody ToDoListRequsetDto toDoListDto){
         return ResponseEntity.ok(toDoListService.createToDoList(toDoListDto));
     }
+
+    @PostMapping(value="to_do_list_read_all")
+    public ResponseEntity<ResponseDto<?>> readAllToDoList(){
+        return ResponseEntity.ok(toDoListService.readAllToDoList());
+    }
 }

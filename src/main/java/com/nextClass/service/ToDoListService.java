@@ -4,13 +4,16 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import com.nextClass.dto.ResponseDto;
+import com.nextClass.dto.TimeTableReponseDto;
 import com.nextClass.dto.ToDoListRequsetDto;
+import com.nextClass.dto.ToDoListResponseDto;
 import com.nextClass.entity.ToDoList;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.LoginRepository;
 import com.nextClass.repository.ToDoListDetailRepository;
 import com.nextClass.utils.CommonUtils;
+import com.querydsl.core.Tuple;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecutionException;
@@ -25,11 +28,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static com.nextClass.entity.QTimeTable.timeTable;
+import static com.nextClass.entity.QToDoList.toDoList;
 
 @Service
 @Slf4j
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class ToDoListService {
     private ToDoListDetailRepository toDoListRepository;
     //    private JobLauncher jobLauncher;
@@ -98,7 +106,7 @@ public class ToDoListService {
             log.error("ToDoService << createToDoList >> | DataAccessException e : {}", e.getMessage(), e);
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SYSTEM_ERROR.getErrorCode(), String.format(ErrorCode.SYSTEM_ERROR.getErrorDescription()));
         }
-        if (!toDoListRequsetDto.getApp_token().isBlank())
+        if (toDoListRequsetDto.getAlarm_time() != null)
         //firebase에 연결해서 알람도 설정 (alarmTime 시간)
         {
 //            taskScheduler.schedule(sendToDoListNotification(toDoListRequsetDto.getContent(), loginRepository.getMemberByUuid(toDoListRequsetDto.getMember_uuid()).getAppToken()), toDoListRequsetDto.);
@@ -125,10 +133,20 @@ public class ToDoListService {
 //        //일치 하면 firebase 알람 삭제 후 해당 ToDoList 삭제 후 return
 //    }
 //
-//    public ResponseDto<?> readAllToDoList(){
-//        //로그인 한 유저 확인
-//        //해당 유저가 생성한 ToDoList전부 읽어온 뒤에 return
-//    }
+    public ResponseDto<?> readAllToDoList(){
+        log.info("ToDoService << readAllToDoList >> | requestBody : none");
+        //로그인 한 유저 확인
+        String currentUser = CommonUtils.getMemberUuidIfAdminOrUser();
+        //해당 유저가 생성한 ToDoList전부 읽어온 뒤에 return
+        List<ToDoListResponseDto> toDoList;
+        try{
+            toDoList = toDoListRepository.readAll(currentUser).stream().map(this::convertTupleToResponse).collect(Collectors.toList());
+        }catch (DataAccessException e){
+            log.error("ToDoService << readAllToDoList >> | DataAccessException e : {}", e.getMessage(), e);
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SYSTEM_ERROR.getErrorCode(), String.format(ErrorCode.SYSTEM_ERROR.getErrorDescription()));
+        }
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, toDoList);
+    }
     private String checkToDoListRequest(ToDoListRequsetDto toDoListRequsetDto) {
         if (toDoListRequsetDto.getContent() == null || toDoListRequsetDto.getContent().isBlank()) {
             return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "content");
@@ -162,5 +180,14 @@ public class ToDoListService {
             log.error("ToDoService << sendToDoListNotification >> | Exception : {}", e.getMessage());
             return null;
         }
+    }
+
+    private ToDoListResponseDto convertTupleToResponse(Tuple tuple){
+        return new ToDoListResponseDto(
+                tuple.get(toDoList.uuid),
+                tuple.get(toDoList.content),
+                tuple.get(toDoList.alarmTime),
+                tuple.get(toDoList.goalTime)
+        );
     }
 }

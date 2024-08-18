@@ -26,7 +26,7 @@ import static com.nextClass.entity.QTimeTable.timeTable;
 
 @Slf4j
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class TimeTableService {
     private final TimeTableDetailRepository timeTableRepository;
     private final LoginRepository loginRepository;
@@ -160,7 +160,6 @@ public class TimeTableService {
             log.info("TimeTableService << deleteOneTimeTable >> | howManyDelete : {}", howManyDelete);
         } catch (DataAccessException e) {
             log.error("TimeTableService << deleteOneTimeTable >> | DataAccessException e : {}", e.getMessage(), e);
-
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SYSTEM_ERROR.getErrorCode(), String.format(ErrorCode.SYSTEM_ERROR.getErrorDescription()));
         }
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);

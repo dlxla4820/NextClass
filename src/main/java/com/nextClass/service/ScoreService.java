@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @Service
 @Slf4j
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class ScoreService {
     private final ScoreDetailRepository scoreRepository;
 
@@ -144,6 +144,10 @@ public class ScoreService {
                     log.error("ScoreService << getAllScore >> | INPUT_SCORE_OUT_OF_RANGE scoreInfo : {}", scoreInfo);
                     return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorCode(), ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorDescription());
                 }
+                else if(grade.equals(10)){
+                    log.error("ScoreService << getAllScore >> | INPUT_SCORE_OUT_OF_RANGE scoreInfo : {}", scoreInfo);
+                    return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorCode(), ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorDescription());
+                }
                 score = Score.builder()
                         .uuid(duplicateUUID)
                         .title(scoreInfo.getTitle())
@@ -193,7 +197,13 @@ public class ScoreService {
     }
 
     private Integer calculateGradeUsingAchievement(Double averageScore, Double studentScore, Double standardDeviation) {
-        double zScore = (studentScore - averageScore) / standardDeviation;
+        double zScore;
+        try{
+            zScore = (studentScore - averageScore) / standardDeviation;
+        }catch(Exception e){
+            log.error("ScoreService << calculateGradeUsingAchievement >> | Exception e : {}", e.getMessage(), e);
+            return 10;
+        }
         if (zScore >= 1.76 && zScore <= 3.00) {
             return 1;
         } else if (zScore >= 1.23 && zScore <= 1.75) {
