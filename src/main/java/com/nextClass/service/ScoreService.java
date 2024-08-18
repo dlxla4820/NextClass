@@ -8,11 +8,13 @@ import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.ScoreDetailRepository;
 import com.nextClass.utils.CommonUtils;
+import com.nextClass.utils.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.*;
 
@@ -22,9 +24,16 @@ import java.util.*;
 public class ScoreService {
     private final ScoreDetailRepository scoreRepository;
 
-    public ScoreService(ScoreDetailRepository scoreRepository) {
+    private final TransactionTemplate transactionTemplate;
+
+    public ScoreService(
+            ScoreDetailRepository scoreRepository,
+            TransactionTemplate transactionTemplate
+    ) {
+        this.transactionTemplate = transactionTemplate;
         this.scoreRepository = scoreRepository;
     }
+
 
     public ResponseDto<?> getAllScore() {
         log.info("ScoreService << getAllScore >>");
@@ -100,102 +109,109 @@ public class ScoreService {
     }
 
     public ResponseDto<?> addScoreOnSemester(ScoreRequestDto scoreRequestDto) {
-        log.info("ScoreService << addScoreOnSemester >> | requestBody : {}", scoreRequestDto);
-        //대한이가 request body에 대해서 전체적으로 관리해주는거 만들었다고 했었던거 다시 물어보기
-        String currentUser = CommonUtils.getMemberUuidIfAdminOrUser();
-        UUID duplicateUUID;
-        Score score;
-        //db 리셋
-        try{
-            scoreRepository.deleteAllDataAboutCurrentUser(currentUser);
-        }catch(DataAccessException ex){
-            log.error("ScoreService << addScoreOnSemester >> | DataAccessException ex : {}", ex.getMessage(), ex);
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SCORE_SAVE_FAIL.getErrorCode(), ErrorCode.SCORE_SAVE_FAIL.getErrorDescription());
-        }
-        //list 안에 있는 모든 객체에 대해서 행동
-//        for (ScoreRequestDto.ScoreInfo scoreInfo : scoreRequestDto.getData()) {
-        ScoreRequestDto.ScoreInfo scoreInfo;
-        Iterator<ScoreRequestDto.ScoreInfo> iteratorDataList = scoreRequestDto.getData().iterator();
-        while(iteratorDataList.hasNext()){
-            //iterator를 통해서 해당 리스트를 순차적으로 하나씩 꺼냄
-            scoreInfo = iteratorDataList.next();
-            //동일 제목, 학점, 학기, 멤버를가지고 있는 수업이 해당 테이블에 존재하는지 확인
-            //있으면 해당 값의 점수만 수정해서 저장
-            if (scoreInfo.getUuid() == null || scoreInfo.getUuid().isBlank()) {
-                duplicateUUID = UUID.randomUUID();
-            } else {
-                duplicateUUID = convertToUUID(scoreInfo.getUuid());
-            }
-            if (scoreInfo.getCategory().equals("공통")) {
-                score = Score.builder()
-                        .uuid(duplicateUUID)
-                        .title(scoreInfo.getTitle())
-                        .credit(scoreInfo.getCredit())
-                        .category(scoreInfo.getCategory())
-                        .achievement(scoreInfo.getAchievement())
-                        .grade(scoreInfo.getGrade())
-                        .studentScore(null)
-                        .averageScore(null)
-                        .standardDeviation(null)
-                        .semester(scoreInfo.getSemester())
-                        .memberUuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()))
-                        .build();
-
-            } else if (scoreInfo.getCategory().equals("선택")) {
-                Integer grade = calculateGradeUsingAchievement(scoreInfo.getAverage_score(), scoreInfo.getStudent_score(), scoreInfo.getStandard_deviation());
-                if (grade==(null)) {
-                    log.error("ScoreService << getAllScore >> | INPUT_SCORE_OUT_OF_RANGE scoreInfo : {}", scoreInfo);
-                    return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorCode(), ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorDescription());
-                }
-                else if(grade.equals(10)){
-                    log.error("ScoreService << getAllScore >> | INPUT_SCORE_OUT_OF_RANGE scoreInfo : {}", scoreInfo);
-                    return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorCode(), ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorDescription());
-                }
-                score = Score.builder()
-                        .uuid(duplicateUUID)
-                        .title(scoreInfo.getTitle())
-                        .credit(scoreInfo.getCredit())
-                        .category(scoreInfo.getCategory())
-                        .achievement(scoreInfo.getAchievement())
-                        .grade(scoreInfo.getGrade())
-                        .studentScore(scoreInfo.getStudent_score())
-                        .averageScore(scoreInfo.getAverage_score())
-                        .standardDeviation(scoreInfo.getStandard_deviation())
-                        .semester(scoreInfo.getSemester())
-                        .memberUuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()))
-                        .build();
-            } else {
-                //창체 정보 저장
-                score = Score.builder()
-                        .uuid(duplicateUUID)
-                        .title(scoreInfo.getTitle())
-                        .credit(scoreInfo.getCredit())
-                        .category(scoreInfo.getCategory())
-                        .achievement(scoreInfo.getAchievement())
-                        .grade(scoreInfo.getGrade())
-                        .studentScore(null)
-                        .averageScore(null)
-                        .standardDeviation(null)
-                        .semester(scoreInfo.getSemester())
-                        .memberUuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()))
-                        .build();
-            }
-            //해당 부분에서 score 객체를 만드는데 scoreInfo를 사용했으므로 이제 scoreInfo는 제거해도 괜찮음
-            //그래서 해당 부분에서 uuid 검증을 함
-            iteratorDataList.remove();
-            if(scoreRequestDto.checkDuplicateList(duplicateUUID.toString())){
-                log.error("ScoreService << addScoreOnSemester >> | Uuid Duplicate");
-                return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), String.format(ErrorCode.INPUT_DUPLICATED.getErrorDescription(), "uuid"));
-            }
+        return transactionTemplate.execute(status -> {
+            log.info("ScoreService << addScoreOnSemester >> | requestBody : {}", scoreRequestDto);
+            //대한이가 request body에 대해서 전체적으로 관리해주는거 만들었다고 했었던거 다시 물어보기
+            String currentUser = CommonUtils.getMemberUuidIfAdminOrUser();
+            UUID duplicateUUID;
+            Score score;
+            //db 리셋
             try {
-                scoreRepository.saveScore(score);
+                scoreRepository.deleteAllDataAboutCurrentUser(currentUser);
             } catch (DataAccessException ex) {
                 log.error("ScoreService << addScoreOnSemester >> | DataAccessException ex : {}", ex.getMessage(), ex);
-                return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SCORE_SAVE_FAIL.getErrorCode(), ErrorCode.SCORE_SAVE_FAIL.getErrorDescription());
+                status.setRollbackOnly();
+                throw new CustomException(ErrorCode.SCORE_SAVE_FAIL);
             }
-        }
-        log.info("ScoreService << addScoreOnSemester >> | save complete");
-        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+            //list 안에 있는 모든 객체에 대해서 행동
+            ScoreRequestDto.ScoreInfo scoreInfo;
+            Iterator<ScoreRequestDto.ScoreInfo> iteratorDataList = scoreRequestDto.getData().iterator();
+            List<Score> allScore = new ArrayList<>();
+            while (iteratorDataList.hasNext()) {
+                //iterator를 통해서 해당 리스트를 순차적으로 하나씩 꺼냄
+                scoreInfo = iteratorDataList.next();
+                //동일 제목, 학점, 학기, 멤버를가지고 있는 수업이 해당 테이블에 존재하는지 확인
+                //있으면 해당 값의 점수만 수정해서 저장
+                if (scoreInfo.getUuid() == null || scoreInfo.getUuid().isBlank()) {
+                    duplicateUUID = UUID.randomUUID();
+                } else {
+                    duplicateUUID = convertToUUID(scoreInfo.getUuid());
+                }
+                if (scoreInfo.getCategory().equals("공통")) {
+                    score = Score.builder()
+                            .uuid(duplicateUUID)
+                            .title(scoreInfo.getTitle())
+                            .credit(scoreInfo.getCredit())
+                            .category(scoreInfo.getCategory())
+                            .achievement(scoreInfo.getAchievement())
+                            .grade(scoreInfo.getGrade())
+                            .studentScore(null)
+                            .averageScore(null)
+                            .standardDeviation(null)
+                            .semester(scoreInfo.getSemester())
+                            .memberUuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()))
+                            .build();
+
+                } else if (scoreInfo.getCategory().equals("선택")) {
+                    Integer grade = calculateGradeUsingAchievement(scoreInfo.getAverage_score(), scoreInfo.getStudent_score(), scoreInfo.getStandard_deviation());
+                    if (grade == (null)) {
+                        log.error("ScoreService << getAllScore >> | INPUT_SCORE_OUT_OF_RANGE scoreInfo : {}", scoreInfo);
+                        status.setRollbackOnly();
+                        throw new CustomException(ErrorCode.INPUT_SCORE_OUT_OF_RANGE);
+                    } else if (grade.equals(10)) {
+                        log.error("ScoreService << getAllScore >> | INPUT_SCORE_OUT_OF_RANGE scoreInfo : {}", scoreInfo);
+                        status.setRollbackOnly();
+                        throw new CustomException(ErrorCode.INPUT_SCORE_OUT_OF_RANGE);
+                    }
+                    score = Score.builder()
+                            .uuid(duplicateUUID)
+                            .title(scoreInfo.getTitle())
+                            .credit(scoreInfo.getCredit())
+                            .category(scoreInfo.getCategory())
+                            .achievement(scoreInfo.getAchievement())
+                            .grade(scoreInfo.getGrade())
+                            .studentScore(scoreInfo.getStudent_score())
+                            .averageScore(scoreInfo.getAverage_score())
+                            .standardDeviation(scoreInfo.getStandard_deviation())
+                            .semester(scoreInfo.getSemester())
+                            .memberUuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()))
+                            .build();
+                } else {
+                    //창체 정보 저장
+                    score = Score.builder()
+                            .uuid(duplicateUUID)
+                            .title(scoreInfo.getTitle())
+                            .credit(scoreInfo.getCredit())
+                            .category(scoreInfo.getCategory())
+                            .achievement(scoreInfo.getAchievement())
+                            .grade(scoreInfo.getGrade())
+                            .studentScore(null)
+                            .averageScore(null)
+                            .standardDeviation(null)
+                            .semester(scoreInfo.getSemester())
+                            .memberUuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()))
+                            .build();
+                }
+                //해당 부분에서 score 객체를 만드는데 scoreInfo를 사용했으므로 이제 scoreInfo는 제거해도 괜찮음
+                //그래서 해당 부분에서 uuid 검증을 함
+                iteratorDataList.remove();
+                if (scoreRequestDto.checkDuplicateList(duplicateUUID.toString())) {
+                    log.error("ScoreService << addScoreOnSemester >> | Uuid Duplicate");
+                    status.setRollbackOnly();
+                    throw new CustomException(ErrorCode.INPUT_DUPLICATED, "uuid");
+                }
+                allScore.add(score);
+            }
+            try {
+                scoreRepository.saveAll(allScore);
+            } catch (DataAccessException ex) {
+                log.error("ScoreService << addScoreOnSemester >> | DataAccessException ex : {}", ex.getMessage(), ex);
+                status.setRollbackOnly();
+                throw new CustomException(ErrorCode.SCORE_SAVE_FAIL);
+            }
+            log.info("ScoreService << addScoreOnSemester >> | save complete");
+            return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+        });
     }
 
     private UUID convertToUUID(String uuidString) {

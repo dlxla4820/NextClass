@@ -47,4 +47,6 @@ public class ScoreDetailRepository {
                 .distinct()
                 .fetch();
     }
+
+    public void saveAll(List<Score> scoreList){scoreRepository.saveAll(scoreList);}
 }

@@ -2,8 +2,11 @@ package com.nextClass.controller;
 
 import com.nextClass.dto.ResponseDto;
 import com.nextClass.dto.ScoreRequestDto;
+import com.nextClass.enums.Description;
 import com.nextClass.service.ScoreService;
+import com.nextClass.utils.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +24,11 @@ public class ScoreController {
 
     @PostMapping(value="score_update")
     public ResponseEntity<ResponseDto<?>> addScore(@RequestBody ScoreRequestDto scoreRequestDto){
-        return ResponseEntity.ok(scoreService.addScoreOnSemester(scoreRequestDto));
+        try{
+            return ResponseEntity.ok(scoreService.addScoreOnSemester(scoreRequestDto));
+        }catch (CustomException e){
+            return ResponseEntity.ok( new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, e.getErrorCode(), e.getErrorDescription()));
+        }
     }
 
     @PostMapping(value="score")
