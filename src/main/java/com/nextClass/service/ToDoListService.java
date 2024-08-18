@@ -19,6 +19,7 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+//import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,10 +35,12 @@ public class ToDoListService {
     //    private JobLauncher jobLauncher;
 //    private Job job;
     private LoginRepository loginRepository;
+//    private TaskScheduler taskScheduler;
 
     public ToDoListService(
             ToDoListDetailRepository toDoListDetailRepository,
             LoginRepository loginRepository
+//            TaskScheduler taskScheduler
 //            JobLauncher jobLauncher,
 //            Job job
     ) {
@@ -45,6 +48,7 @@ public class ToDoListService {
         this.loginRepository = loginRepository;
 //        this.jobLauncher = jobLauncher;
 //        this.job = job;
+//        this.taskScheduler = taskScheduler;
     }
 
     public ResponseDto<?> createToDoList(ToDoListRequsetDto toDoListRequsetDto) {
@@ -62,6 +66,7 @@ public class ToDoListService {
         toDoListRequsetDto.setMember_uuid(CommonUtils.getMemberUuidIfAdminOrUser());
         toDoListRequsetDto.setCreated_time(LocalDateTime.now());
         toDoListRequsetDto.setUpdate_time(toDoListRequsetDto.getCreated_time());
+        toDoListRequsetDto.setApp_token(loginRepository.getMemberByUuid(toDoListRequsetDto.getMember_uuid()).getAppToken());
         if (toDoListRepository.checkDuplicate(toDoListRequsetDto) != null) {
             log.error("ToDoService << createToDoList >> | TO_DO_LIST_ALREADY_EXIST");
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TO_DO_LIST_ALREADY_EXIST.getErrorCode(), ErrorCode.TO_DO_LIST_ALREADY_EXIST.getErrorDescription());
@@ -96,7 +101,8 @@ public class ToDoListService {
         if (!toDoListRequsetDto.getApp_token().isBlank())
         //firebase에 연결해서 알람도 설정 (alarmTime 시간)
         {
-            sendToDoListNotification(toDoListRequsetDto.getContent(), loginRepository.getMemberByUuid(toDoListRequsetDto.getMember_uuid()).getAppToken());
+//            taskScheduler.schedule(sendToDoListNotification(toDoListRequsetDto.getContent(), loginRepository.getMemberByUuid(toDoListRequsetDto.getMember_uuid()).getAppToken()), toDoListRequsetDto.);
+            sendToDoListNotification(toDoListRequsetDto.getContent(), toDoListRequsetDto.getApp_token());
         }
         log.info("ToDoService << createToDoList >> | toDoList : {}", toDoList);
         return new ResponseDto<>(HttpStatus.ACCEPTED.value(), Description.SUCCESS);

@@ -25,7 +25,6 @@ public class ToDoListRequsetDto {
         this.content = content;
         this.alarm_time = alarm_time;
         this.goal_time = goal_time;
-        this.app_token = app_token;
     }
 
     public ToDoListRequsetDto(String uuid, String content, LocalDateTime alarm_time, LocalDateTime goal_time, String app_token){
@@ -33,6 +32,5 @@ public class ToDoListRequsetDto {
         this.content = content;
         this.alarm_time = alarm_time;
         this.goal_time = goal_time;
-        this.app_token = app_token;
     }
 }
