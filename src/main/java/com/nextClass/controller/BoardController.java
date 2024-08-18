@@ -59,6 +59,9 @@ public class BoardController {
         return ResponseEntity.ok(boardService.getCommentList(requestBody));
     }
 
-
+    @PostMapping(value = "/vote")
+    public ResponseEntity<ResponseDto<?>> saveOrDeleteVote(@RequestBody VoteSaveOrDeleteRequestDto requestBody){
+        return ResponseEntity.ok(boardService.saveOrDeleteVote(requestBody));
+    }
 
 }

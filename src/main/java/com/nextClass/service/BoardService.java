@@ -4,6 +4,7 @@ import com.nextClass.dto.*;
 import com.nextClass.entity.Comment;
 import com.nextClass.entity.Member;
 import com.nextClass.entity.Post;
+import com.nextClass.entity.Vote;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.BoardRepository;
@@ -15,11 +16,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.nextClass.entity.QPost.post;
+import static com.nextClass.enums.ErrorCode.MEMBER_NOT_EXIST;
 import static com.nextClass.enums.ErrorCode.TOKEN_UNAUTHORIZED;
 import static java.util.Arrays.stream;
 
@@ -50,6 +52,8 @@ public class BoardService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "is_secret"));
 
         Member member = loginRepository.getMemberByUuid(memberUuid);
+        if(member == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
         String author = requestBody.getIsSecret() ? ANONYMOUS_NAME : member.getId();
 
         boardRepository.savePost(requestBody, member, author);
@@ -100,7 +104,7 @@ public class BoardService {
 
         boardRepository.deleteCommentByPost(requestBody);
         boardRepository.deletePost(requestBody);
-
+        boardRepository.deleteVoteByBoardSequence(requestBody.getPostSequence(), Vote.BoardType.POST, memberUuid);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
@@ -115,12 +119,16 @@ public class BoardService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.POST_NOT_EXIST.getErrorCode(), ErrorCode.POST_NOT_EXIST.getErrorDescription());
         boolean isOwner = memberUuid.equals(post.getMember().getUuid().toString());
 
+        Vote vote = boardRepository.selectVoteByBoardSequence(postSequence, Vote.BoardType.POST, memberUuid);
+        boolean isVote = vote != null;
+
         PostSelectResponseDto response = PostSelectResponseDto.builder()
                 .postSequence(postSequence)
                 .author(post.getAuthor())
                 .subject(post.getSubject())
                 .content(post.getContent())
                 .isOwner(isOwner)
+                .isVote(isVote)
                 .build();
         log.info("BoardService << getPost >> | response : {}", response);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, response);
@@ -153,7 +161,7 @@ public class BoardService {
 
         boardRepository.saveComment(requestBody,member, author);
 
-        boardRepository.updatePostCommentCount(requestBody.getPostSequence());
+        boardRepository.updatePostCommentCount(requestBody.getPostSequence(), 1);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
@@ -201,6 +209,8 @@ public class BoardService {
         if(memberUuid == null)
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
         //유효성 검사
+        if(requestBody.getPostSequence() == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "post_sequence"));
         if(requestBody.getCommentSequence() == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "comment_sequence"));
 
@@ -211,8 +221,37 @@ public class BoardService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL,ErrorCode.COMMENT_NOT_MATCH_MEMBER.getErrorCode(), ErrorCode.COMMENT_NOT_MATCH_MEMBER.getErrorDescription());
 
         boardRepository.deleteComment(requestBody);
+        boardRepository.updatePostCommentCount(requestBody.getPostSequence(), -1);
+        boardRepository.deleteVoteByBoardSequence(requestBody.getCommentSequence(), Vote.BoardType.COMMENT, memberUuid);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
+
+    public ResponseDto<?> saveOrDeleteVote(VoteSaveOrDeleteRequestDto requestBody){
+        String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+        log.info("BoardService << saveVote >> | memberUuid : {}, requestBody : {}",memberUuid, requestBody);
+
+        if(memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
+        //유효성 검사
+        if(requestBody.getPostSequence() == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "comment_sequence"));
+        Integer boardSequence = requestBody.getCommentSequence() == null ? requestBody.getPostSequence() : requestBody.getCommentSequence();
+        Vote.BoardType boardType = requestBody.getCommentSequence() == null ? Vote.BoardType.POST : Vote.BoardType.COMMENT;
+        Member member = loginRepository.getMemberByUuid(memberUuid);
+        if(member == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
+
+        Vote vote = boardRepository.selectVoteByBoardSequence(boardSequence, boardType, memberUuid);
+        if(vote == null) {
+            boardRepository.saveVote(requestBody, member);
+            boardRepository.updateVoteCount(boardSequence, boardType, 1);
+        } else {
+            boardRepository.deleteVoteByUuid(vote.getUuid().toString());
+            boardRepository.updateVoteCount(boardSequence, boardType, -1);
+        }
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+    }
+
 
     public ResponseDto<?> getPostList(PostListSelectRequestDto requestBody){
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
@@ -243,7 +282,15 @@ public class BoardService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "sort"));
 
 
-        List<Comment> commentList = boardRepository.selectCommentList(requestBody.getPostSequence(), requestBody.getSize());
+        List<Comment> commentList = boardRepository.selectCommentList(requestBody);
+        List<Integer> commentSequenceList = commentList
+                .stream()
+                .map(Comment::getSequence)
+                .toList();
+        List<Vote> voteList = boardRepository.selectVoteListByBoardSequence(commentSequenceList, Vote.BoardType.COMMENT, memberUuid);
+        Set<Integer> voteSet = voteList.stream()
+                .map(Vote::getBoardSequence)
+                .collect(Collectors.toSet());
         List<CommentListSelectResponseDto> responseList = new ArrayList<>();
         for( Comment comment : commentList){
             CommentListSelectResponseDto response = CommentListSelectResponseDto.builder()
@@ -253,6 +300,7 @@ public class BoardService {
                     .voteCount(comment.getVoteCount())
                     .regDate(comment.getRegDate())
                     .isOwner(memberUuid.equals(comment.getMember().getUuid().toString()))
+                    .isVote(voteSet.contains(comment.getSequence()))
                     .build();
             responseList.add(response);
         }
