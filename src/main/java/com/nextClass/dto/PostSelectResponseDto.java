@@ -20,15 +20,25 @@ public class PostSelectResponseDto {
     private boolean isOwner;
     @JsonProperty("is_vote")
     private boolean isVote;
+    @JsonProperty("comment_count")
+    private Integer commentCount;
+    @JsonProperty("vote_count")
+    private Integer voteCount;
+
     @Builder
-    public PostSelectResponseDto(Integer postSequence, String subject, String content, String author, boolean isOwner, boolean isVote) {
+    public PostSelectResponseDto(Integer postSequence, String subject, String content, String author, boolean isOwner, boolean isVote, Integer commentCount, Integer voteCount) {
         this.postSequence = postSequence;
         this.subject = subject;
         this.content = content;
         this.author = author;
         this.isOwner = isOwner;
         this.isVote = isVote;
+        this.commentCount = commentCount;
+        this.voteCount = voteCount;
     }
+
+
+
 
     @Override
     public String toString() {
@@ -39,6 +49,8 @@ public class PostSelectResponseDto {
                 .add("author='" + author + "'")
                 .add("isOwner='" + isOwner + "'")
                 .add("isVote='" + isVote + "'")
+                .add("commentCount='" + commentCount + "'")
+                .add("voteCount='" + voteCount + "'")
                 .toString();
     }
 }

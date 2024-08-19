@@ -36,7 +36,9 @@ public class BoardRepository {
     private final static int compareVoteCount = 10;
     private final static String MY_SCHOOL = "my_school";
     private final static String VOTE = "vote";
-
+    private final static String MY_POST = "my_post";
+    private final static String MY_VOTE = "my_vote";
+    private final static String MY_COMMENT = "my_comment";
     public BoardRepository(PostRepository postRepository, CommentRepository commentRepository, VoteRepository voteRepository, JPAQueryFactory queryFactory) {
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
@@ -149,10 +151,17 @@ public class BoardRepository {
         JPAQuery<PostListSelectResponseDto> query = queryFactory.select(Projections.fields(PostListSelectResponseDto.class, post.sequence.as("postSequence"), post.subject, post.content, post.author, post.voteCount, post.commentCount, post.regDate)).from(post);
         if(MY_SCHOOL.equals(postListSelectRequestDto.getSort()))
             query.join(member).on(member.uuid.eq(post.member.uuid));
+        if(MY_COMMENT.equals(postListSelectRequestDto.getSort()))
+            query.join(comment).on(comment.post.sequence.eq(post.sequence));
+        if(MY_VOTE.equals(postListSelectRequestDto.getSort()))
+            query.join(vote).on(vote.member.uuid.eq(post.member.uuid));
         return query
-                .where(eqPostSequence(postListSelectRequestDto.getPostSequence()))
-                .where(eqMemberSchool(memberUuid, postListSelectRequestDto.getSort()))
-                .where(goeVoteCount(postListSelectRequestDto.getSort()))
+                .where(eqPostSequence(postListSelectRequestDto.getPostSequence())) // ALL 인경우
+                .where(eqMemberSchool(memberUuid, postListSelectRequestDto.getSort())) // MY_SCHOOL 인경우
+                .where(goeVoteCount(postListSelectRequestDto.getSort())) // VOTE 인경우
+                .where(eqMyPost(memberUuid, postListSelectRequestDto.getSort())) // MY_POST 인경우
+                .where(eqMyComment(memberUuid, postListSelectRequestDto.getSort())) //MY_COMMENT 인경우
+                .where(eqMyVote(memberUuid, postListSelectRequestDto.getSort())) //MY_VOTE 인경우
                 .orderBy(post.regDate.desc())
                 .limit(postListSelectRequestDto.getSize())
                 .fetch();
@@ -191,7 +200,7 @@ public class BoardRepository {
     }
 
     public List<Comment> selectCommentList(CommentListSelectRequestDto commentListSelectRequestDto){
-        return queryFactory.select(comment)
+        return queryFactory.selectFrom(comment)
                 .where(comment.post.sequence.eq(commentListSelectRequestDto.getPostSequence()))
                 .where(eqCommentSequence(commentListSelectRequestDto.getCommentSequence()))
                 .orderBy(comment.regDate.asc())
@@ -200,7 +209,7 @@ public class BoardRepository {
     }
 
     public Vote selectVoteByBoardSequence(Integer BoardSequence, Vote.BoardType boardType, String memberUuid){
-        return queryFactory.select(vote)
+        return queryFactory.selectFrom(vote)
                 .where(vote.boardSequence.eq(BoardSequence))
                 .where(vote.boardType.eq(boardType))
                 .where(Expressions.stringTemplate("HEX({0})", vote.member.uuid).eq(memberUuid.replace("-", "")))
@@ -208,7 +217,7 @@ public class BoardRepository {
     }
 
     public List<Vote> selectVoteListByBoardSequence(List<Integer> BoardSequenceList, Vote.BoardType boardType, String memberUuid){
-        return queryFactory.select(vote)
+        return queryFactory.selectFrom(vote)
                 .where(vote.boardSequence.in(BoardSequenceList))
                 .where(vote.boardType.eq(boardType))
                 .where(Expressions.stringTemplate("HEX({0})", vote.member.uuid).eq(memberUuid.replace("-", "")))
@@ -220,6 +229,21 @@ public class BoardRepository {
             String memberSchool = selectMember(memberUuid).getMemberSchool();
             return member.memberSchool.eq(memberSchool);
         }
+        return null;
+    }
+    private BooleanExpression eqMyPost(String memberUuid, String sort){
+        if(MY_POST.equals(sort))
+            return Expressions.stringTemplate("HEX({0})", post.member.uuid).eq(memberUuid.replace("-", ""));
+        return null;
+    }
+    private BooleanExpression eqMyComment(String memberUuid, String sort){
+        if(MY_COMMENT.equals(sort))
+            return Expressions.stringTemplate("HEX({0})", comment.member.uuid).eq(memberUuid.replace("-", ""));
+        return null;
+    }
+    private BooleanExpression eqMyVote(String memberUuid, String sort){
+        if(MY_VOTE.equals(sort))
+            return Expressions.stringTemplate("HEX({0})", vote.member.uuid).eq(memberUuid.replace("-", ""));
         return null;
     }
     private BooleanExpression goeVoteCount(String sort) {

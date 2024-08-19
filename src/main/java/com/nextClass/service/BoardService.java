@@ -129,6 +129,8 @@ public class BoardService {
                 .content(post.getContent())
                 .isOwner(isOwner)
                 .isVote(isVote)
+                .commentCount(post.getCommentCount())
+                .voteCount(post.getVoteCount())
                 .build();
         log.info("BoardService << getPost >> | response : {}", response);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, response);
