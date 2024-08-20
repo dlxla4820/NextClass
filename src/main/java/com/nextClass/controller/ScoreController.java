@@ -24,11 +24,7 @@ public class ScoreController {
 
     @PostMapping(value="score_update")
     public ResponseEntity<ResponseDto<?>> addScore(@RequestBody ScoreRequestDto scoreRequestDto){
-        try{
             return ResponseEntity.ok(scoreService.addScoreOnSemester(scoreRequestDto));
-        }catch (CustomException e){
-            return ResponseEntity.ok( new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, e.getErrorCode(), e.getErrorDescription()));
-        }
     }
 
     @PostMapping(value="score")

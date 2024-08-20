@@ -154,14 +154,9 @@ public class TimeTableService {
             log.error("TimeTableService << deleteOneTimeTable >> | TIME_TABLE_UNAUTHORIZED");
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
         }
-        //같은 그거 이므로 동일한 데이터만 삭제한다
-        try {
             long howManyDelete = timeTableRepository.deleteTimeTable(timeTableRequestDto.getUuid());
             log.info("TimeTableService << deleteOneTimeTable >> | howManyDelete : {}", howManyDelete);
-        } catch (DataAccessException e) {
-            log.error("TimeTableService << deleteOneTimeTable >> | DataAccessException e : {}", e.getMessage(), e);
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SYSTEM_ERROR.getErrorCode(), String.format(ErrorCode.SYSTEM_ERROR.getErrorDescription()));
-        }
+
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
@@ -257,13 +252,8 @@ public class TimeTableService {
                 .semester(timeTableRequestDto.getSemester())
                 .memberUuid(convertToUUID(timeTableDto.getMemberUUID()))
                 .build();
-        try{
             timeTableRepository.saveTimeTable(timeTable);
             scoreRepository.saveScore(score);
-        }catch(DataAccessException e){
-            log.error("TimeTableService << deleteOneTimeTable >> | DataAccessException e : {}", e.getMessage(), e);
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SYSTEM_ERROR.getErrorCode(), String.format(ErrorCode.SYSTEM_ERROR.getErrorDescription()));
-        }
         log.info("TimeTableService << makeTimeTable >> | timeTable : {}", timeTable);
         return new ResponseDto<>(HttpStatus.ACCEPTED.value(), Description.SUCCESS);
     }

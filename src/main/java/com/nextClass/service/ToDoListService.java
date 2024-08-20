@@ -100,12 +100,7 @@ public class ToDoListService {
                     .alarmTime(toDoListRequsetDto.getAlarm_time())
                     .build();
         }
-        try {
             toDoListRepository.save(toDoList);
-        } catch (DataAccessException e) {
-            log.error("ToDoService << createToDoList >> | DataAccessException e : {}", e.getMessage(), e);
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SYSTEM_ERROR.getErrorCode(), String.format(ErrorCode.SYSTEM_ERROR.getErrorDescription()));
-        }
         if (toDoListRequsetDto.getAlarm_time() != null)
         //firebase에 연결해서 알람도 설정 (alarmTime 시간)
         {
@@ -139,12 +134,7 @@ public class ToDoListService {
         String currentUser = CommonUtils.getMemberUuidIfAdminOrUser();
         //해당 유저가 생성한 ToDoList전부 읽어온 뒤에 return
         List<ToDoListResponseDto> toDoList;
-        try{
             toDoList = toDoListRepository.readAll(currentUser).stream().map(this::convertTupleToResponse).collect(Collectors.toList());
-        }catch (DataAccessException e){
-            log.error("ToDoService << readAllToDoList >> | DataAccessException e : {}", e.getMessage(), e);
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.SYSTEM_ERROR.getErrorCode(), String.format(ErrorCode.SYSTEM_ERROR.getErrorDescription()));
-        }
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, toDoList);
     }
     private String checkToDoListRequest(ToDoListRequsetDto toDoListRequsetDto) {
