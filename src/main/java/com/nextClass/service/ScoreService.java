@@ -8,14 +8,15 @@ import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.ScoreDetailRepository;
 import com.nextClass.utils.CommonUtils;
-import com.nextClass.utils.CustomException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @Service
@@ -42,19 +43,19 @@ public class ScoreService {
         List<String> currentMemberScoreSemester = scoreRepository.findSemesterList(currentUser);
         //학기 내에서 학점 계산(for문)
         List<Score> semesterScore;
-        List<ScoreResponseDto.SemesterDto.SubjectDto> dataList = new ArrayList<>();
+
         List<ScoreResponseDto.SemesterDto> semesterList = new ArrayList<>();
         Double semesterScoreSum = 0.0;
         Integer semeseterScoreCount = 0;
         Double semesterScoreSumAll = 0.0;
         Integer semesterScoreCountAll = 0;
-
+        ScoreResponseDto.SemesterDto semesterDto;
         for (String semester : currentMemberScoreSemester) {
             semesterScore = scoreRepository.findSemesterScores(semester, currentUser);
-            ScoreResponseDto.SemesterDto semesterDto = ScoreResponseDto.SemesterDto.builder()
+            semesterDto = ScoreResponseDto.SemesterDto.builder()
                     .semester(semester)
                     .build();
-            dataList.clear();
+            List<ScoreResponseDto.SemesterDto.SubjectDto> dataList= new ArrayList<>();
             for (Score scoreInfo : semesterScore) {
                 if (scoreInfo.getCategory().equals("창체")) {
                     ScoreResponseDto.SemesterDto.SubjectDto scoreDetail = ScoreResponseDto.SemesterDto.SubjectDto.builder()
@@ -237,6 +238,5 @@ public class ScoreService {
         return null;
     }
 
-    ;
 
 }

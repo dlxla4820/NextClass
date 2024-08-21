@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 public class ToDoListRequsetDto {
 
     private String uuid;
-    private String member_uuid;
+    private UUID member_uuid;
     private LocalDateTime created_time;
     private LocalDateTime update_time;
     private LocalDateTime alarm_time;
