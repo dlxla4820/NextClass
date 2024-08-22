@@ -27,6 +27,7 @@ public class Vote {
     private Integer boardSequence;
 
     @Column(name = "board_type")
+    @Enumerated(EnumType.STRING)
     private BoardType boardType;
 
     @Column(name = "reg_date")
