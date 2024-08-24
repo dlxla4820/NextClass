@@ -12,6 +12,8 @@ import com.nextClass.repository.LoginRepository;
 import com.nextClass.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -266,9 +268,29 @@ public class BoardService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "sort"));
         if(requestBody.getSize() == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "size"));
+        if(requestBody.getSearchWord() != null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.JSON_INVALID.getErrorCode(), ErrorCode.REQUEST_BODY_NULL.getErrorDescription());
         List<PostListSelectResponseDto> responseList = boardRepository.selectAllPostList(memberUuid, requestBody);
 
         log.info("BoardService << getPostList >> | responseList : {}", responseList);
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);
+    }
+
+    public ResponseDto<?> searchPostList(PostListSelectRequestDto requestBody){
+        String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+        log.info("BoardService << searchPostList >> | memberUuid : {}, requestBody : {}",memberUuid, requestBody);
+        if(memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
+        //유효성 검사
+        if(requestBody.getSort() == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "sort"));
+        if(requestBody.getSize() == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "size"));
+        if(requestBody.getSearchWord() == null)
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "search_word"));
+        List<PostListSelectResponseDto> responseList = boardRepository.selectAllPostList(memberUuid, requestBody);
+
+        log.info("BoardService << searchPostList >> | responseList : {}", responseList);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);
     }
 

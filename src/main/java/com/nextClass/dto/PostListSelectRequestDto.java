@@ -16,6 +16,8 @@ public class PostListSelectRequestDto {
 
     private String sort;
     private Integer size;
+    @JsonProperty("search_word")
+    private String searchWord;
 
     @Override
     public String toString() {
@@ -23,6 +25,7 @@ public class PostListSelectRequestDto {
                 .add("postSequence='" + postSequence + "'")
                 .add("sort='" + sort + "'")
                 .add("size='" + size + "'")
+                .add("searchWord='" + searchWord + "'")
                 .toString();
     }
 }

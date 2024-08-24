@@ -162,6 +162,7 @@ public class BoardRepository {
                 .where(eqMyPost(memberUuid, postListSelectRequestDto.getSort())) // MY_POST 인경우
                 .where(eqMyComment(memberUuid, postListSelectRequestDto.getSort())) //MY_COMMENT 인경우
                 .where(eqMyVote(memberUuid, postListSelectRequestDto.getSort())) //MY_VOTE 인경우
+                .where(eqContentOrSubjectBySearchWord(postListSelectRequestDto.getSearchWord())) // Search의 경우
                 .orderBy(post.regDate.desc())
                 .limit(postListSelectRequestDto.getSize())
                 .fetch();
@@ -261,6 +262,12 @@ public class BoardRepository {
             return comment.sequence.gt(0);
         return comment.sequence.lt(commentSequence);
     }
+    private BooleanExpression eqContentOrSubjectBySearchWord(String searchWord){
+        if(searchWord == null)
+            return null;
+        return post.content.eq(searchWord).or(post.subject.eq(searchWord));
+    }
+
     private BooleanExpression eqBoardSequence(Integer postSequence, Integer commentSequence){
         if(commentSequence ==null)
             return vote.boardSequence.eq(postSequence).and(vote.boardType.eq(Vote.BoardType.POST));

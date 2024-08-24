@@ -40,7 +40,10 @@ public class BoardController {
     public ResponseEntity<ResponseDto<?>> getPostList(@RequestBody PostListSelectRequestDto requestBody){
         return ResponseEntity.ok(boardService.getPostList(requestBody));
     }
-
+    @PostMapping(value = "/post_list_search")
+    public ResponseEntity<ResponseDto<?>> searchPostList(@RequestBody PostListSelectRequestDto requestBody){
+        return ResponseEntity.ok(boardService.searchPostList(requestBody));
+    }
     @PostMapping(value = "/comment_save")
     public ResponseEntity<ResponseDto<?>> saveComment(@RequestBody CommentSaveRequestDto requestBody){
         return ResponseEntity.ok(boardService.saveComment(requestBody));
