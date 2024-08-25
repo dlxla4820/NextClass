@@ -3,39 +3,31 @@ package com.nextClass.service;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
+import com.nextClass.Scheduler.SchedulerMain;
 import com.nextClass.dto.ResponseDto;
 import com.nextClass.dto.TimeTableReponseDto;
 import com.nextClass.dto.ToDoListRequsetDto;
 import com.nextClass.dto.ToDoListResponseDto;
 import com.nextClass.entity.ToDoList;
+import com.nextClass.entity.ToDoListAlarm;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.LoginRepository;
 import com.nextClass.repository.ToDoListDetailRepository;
 import com.nextClass.utils.CommonUtils;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.Expressions;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecutionException;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
-//import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.nextClass.entity.QTimeTable.timeTable;
 import static com.nextClass.entity.QToDoList.toDoList;
 
 @Service
@@ -43,26 +35,17 @@ import static com.nextClass.entity.QToDoList.toDoList;
 @Transactional(rollbackFor = Exception.class)
 public class ToDoListService {
     private ToDoListDetailRepository toDoListRepository;
-    //    private JobLauncher jobLauncher;
-//    private Job job;
-    private ThreadPoolTaskScheduler threadPoolTaskScheduler;
     private LoginRepository loginRepository;
-//    private TaskScheduler taskScheduler;
+    private SchedulerMain schedulerMain;
 
     public ToDoListService(
             ToDoListDetailRepository toDoListDetailRepository,
             LoginRepository loginRepository,
-            ThreadPoolTaskScheduler threadPoolTaskScheduler
-//            TaskScheduler taskScheduler
-//            JobLauncher jobLauncher,
-//            Job job
+            SchedulerMain schedulerMain
     ) {
         this.toDoListRepository = toDoListDetailRepository;
         this.loginRepository = loginRepository;
-        this.threadPoolTaskScheduler = threadPoolTaskScheduler;
-//        this.jobLauncher = jobLauncher;
-//        this.job = job;
-//        this.taskScheduler = taskScheduler;
+        this.schedulerMain = schedulerMain;
     }
 
     public ResponseDto<?> createToDoList(ToDoListRequsetDto toDoListRequsetDto) {
@@ -86,32 +69,73 @@ public class ToDoListService {
             log.error("ToDoService << createToDoList >> | TO_DO_LIST_ALREADY_EXIST");
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TO_DO_LIST_ALREADY_EXIST.getErrorCode(), ErrorCode.TO_DO_LIST_ALREADY_EXIST.getErrorDescription());
         }
-        toDoListRepository.save(toDoListRequsetDto);
-        if (alarmTime != null) {
-            Date date = Date.from(alarmTime.toInstant(ZoneOffset.of("+09:00")));
-            threadPoolTaskScheduler.schedule(this.sendToDoListAlarmToFcm(alarmTime, toDoListRequsetDto.getContent(), toDoListRequsetDto.getApp_token()),date );
+        ToDoList result = toDoListRepository.save(toDoListRequsetDto);
+        if (alarmTime != null && alarmTime.isAfter(LocalDateTime.now())) {
+            toDoListRepository.saveAlarm(result.getUuid());
+            schedulerMain.toDoListAlarmScheduler(result);
         }
         log.info("ToDoService << createToDoList >> | toDoList : {}", toDoList);
-        return new ResponseDto<>(HttpStatus.ACCEPTED.value(), Description.SUCCESS);
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
-    //    public ResponseDto<?> updateToDoList(ToDoListRequsetDto toDoListDto){
-//        //request검증(uuid, updateTime, content, alarmTime,doneTime)
-//        //현재 로그인 한 사람 가져오기
-//        //해당 uuid를 가진 todoList의 생성자가 해당 멤버인지 검증
-//        //아닐 경우 UnAuthorized 에러
-//        //맞을 경우 해당 데이터 업데이트 후 firebase의 알람도 update
-//        //성공 return
-//    }
-//
-//    public ResponseDto<?> deleteToDoList(ToDoListRequsetDto toDoListRequsetDto){
-//        //해당 uuid가 존재하는지 확인
-//        //존재하지 않으면 존재하지 않는다 에러
-//        //현재 접속 유저와 해당 to_do_list의 생성자가 일치하는지 확인
-//        //일치하지 않으면 권한 없음
-//        //일치 하면 firebase 알람 삭제 후 해당 ToDoList 삭제 후 return
-//    }
-//
+        public ResponseDto<?> updateToDoList(ToDoListRequsetDto toDoListRequsetDto){
+        //request검증(uuid, updateTime, content, alarmTime,doneTime)
+            log.info("ToDoService << updateToDoList >> | requestBody : {}", toDoListRequsetDto);
+            String checkRequestDto = checkToDoListRequest(toDoListRequsetDto);
+            LocalDateTime alarmTime = toDoListRequsetDto.getAlarm_time();
+            //현재 로그인 한 사람 데이터 가져오기
+            if (checkRequestDto != null) {
+                log.error("ToDoService << updateToDoList >> | PARAMETER_INVALID_SPECIFIC");
+                return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), checkRequestDto);
+            }
+            if (toDoListRequsetDto.getGoal_time() == (null)) {
+                log.error("ToDoService << updateToDoList >> | PARAMETER_INVALID_SPECIFIC");
+                return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "create_time"));
+            }
+            toDoListRequsetDto.setMember_uuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()));
+            ToDoList beforeToDoList = toDoListRepository.checkAuthorize(toDoListRequsetDto);
+            if (beforeToDoList == null) {
+                log.error("ToDoService << updateToDoList >> | UNAUTHORIZED TO DO LIST");
+                return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TOKEN_UNAUTHORIZED.getErrorCode(), ErrorCode.TOKEN_UNAUTHORIZED.getErrorDescription());
+            }
+            toDoListRequsetDto.setCreated_time(beforeToDoList.getCreateTime());
+            toDoListRequsetDto.setUpdate_time(LocalDateTime.now());
+            toDoListRequsetDto.setApp_token(loginRepository.getMemberByUuid(CommonUtils.getMemberUuidIfAdminOrUser()).getAppToken());
+
+            ToDoList result = toDoListRepository.save(toDoListRequsetDto);
+            if (alarmTime != null && alarmTime.isAfter(LocalDateTime.now())) {
+                toDoListRepository.saveAlarm(result.getUuid());
+                schedulerMain.updateToDoListAlarmScheduler(result);
+            }
+            log.info("ToDoService << updateToDoList >> | toDoList : {}", toDoList);
+            return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+    }
+
+    public ResponseDto<?> deleteToDoList(ToDoListRequsetDto toDoListRequsetDto){
+        log.info("ToDoService << deleteToDoList >> | requestBody : {}", toDoListRequsetDto);
+        String checkRequestDto = checkToDoListRequest(toDoListRequsetDto);
+        LocalDateTime alarmTime = toDoListRequsetDto.getAlarm_time();
+        if (checkRequestDto != null) {
+            log.error("ToDoService << deleteToDoList >> | PARAMETER_INVALID_SPECIFIC");
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), checkRequestDto);
+        }
+        ToDoList currentToDoList = toDoListRepository.checkExist(toDoListRequsetDto);
+        if (currentToDoList == (null)) {
+            log.error("ToDoService << deleteToDoList >> | TO_DO_LIST_ALREADY_DELETE");
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TO_DO_LIST_ALREADY_DELETE.getErrorCode(), String.format(ErrorCode.TO_DO_LIST_ALREADY_DELETE.getErrorDescription()));
+        }
+        if (!CommonUtils.getMemberUuidIfAdminOrUser().equals(currentToDoList.getMember_uuid().toString())) {
+            log.error("ToDoService << deleteToDoList >> | UNAUTHORIZED TO DO LIST");
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TOKEN_UNAUTHORIZED.getErrorCode(), ErrorCode.TOKEN_UNAUTHORIZED.getErrorDescription());
+        }
+        toDoListRepository.delete(currentToDoList);
+        if (alarmTime != null && alarmTime.isAfter(LocalDateTime.now())) {
+            toDoListRepository.deleteAlarm(currentToDoList.getUuid());
+            schedulerMain.finishTask(currentToDoList.getUuid());
+        }
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+    }
+
     public ResponseDto<?> readAllToDoList(){
         log.info("ToDoService << readAllToDoList >> | requestBody : none");
         //로그인 한 유저 확인
@@ -147,23 +171,5 @@ public class ToDoListService {
                 tuple.get(toDoList.goalTime)
         );
     }
-    private Runnable sendToDoListAlarmToFcm(LocalDateTime alarmTime,String body, String appToken ){
-        return () -> {
-            log.info("ToDoService << sendToDoListAlarmToFcm >> | AlarmStartTime : {}", alarmTime);
-            // FCM 알림을 보내는 로직을 여기에 추가합니다.
-            // 예를 들어, FCM 서비스 호출 등의 작업을 수행
-            try {
-                Message message = Message.builder()
-                        .setNotification(Notification.builder()
-                                .setBody(body)
-                                .build())
-                        .setToken(appToken)
-                        .build();
-                String response = FirebaseMessaging.getInstance().send(message);
-                log.info("ToDoService << sendToDoListAlarmToFcm >> | A : {}", response);
-            } catch (Exception e) {
-                log.error("ToDoService << sendToDoListAlarmToFcm >> | Exception : {}", e.getMessage());
-            }
-        };
-    }
+
 }

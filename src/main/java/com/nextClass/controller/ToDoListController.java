@@ -27,4 +27,13 @@ public class ToDoListController {
     public ResponseEntity<ResponseDto<?>> readAllToDoList(){
         return ResponseEntity.ok(toDoListService.readAllToDoList());
     }
+
+    @PostMapping(value="to_do_list_update")
+    public ResponseEntity<ResponseDto<?>> updateToDoList(@RequestBody ToDoListRequsetDto toDoListDto){
+        return ResponseEntity.ok(toDoListService.updateToDoList(toDoListDto));
+    }
+    @PostMapping(value="to_do_list_delete")
+    public ResponseEntity<ResponseDto<?>> deleteToDoList(@RequestBody ToDoListRequsetDto toDoListDto){
+        return ResponseEntity.ok(toDoListService.deleteToDoList(toDoListDto));
+    }
 }
