@@ -3,11 +3,13 @@ package com.nextClass.service;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
+import com.nextClass.Scheduler.SchedulerMain;
 import com.nextClass.dto.ResponseDto;
 import com.nextClass.dto.TimeTableReponseDto;
 import com.nextClass.dto.ToDoListRequsetDto;
 import com.nextClass.dto.ToDoListResponseDto;
 import com.nextClass.entity.ToDoList;
+import com.nextClass.entity.ToDoListAlarm;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.LoginRepository;
@@ -15,27 +17,15 @@ import com.nextClass.repository.ToDoListDetailRepository;
 import com.nextClass.utils.CommonUtils;
 import com.querydsl.core.Tuple;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecutionException;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
-//import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.nextClass.entity.QTimeTable.timeTable;
 import static com.nextClass.entity.QToDoList.toDoList;
 
 @Service
@@ -45,21 +35,21 @@ public class ToDoListService {
     private ToDoListDetailRepository toDoListRepository;
     //    private JobLauncher jobLauncher;
 //    private Job job;
-    private ThreadPoolTaskScheduler threadPoolTaskScheduler;
     private LoginRepository loginRepository;
+    private SchedulerMain schedulerMain;
 //    private TaskScheduler taskScheduler;
 
     public ToDoListService(
             ToDoListDetailRepository toDoListDetailRepository,
             LoginRepository loginRepository,
-            ThreadPoolTaskScheduler threadPoolTaskScheduler
+            SchedulerMain schedulerMain
 //            TaskScheduler taskScheduler
 //            JobLauncher jobLauncher,
 //            Job job
     ) {
         this.toDoListRepository = toDoListDetailRepository;
         this.loginRepository = loginRepository;
-        this.threadPoolTaskScheduler = threadPoolTaskScheduler;
+        this.schedulerMain = schedulerMain;
 //        this.jobLauncher = jobLauncher;
 //        this.job = job;
 //        this.taskScheduler = taskScheduler;
@@ -86,16 +76,16 @@ public class ToDoListService {
             log.error("ToDoService << createToDoList >> | TO_DO_LIST_ALREADY_EXIST");
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TO_DO_LIST_ALREADY_EXIST.getErrorCode(), ErrorCode.TO_DO_LIST_ALREADY_EXIST.getErrorDescription());
         }
-        toDoListRepository.save(toDoListRequsetDto);
+        ToDoList result = toDoListRepository.save(toDoListRequsetDto);
         if (alarmTime != null) {
-            Date date = Date.from(alarmTime.toInstant(ZoneOffset.of("+09:00")));
-            threadPoolTaskScheduler.schedule(this.sendToDoListAlarmToFcm(alarmTime, toDoListRequsetDto.getContent(), toDoListRequsetDto.getApp_token()),date );
+            toDoListRepository.saveAlarm(result.getUuid());
+            schedulerMain.toDoListAlarmScheduler(result);
         }
         log.info("ToDoService << createToDoList >> | toDoList : {}", toDoList);
-        return new ResponseDto<>(HttpStatus.ACCEPTED.value(), Description.SUCCESS);
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
-    //    public ResponseDto<?> updateToDoList(ToDoListRequsetDto toDoListDto){
+//        public ResponseDto<?> updateToDoList(ToDoListRequsetDto toDoListDto){
 //        //request검증(uuid, updateTime, content, alarmTime,doneTime)
 //        //현재 로그인 한 사람 가져오기
 //        //해당 uuid를 가진 todoList의 생성자가 해당 멤버인지 검증
@@ -147,23 +137,5 @@ public class ToDoListService {
                 tuple.get(toDoList.goalTime)
         );
     }
-    private Runnable sendToDoListAlarmToFcm(LocalDateTime alarmTime,String body, String appToken ){
-        return () -> {
-            log.info("ToDoService << sendToDoListAlarmToFcm >> | AlarmStartTime : {}", alarmTime);
-            // FCM 알림을 보내는 로직을 여기에 추가합니다.
-            // 예를 들어, FCM 서비스 호출 등의 작업을 수행
-            try {
-                Message message = Message.builder()
-                        .setNotification(Notification.builder()
-                                .setBody(body)
-                                .build())
-                        .setToken(appToken)
-                        .build();
-                String response = FirebaseMessaging.getInstance().send(message);
-                log.info("ToDoService << sendToDoListAlarmToFcm >> | A : {}", response);
-            } catch (Exception e) {
-                log.error("ToDoService << sendToDoListAlarmToFcm >> | Exception : {}", e.getMessage());
-            }
-        };
-    }
+
 }
