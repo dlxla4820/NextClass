@@ -1,16 +1,15 @@
 package com.nextClass.repository;
 
 import com.nextClass.dto.ToDoListRequsetDto;
-import com.nextClass.dto.ToDoListResponseDto;
 import com.nextClass.entity.ToDoList;
 import com.nextClass.entity.ToDoListAlarm;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.nextClass.entity.QToDoList.toDoList;
@@ -40,6 +39,23 @@ public class ToDoListDetailRepository {
                 .fetchOne();
     }
 
+    public ToDoList checkExist(ToDoListRequsetDto toDoListRequsetDto){
+        return queryFactory.selectFrom(toDoList)
+                .where(Expressions.stringTemplate("HEX({0})", toDoList.uuid).eq(toDoListRequsetDto.getUuid().toString().replace("-","")))
+                .fetchOne();
+    }
+
+    public ToDoList checkAuthorize(ToDoListRequsetDto toDoListRequsetDto){
+        return queryFactory.selectFrom(toDoList)
+                .where(Expressions.stringTemplate("HEX({0})", toDoList.member_uuid).eq(toDoListRequsetDto.getMember_uuid().toString().replace("-","")))
+                .where(Expressions.stringTemplate("HEX({0})", toDoList.uuid).eq(toDoListRequsetDto.getUuid().toString().replace("-","")))
+                .fetchOne();
+    }
+
+    public void delete(ToDoList data){
+        toDoListRepository.delete(data);
+    }
+
     public ToDoList save(ToDoListRequsetDto toDoListRequsetDto) {
         ToDoList toDoListData = ToDoList.builder()
                 .content(toDoListRequsetDto.getContent())
@@ -52,6 +68,8 @@ public class ToDoListDetailRepository {
                 .build();
         return toDoListRepository.save(toDoListData);
     }
+
+
     public ToDoListAlarm saveAlarm(UUID toDoListUuid){
         return toDoListAlarmRepository.save(ToDoListAlarm.builder().to_do_list_uuid(toDoListUuid).build());
     }

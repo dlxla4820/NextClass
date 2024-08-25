@@ -31,6 +31,7 @@ public enum ErrorCode {
     CLASS_ALREADY_EXIST_ON_SAME_TIME("E00304", "해당 시간에 이미 수업이 존재합니다."),
 
     TO_DO_LIST_ALREADY_EXIST("E00401", "ToDoList가 중복되었습니다"),
+    TO_DO_LIST_ALREADY_DELETE("E00402", "ToDoList가 존재하지 않습니다"),
 
     MAIL_SEND_FAIL("E00501","메일 발송에 실패하였습니다."),
     MAIL_NOT_EXIST("E00502","해당 인증건에 대한 발송 메일이 존재 하지 않습니다."),

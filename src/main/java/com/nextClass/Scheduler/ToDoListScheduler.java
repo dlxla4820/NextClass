@@ -33,8 +33,9 @@ public class ToDoListScheduler {
                         .build();
                 String response = FirebaseMessaging.getInstance().send(message);
                 toDoListRepository.deleteAlarm(toDoList.getUuid());
+                log.info("ToDoListScheduler << sendToDoListAlarmToFcm >> | Response : {}", response);
             } catch (Exception e) {
-                log.error("ToDoService << sendToDoListAlarmToFcm >> | Exception : {}", e.getMessage());
+                log.error("ToDoListScheduler << sendToDoListAlarmToFcm >> | Exception : {}", e.getMessage());
             }
         };
     }
