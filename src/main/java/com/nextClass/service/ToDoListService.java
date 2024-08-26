@@ -167,8 +167,8 @@ public class ToDoListService {
         return new ToDoListResponseDto(
                 tuple.get(toDoList.uuid),
                 tuple.get(toDoList.content),
-                tuple.get(toDoList.alarmTime),
-                tuple.get(toDoList.goalTime)
+                tuple.get(toDoList.goalTime),
+                tuple.get(toDoList.alarmTime)
         );
     }
 
