@@ -269,7 +269,7 @@ public class BoardRepository {
     private BooleanExpression eqContentOrSubjectBySearchWord(String searchWord){
         if(searchWord == null)
             return null;
-        return post.content.eq(searchWord).or(post.subject.eq(searchWord));
+        return post.content.contains(searchWord).or(post.subject.contains(searchWord));
     }
 
     private BooleanExpression eqBoardSequence(Integer postSequence, Integer commentSequence){
