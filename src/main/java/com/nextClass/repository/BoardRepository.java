@@ -155,6 +155,8 @@ public class BoardRepository {
             query.join(member).on(member.uuid.eq(post.member.uuid));
         if(MY_COMMENT.equals(postListSelectRequestDto.getSort()))
             query.join(comment).on(comment.post.sequence.eq(post.sequence));
+        if(MY_VOTE.equals(postListSelectRequestDto.getSort()))
+            query.join(vote).on(vote.boardSequence.eq(post.sequence));
         return query
                 .where(eqPostSequence(postListSelectRequestDto.getPostSequence())) // ALL 인경우
                 .where(eqMemberSchool(memberUuid, postListSelectRequestDto.getSort())) // MY_SCHOOL 인경우
@@ -243,12 +245,8 @@ public class BoardRepository {
         return null;
     }
     private BooleanExpression eqMyVote(String memberUuid, String sort){
-        if(MY_VOTE.equals(sort)) {
-            return post.sequence.eq(JPAExpressions.select(vote.boardSequence)
-                            .from(vote)
-                            .where(vote.boardType.eq(Vote.BoardType.POST))
-                            .where(Expressions.stringTemplate("HEX({0})", vote.member.uuid).eq(memberUuid.replace("-", ""))));
-        }
+        if(MY_VOTE.equals(sort))
+            return Expressions.stringTemplate("HEX({0})", vote.member.uuid).eq(memberUuid.replace("-", "")).and(vote.boardType.eq(Vote.BoardType.POST));
         return null;
     }
     private BooleanExpression goeVoteCount(String sort) {
