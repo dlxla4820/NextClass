@@ -1,22 +1,16 @@
 package com.nextClass.service;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
-import com.nextClass.Scheduler.SchedulerMain;
+import com.nextClass.scheduler.SchedulerMain;
 import com.nextClass.dto.ResponseDto;
-import com.nextClass.dto.TimeTableReponseDto;
 import com.nextClass.dto.ToDoListRequsetDto;
 import com.nextClass.dto.ToDoListResponseDto;
 import com.nextClass.entity.ToDoList;
-import com.nextClass.entity.ToDoListAlarm;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.LoginRepository;
 import com.nextClass.repository.ToDoListDetailRepository;
 import com.nextClass.utils.CommonUtils;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.dsl.Expressions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
