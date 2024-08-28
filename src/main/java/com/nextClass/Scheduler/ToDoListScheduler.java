@@ -1,6 +1,7 @@
 package com.nextClass.Scheduler;
 
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import com.nextClass.entity.ToDoList;
@@ -32,7 +33,7 @@ public class ToDoListScheduler {
                 String response = androidPushNotificationService.sendPushNotification("To Do List", toDoList.getContent(), toDoList.getAppToken());
                 toDoListRepository.deleteAlarm(toDoList.getUuid());
                 log.info("ToDoListScheduler << sendToDoListAlarmToFcm >> | Response : {}", response);
-            } catch (Exception e) {
+            } catch (FirebaseMessagingException e) {
                 log.error("ToDoListScheduler << sendToDoListAlarmToFcm >> | Exception : {}", e.getMessage());
             }
         };
