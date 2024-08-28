@@ -1,5 +1,8 @@
 package com.nextClass.repository;
 
+import org.springframework.stereotype.Repository;
+
+@Repository
 public class NotificationDetailRepository {
     private NotificationRepository notificationRepository;
 
@@ -8,5 +11,5 @@ public class NotificationDetailRepository {
     ){
         this.notificationRepository = notificationRepository;
     }
-    
+
 }

@@ -29,9 +29,9 @@ public class NotificationConfig {
     private String is_notification_activated;
 
     @Column(nullable = false)
-    private LocalDateTime create_time;
+    private LocalDateTime req_date;
 
     @Column(nullable = false)
-    private LocalDateTime update_time;
+    private LocalDateTime mod_date;
 
 }
