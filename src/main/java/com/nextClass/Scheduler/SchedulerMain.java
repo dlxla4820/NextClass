@@ -48,16 +48,20 @@ public class SchedulerMain {
         log.info("SchedulerMain << init >> | finish");
     }
 
-    public void toDoListAlarmScheduler(ToDoList toDoList){
+    public void toDoListAlarmScheduler(ToDoList toDoList) {
         log.info("SchedulerMain << toDoListAlarmScheduler >> | AlarmStartTime : {}", toDoList.getAlarmTime());
         ScheduledFuture<?> newSchedule = threadPoolTaskScheduler.schedule(() -> {
-            // 작업 내용
-            toDoListScheduler.sendToDoListAlarmToFcm(toDoList);
+            // Runnable 실행
+            Runnable task = toDoListScheduler.sendToDoListAlarmToFcm(toDoList);
+            task.run(); // Runnable 실행
             scheduledTasks.remove(toDoList.getUuid()); // 스케줄 목록에서 제거
+            log.info("SchedulerMain << toDoListAlarmScheduler >> | ScheduledTask Size : {} ", scheduledTasks.size());
         }, Date.from(toDoList.getAlarmTime().toInstant(ZoneOffset.of("+09:00"))));
         scheduledTasks.put(toDoList.getUuid(), newSchedule);
+        log.info("SchedulerMain << toDoListAlarmScheduler >> | ScheduledTask Size : {} ", scheduledTasks.size());
         log.info("SchedulerMain << toDoListAlarmScheduler >> | Finish ");
     }
+
 
     public void updateToDoListAlarmScheduler(ToDoList toDoList){
         log.info("SchedulerMain << updateToDoListAlarmScheduler >> | AlarmStartTime : {}", toDoList.getAlarmTime());
