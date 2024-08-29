@@ -19,19 +19,19 @@ public class NotificationConfig {
     @Builder.Default
     private UUID uuid = UUID.randomUUID();
 
-    @Column(nullable = false)
-    private UUID member_uuid;
+    @ManyToOne
+    @JoinColumn(name = "member_uuid")
+    private Member member;
 
-    @Column(nullable = false)
     private String category;
 
-    @Column(nullable = false)
-    private String is_notification_activated;
+    @Column(name = "is_notification_activated")
+    private String isNotificationActivated;
 
-    @Column(nullable = false)
+    @Column(name = "reqDate")
     private LocalDateTime req_date;
 
-    @Column(nullable = false)
+    @Column(name = "modDate")
     private LocalDateTime mod_date;
 
 }
