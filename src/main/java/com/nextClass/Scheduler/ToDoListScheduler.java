@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
 @Slf4j
 @Component
 public class ToDoListScheduler {
-    private ToDoListDetailRepository toDoListRepository;
-    private AndroidPushNotificationService androidPushNotificationService;
+    private final ToDoListDetailRepository toDoListRepository;
+    private final AndroidPushNotificationService androidPushNotificationService;
     public ToDoListScheduler(
             ToDoListDetailRepository toDoListRepository,
             AndroidPushNotificationService androidPushNotificationService

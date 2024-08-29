@@ -20,11 +20,11 @@ import java.util.concurrent.ScheduledFuture;
 @Component
 @Slf4j
 public class SchedulerMain {
-    private ThreadPoolTaskScheduler threadPoolTaskScheduler;
-    private ToDoListScheduler toDoListScheduler;
-    private ToDoListDetailRepository toDoListRepository;
-    private Map<UUID, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
-    private Environment environment;
+    private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
+    private final ToDoListScheduler toDoListScheduler;
+    private final ToDoListDetailRepository toDoListRepository;
+    private final Map<UUID, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
+    private final Environment environment;
     public SchedulerMain(
             ThreadPoolTaskScheduler threadPoolTaskScheduler,
             ToDoListScheduler toDoListScheduler,
