@@ -1,12 +1,6 @@
 package com.nextClass.scheduler;
 
-<<<<<<< HEAD:src/main/java/com/nextClass/Scheduler/ToDoListScheduler.java
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
-=======
->>>>>>> ea5b0ec (NotificationConfig Entity 생성):src/main/java/com/nextClass/scheduler/ToDoListScheduler.java
 import com.nextClass.entity.ToDoList;
 import com.nextClass.repository.ToDoListDetailRepository;
 import com.nextClass.service.AndroidPushNotificationService;
