@@ -1,4 +1,4 @@
-package com.nextClass.Scheduler;
+package com.nextClass.scheduler;
 
 import com.nextClass.entity.ToDoList;
 import com.nextClass.repository.ToDoListDetailRepository;

@@ -3,8 +3,10 @@ package com.nextClass.controller;
 import com.nextClass.dto.*;
 import com.nextClass.service.MailService;
 import com.nextClass.service.MemberService;
+import com.nextClass.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,10 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
     private final MailService mailService;
     private final MemberService memberService;
+    private final NotificationService notificationService;
 
-    public MemberController(MailService mailService, MemberService memberService) {
+    public MemberController(MailService mailService, MemberService memberService, NotificationService notificationService) {
         this.mailService = mailService;
         this.memberService = memberService;
+        this.notificationService = notificationService;
     }
 
     @PostMapping(value = "/info_change")
@@ -58,4 +62,12 @@ public class MemberController {
         return ResponseEntity.ok(mailService.sendEmailRandomPassword(requestBody));
     }
 
+    @GetMapping(value = "/notification_config")
+    public ResponseEntity<ResponseDto<?>> getNotificationConfig(){
+        return ResponseEntity.ok(notificationService.getNotificationConfig());
+    }
+    @GetMapping(value = "/notification_config_update")
+    public ResponseEntity<ResponseDto<?>> updateNotificationConfig(@RequestBody NotificationConfigRequestDto requestBody){
+        return ResponseEntity.ok(notificationService.updateNotificationConfig(requestBody));
+    }
 }

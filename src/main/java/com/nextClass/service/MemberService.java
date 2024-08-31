@@ -7,8 +7,10 @@ import com.nextClass.entity.Member;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.enums.GradeType;
+import com.nextClass.enums.NotificationConfigCategory;
 import com.nextClass.repository.LoginRepository;
 import com.nextClass.repository.MailRepository;
+import com.nextClass.repository.NotificationDetailRepository;
 import com.nextClass.repository.TimeTableDetailRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,16 +37,19 @@ public class MemberService {
     private final LoginRepository loginRepository;
     private final MailRepository mailRepository;
     private final TimeTableDetailRepository timeTableRepository;
+
+    private final NotificationDetailRepository notificationDetailRepository;
     private final String[] duplicatedKey= {"id","email"};
 
 
     @Autowired
-    public MemberService(PasswordEncoder passwordEncoder, TokenProvider tokenProvider, LoginRepository loginRepository, MailRepository mailRepository, TimeTableDetailRepository timeTableRepository) {
+    public MemberService(PasswordEncoder passwordEncoder, TokenProvider tokenProvider, LoginRepository loginRepository, MailRepository mailRepository, TimeTableDetailRepository timeTableRepository, NotificationDetailRepository notificationDetailRepository) {
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
         this.loginRepository = loginRepository;
         this.mailRepository = mailRepository;
         this.timeTableRepository = timeTableRepository;
+        this.notificationDetailRepository = notificationDetailRepository;
     }
 
     public ResponseDto<?> saveMember(MemberRequestDto requestBody){
@@ -63,8 +68,12 @@ public class MemberService {
         if(loginRepository.getMemberByKeyValue("email",requestBody.getEmail()) != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), String.format(ErrorCode.INPUT_DUPLICATED.getErrorDescription(),"email"));
 
+
         // 비밀번호 hashing + 저장
-        loginRepository.saveMember(requestBody, passwordEncoder.encode(requestBody.getPassword()));
+        Member member = loginRepository.saveMember(requestBody, passwordEncoder.encode(requestBody.getPassword()));
+        NotificationConfigCategory[] values = NotificationConfigCategory.values();
+        for (NotificationConfigCategory category : values)
+            notificationDetailRepository.saveNotificationConfigByCategory(member,category);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
     public ResponseDto<?> loginMember(LoginRequestDto requestBody) {

@@ -1,17 +1,11 @@
-package com.nextClass.Scheduler;
+package com.nextClass.scheduler;
 
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
 import com.nextClass.entity.ToDoList;
 import com.nextClass.repository.ToDoListDetailRepository;
 import com.nextClass.service.AndroidPushNotificationService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @Component

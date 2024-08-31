@@ -27,7 +27,7 @@ public class LoginRepository {
     /**
      * DB INSERT : MEMBER
      **/
-    public void saveMember(MemberRequestDto MemberRequestDto, String encodePassword){
+    public Member saveMember(MemberRequestDto MemberRequestDto, String encodePassword){
         Member member = Member.builder()
                 .id(MemberRequestDto.getId())
                 .name(MemberRequestDto.getName())
@@ -37,7 +37,7 @@ public class LoginRepository {
                 .memberSchool(MemberRequestDto.getMemberSchool())
                 .regDate(LocalDateTime.now())
                 .build();
-        memberRepository.save(member);
+        return memberRepository.save(member);
     }
 
 
