@@ -271,7 +271,12 @@ public class BoardService {
         if(requestBody.getSearchWord() != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.JSON_INVALID.getErrorCode(), ErrorCode.REQUEST_BODY_NULL.getErrorDescription());
         List<PostListSelectResponseDto> responseList = boardRepository.selectAllPostList(memberUuid, requestBody);
-
+        for(PostListSelectResponseDto data : responseList){
+            if(data.getSubject().length() >10)
+                data.setSubject(data.getSubject().substring(7) + "...");
+            if(data.getContent().length() >25)
+                data.setContent(data.getContent().substring(22) + "...");
+        }
         log.info("BoardService << getPostList >> | responseList : {}", responseList);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);
     }
@@ -289,6 +294,13 @@ public class BoardService {
         if(requestBody.getSearchWord() == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "search_word"));
         List<PostListSelectResponseDto> responseList = boardRepository.selectAllPostList(memberUuid, requestBody);
+
+        for(PostListSelectResponseDto data : responseList){
+            if(data.getSubject().length() >10)
+                data.setSubject(data.getSubject().substring(7) + "...");
+            if(data.getContent().length() >25)
+                data.setContent(data.getContent().substring(22) + "...");
+        }
 
         log.info("BoardService << searchPostList >> | responseList : {}", responseList);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);

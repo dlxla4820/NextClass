@@ -2,10 +2,7 @@ package com.nextClass.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.criteria.CriteriaBuilder;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.StringJoiner;
@@ -15,7 +12,9 @@ import java.util.StringJoiner;
 public class PostListSelectResponseDto {
     @JsonProperty("post_sequence")
     private Integer postSequence;
+    @Setter
     private String subject;
+    @Setter
     private String content;
     private String author;
     @JsonProperty("vote_count")
