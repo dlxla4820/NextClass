@@ -255,7 +255,7 @@ public class TimeTableService {
             timeTableRepository.saveTimeTable(timeTable);
             scoreRepository.saveScore(score);
         log.info("TimeTableService << makeTimeTable >> | timeTable : {}", timeTable);
-        return new ResponseDto<>(HttpStatus.ACCEPTED.value(), Description.SUCCESS);
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
 

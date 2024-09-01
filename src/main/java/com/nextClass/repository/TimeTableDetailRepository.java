@@ -156,6 +156,7 @@ public class TimeTableDetailRepository {
                         timeTable.classEndTime.between(timeTableRequestDto.getClass_start_time(), timeTableRequestDto.getClass_end_time())
                         )
                 .where(timeTable.week.eq(timeTableRequestDto.getWeek()))
+                .where(Expressions.stringTemplate("HEX({0})", timeTable.uuid).ne(timeTableRequestDto.getUuid().replace("-","")))
                 .fetchFirst();
     }
 }
