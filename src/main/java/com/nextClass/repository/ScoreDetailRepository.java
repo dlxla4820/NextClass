@@ -15,8 +15,8 @@ import static com.nextClass.entity.QTimeTable.timeTable;
 
 @Repository
 public class ScoreDetailRepository {
-    private ScoreRepository scoreRepository;
-    private JPAQueryFactory queryFactory;
+    private final ScoreRepository scoreRepository;
+    private final JPAQueryFactory queryFactory;
 
     ScoreDetailRepository(ScoreRepository scoreRepository, JPAQueryFactory queryFactory){
         this.scoreRepository = scoreRepository;
