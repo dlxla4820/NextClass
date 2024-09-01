@@ -60,7 +60,7 @@ public class TimeTableService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
         }
         //요청받은 시간에 해당 회원이 수업이 등록되어 있는지 확인
-        if (timeTableRepository.isClassExistOnSameTime(timeTableRequestDto, CommonUtils.getMemberUuidIfAdminOrUser()) != null) {
+        if (timeTableRepository.isClassExistOnSameTimeUpdate(timeTableRequestDto, CommonUtils.getMemberUuidIfAdminOrUser()) != null) {
             log.error("TimeTableService << changeTimeTableData >> | CLASS_ALREADY_EXIST_ON_SAME_TIME");
             //null 값이 반환되지 않으면 error response
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.CLASS_ALREADY_EXIST_ON_SAME_TIME.getErrorCode(), ErrorCode.CLASS_ALREADY_EXIST_ON_SAME_TIME.getErrorDescription());
@@ -173,13 +173,9 @@ public class TimeTableService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
         }
         //repository에서 해당 학기 데이터 삭제
-        //false되면 삭제 실패했다고 보내기
-        List<Tuple> timeTableList = timeTableRepository.getTimeTableListOnSemesterFromUser(timeTableDto);
-        List<String> timeTableUuidList = timeTableList.stream()
-                .map(t -> t.get(0, UUID.class).toString().replace("-", ""))
-                .toList();
+        List<String> timeTableList = timeTableRepository.getTimeTableUUIDListOnSemesterFromUser(timeTableDto);
         //삭제
-        long howManyDelete = timeTableRepository.deleteAllTimeTableSelected(timeTableUuidList);
+        long howManyDelete = timeTableRepository.deleteAllTimeTableSelected(timeTableList);
         log.info("TimeTableService << deleteAllTimeTableOnSemester >> | howManyDelete : {}", howManyDelete);
         //classDetail 검증 및 삭제
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
@@ -194,7 +190,7 @@ public class TimeTableService {
         }
         TimeTableDto timeTableDto = new TimeTableDto(CommonUtils.getMemberUuidIfAdminOrUser(), timeTableRequestDto);
         //member와 semester를 가지고 해당 데이터 가져오기(현재는 semester만)
-        List<TimeTableReponseDto> timeTableList = timeTableRepository.getTimeTableListOnSemesterFromUser(timeTableDto).stream().map(this::convertTupleToDto).collect(Collectors.toList());
+        List<TimeTableReponseDto> timeTableList = timeTableRepository.getTimeTableListOnSemesterFromUser(timeTableDto);
         log.info("TimeTableService << getPersonalThisSemesterTimeTable >> | timeTableList : {}", timeTableList);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, timeTableList);
     }
@@ -292,19 +288,6 @@ public class TimeTableService {
         return UUID.fromString(formattedUuidString);
     }
 
-    private TimeTableReponseDto convertTupleToDto(Tuple tuple) {
-        return new TimeTableReponseDto(
-                tuple.get(timeTable.uuid),
-                tuple.get(timeTable.week),
-                tuple.get(timeTable.classStartTime),
-                tuple.get(timeTable.classEndTime),
-                tuple.get(timeTable.semester),
-                tuple.get(timeTable.title),
-                tuple.get(timeTable.classGrade),
-                tuple.get(timeTable.teacherName),
-                tuple.get(timeTable.score),
-                tuple.get(timeTable.school)
-        );
-    }
+
 
 }
