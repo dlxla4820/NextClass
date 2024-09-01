@@ -27,9 +27,9 @@ import static com.nextClass.entity.QToDoList.toDoList;
 @Slf4j
 @Transactional(rollbackFor = Exception.class)
 public class ToDoListService {
-    private ToDoListDetailRepository toDoListRepository;
-    private LoginRepository loginRepository;
-    private SchedulerMain schedulerMain;
+    private final ToDoListDetailRepository toDoListRepository;
+    private final LoginRepository loginRepository;
+    private final SchedulerMain schedulerMain;
 
     public ToDoListService(
             ToDoListDetailRepository toDoListDetailRepository,
