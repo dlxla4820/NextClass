@@ -92,6 +92,7 @@ public class TimeTableService {
                     .score(newClassDetail.getScore())
                     .school(newClassDetail.getSchool())
                     .title(newClassDetail.getTitle())
+                    .color(timeTableRequestDto.getColor())
                     .build();
             timeTableRepository.updateTimeTableWithNewClassDetail(newClassDetail, timeTable);
             log.info("TimeTableService << changeTimeTableData >> | timeTable : {}", timeTable);
@@ -112,6 +113,7 @@ public class TimeTableService {
                         .school(newClassDetailUuid.getSchool())
                         .title(newClassDetailUuid.getTitle())
                         .category(newClassDetailUuid.getCategory())
+                        .color(timeTableRequestDto.getColor())
                         .build();
                 timeTableRepository.updateTimeTable(timeTable);
                 log.info("TimeTableService << changeTimeTableData >> | timeTable : {}", timeTable);
@@ -129,6 +131,7 @@ public class TimeTableService {
                         .score(newClassDetailUuid.getScore())
                         .school(newClassDetailUuid.getSchool())
                         .category(newClassDetailUuid.getCategory())
+                        .color(timeTableRequestDto.getColor())
                         .build();
                 timeTableRepository.updateTimeTable(timeTable);
                 log.info("TimeTableService << changeTimeTableData >> | timeTable : {}", timeTable);
@@ -238,6 +241,7 @@ public class TimeTableService {
                 .score(classDetail.getScore())
                 .school(classDetail.getSchool())
                 .category(classDetail.getCategory())
+                .color(timeTableDto.getTimeTableRequestDto().getColor())
                 .build();
         Score score = Score.builder()
                 .title(classDetail.getTitle())

@@ -50,5 +50,8 @@ public class TimeTable {
     @Column(length = 21, nullable = false)
     private String school;
 
+    @Column(length = 24)
+    private String color;
+
 }
 

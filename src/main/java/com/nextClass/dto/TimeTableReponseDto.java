@@ -21,4 +21,5 @@ public class TimeTableReponseDto {
     private Integer score;
     private String school;
     private String category;
+    private String color;
 }

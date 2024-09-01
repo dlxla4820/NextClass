@@ -55,7 +55,8 @@ public class TimeTableDetailRepository {
                 timeTable.teacherName,
                 timeTable.score,
                 timeTable.school,
-                timeTable.category
+                timeTable.category,
+                timeTable.color
                 )
                 .from(timeTable)
                 .where(Expressions.stringTemplate("HEX({0})", timeTable.memberUuid).eq(timeTableDto.getMemberUUID().replace("-","")))
@@ -121,7 +122,8 @@ public class TimeTableDetailRepository {
                         timeTable.teacherName.eq(timeTableDto.getTimeTableRequestDto().getTeacher_name()),
                         timeTable.score.eq(timeTableDto.getTimeTableRequestDto().getScore()),
                         timeTable.school.eq(timeTableDto.getTimeTableRequestDto().getSchool()),
-                        timeTable.category.eq(timeTableDto.getTimeTableRequestDto().getCategory())
+                        timeTable.category.eq(timeTableDto.getTimeTableRequestDto().getCategory()),
+                        timeTable.color.eq(timeTableDto.getTimeTableRequestDto().getColor())
                 )
                 .where(Expressions.stringTemplate("HEX({0})", timeTable.classDetailUuid).eq(timeTableDto.getClassDetailUUID().replace("-","")))
                 .where(Expressions.stringTemplate("HEX({0})", timeTable.memberUuid).eq(timeTableDto.getMemberUUID().replace("-","")))
@@ -197,7 +199,8 @@ public class TimeTableDetailRepository {
                 tuple.get(timeTable.teacherName),
                 tuple.get(timeTable.score),
                 tuple.get(timeTable.school),
-                tuple.get(timeTable.category)
+                tuple.get(timeTable.category),
+                tuple.get(timeTable.color)
         );
     }
 
