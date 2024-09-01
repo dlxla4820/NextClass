@@ -1,14 +1,13 @@
 package com.nextClass.repository;
 
 import com.nextClass.dto.TimeTableDto;
+import com.nextClass.dto.TimeTableReponseDto;
 import com.nextClass.dto.TimeTableRequestDto;
 import com.nextClass.entity.ClassDetail;
-import com.nextClass.entity.Member;
 import com.nextClass.entity.QTimeTable;
 import com.nextClass.entity.TimeTable;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import static com.nextClass.entity.QTimeTable.timeTable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -43,7 +43,7 @@ public class TimeTableDetailRepository {
                 .execute();
     }
 
-    public List<Tuple> getTimeTableListOnSemesterFromUser(TimeTableDto timeTableDto) {
+    public List<TimeTableReponseDto> getTimeTableListOnSemesterFromUser(TimeTableDto timeTableDto) {
         return queryFactory.select(
                 timeTable.uuid,
                 timeTable.week,
@@ -54,13 +54,28 @@ public class TimeTableDetailRepository {
                 timeTable.classGrade,
                 timeTable.teacherName,
                 timeTable.score,
-                timeTable.school
+                timeTable.school,
+                timeTable.category,
+                timeTable.color
                 )
                 .from(timeTable)
                 .where(Expressions.stringTemplate("HEX({0})", timeTable.memberUuid).eq(timeTableDto.getMemberUUID().replace("-","")))
                 .where(timeTable.semester.eq(timeTableDto.getTimeTableRequestDto().getSemester()))
-                .fetch();
+                .fetch().stream().map(this::convertTupleToDto).collect(Collectors.toList());
     }
+
+    public List<String> getTimeTableUUIDListOnSemesterFromUser(TimeTableDto timeTableDto) {
+        return queryFactory.
+                select(timeTable.uuid).
+                from(
+                        timeTable
+                )
+                .where(Expressions.stringTemplate("HEX({0})", timeTable.memberUuid).eq(timeTableDto.getMemberUUID().replace("-","")))
+                .where(timeTable.semester.eq(timeTableDto.getTimeTableRequestDto().getSemester()))
+                .fetch().stream().map(UUID::toString).collect(Collectors.toList());
+    }
+
+
 
     public long deleteAllTimeTableSelected(List<String> timeTableUuidList) {
         //execute : 총 몇행이 sql문에 걸렸는지 알려줌
@@ -106,7 +121,9 @@ public class TimeTableDetailRepository {
                         timeTable.classGrade.eq(timeTableDto.getTimeTableRequestDto().getClass_grade()),
                         timeTable.teacherName.eq(timeTableDto.getTimeTableRequestDto().getTeacher_name()),
                         timeTable.score.eq(timeTableDto.getTimeTableRequestDto().getScore()),
-                        timeTable.school.eq(timeTableDto.getTimeTableRequestDto().getSchool())
+                        timeTable.school.eq(timeTableDto.getTimeTableRequestDto().getSchool()),
+                        timeTable.category.eq(timeTableDto.getTimeTableRequestDto().getCategory()),
+                        timeTable.color.eq(timeTableDto.getTimeTableRequestDto().getColor())
                 )
                 .where(Expressions.stringTemplate("HEX({0})", timeTable.classDetailUuid).eq(timeTableDto.getClassDetailUUID().replace("-","")))
                 .where(Expressions.stringTemplate("HEX({0})", timeTable.memberUuid).eq(timeTableDto.getMemberUUID().replace("-","")))
@@ -158,4 +175,33 @@ public class TimeTableDetailRepository {
                 .where(timeTable.week.eq(timeTableRequestDto.getWeek()))
                 .fetchFirst();
     }
+    public TimeTable isClassExistOnSameTimeUpdate(TimeTableRequestDto timeTableRequestDto, String memberUuid){
+        return queryFactory.selectFrom(timeTable)
+                .where(
+                        Expressions.stringTemplate("HEX({0})", timeTable.memberUuid).eq(memberUuid.replace("-","")),
+                        timeTable.classStartTime.between(timeTableRequestDto.getClass_start_time(), timeTableRequestDto.getClass_end_time()),
+                        timeTable.classEndTime.between(timeTableRequestDto.getClass_start_time(), timeTableRequestDto.getClass_end_time())
+                )
+                .where(timeTable.week.eq(timeTableRequestDto.getWeek()))
+                .where(Expressions.stringTemplate("HEX({0})", timeTable.uuid).ne(timeTableRequestDto.getUuid().replace("-","")))
+                .fetchFirst();
+    }
+
+    private TimeTableReponseDto convertTupleToDto(Tuple tuple) {
+        return new TimeTableReponseDto(
+                tuple.get(timeTable.uuid),
+                tuple.get(timeTable.week),
+                tuple.get(timeTable.classStartTime),
+                tuple.get(timeTable.classEndTime),
+                tuple.get(timeTable.semester),
+                tuple.get(timeTable.title),
+                tuple.get(timeTable.classGrade),
+                tuple.get(timeTable.teacherName),
+                tuple.get(timeTable.score),
+                tuple.get(timeTable.school),
+                tuple.get(timeTable.category),
+                tuple.get(timeTable.color)
+        );
+    }
+
 }

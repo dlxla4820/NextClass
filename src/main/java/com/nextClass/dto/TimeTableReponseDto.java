@@ -20,4 +20,6 @@ public class TimeTableReponseDto {
     private String teacher_name;
     private Integer score;
     private String school;
+    private String category;
+    private String color;
 }
