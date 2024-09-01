@@ -67,7 +67,7 @@ public class ToDoListService {
             toDoListRepository.saveAlarm(result.getUuid());
             schedulerMain.toDoListAlarmScheduler(result);
         }
-        log.info("ToDoService << createToDoList >> | toDoList : {}", toDoList);
+        log.info("ToDoService << createToDoList >> | toDoList : {}", result);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
@@ -100,7 +100,7 @@ public class ToDoListService {
                 toDoListRepository.saveAlarm(result.getUuid());
                 schedulerMain.updateToDoListAlarmScheduler(result);
             }
-            log.info("ToDoService << updateToDoList >> | toDoList : {}", toDoList);
+            log.info("ToDoService << updateToDoList >> | toDoList : {}", result);
             return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
