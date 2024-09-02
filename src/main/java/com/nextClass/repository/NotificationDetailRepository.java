@@ -12,6 +12,7 @@ import com.nextClass.enums.NotificationConfigCategory;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.nextClass.entity.QComment.comment;
 import static com.nextClass.entity.QMember.member;
 import static com.nextClass.entity.QNotificationConfig.notificationConfig;
 
@@ -51,5 +52,10 @@ public class NotificationDetailRepository {
         return queryFactory.select(Projections.fields(NotificationConfigResponseDto.class, notificationConfig.category, notificationConfig.isNotificationActivated)).from(notificationConfig)
                 .where(Expressions.stringTemplate("HEX({0})", notificationConfig.member.uuid).eq(memberUuid.replace("-","")))
                 .fetch();
+    }
+    public void deleteNotificationConfigByMemberUuid(String memberUuid){
+        queryFactory.delete(notificationConfig)
+                .where(Expressions.stringTemplate("HEX({0})", notificationConfig.member.uuid).eq(memberUuid.replace("-", "")))
+                .execute();
     }
 }

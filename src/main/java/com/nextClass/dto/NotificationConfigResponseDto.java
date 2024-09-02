@@ -1,5 +1,6 @@
 package com.nextClass.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +14,7 @@ import java.util.StringJoiner;
 @Getter
 public class NotificationConfigResponseDto {
     private String category;
-    @Column(name = "is_notification_activated")
+    @JsonProperty("is_notification_activated")
     private Boolean isNotificationActivated;
 
     @Override

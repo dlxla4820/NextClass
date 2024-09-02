@@ -165,6 +165,7 @@ public class BoardService {
 
         boardRepository.saveComment(requestBody,member, author);
 
+
         boardRepository.updatePostCommentCount(requestBody.getPostSequence(), 1);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }

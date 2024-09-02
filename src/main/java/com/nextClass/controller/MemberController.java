@@ -66,7 +66,7 @@ public class MemberController {
     public ResponseEntity<ResponseDto<?>> getNotificationConfig(){
         return ResponseEntity.ok(notificationService.getNotificationConfig());
     }
-    @GetMapping(value = "/notification_config_update")
+    @PostMapping(value = "/notification_config_update")
     public ResponseEntity<ResponseDto<?>> updateNotificationConfig(@RequestBody NotificationConfigRequestDto requestBody){
         return ResponseEntity.ok(notificationService.updateNotificationConfig(requestBody));
     }

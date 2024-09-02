@@ -8,10 +8,7 @@ import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.enums.GradeType;
 import com.nextClass.enums.NotificationConfigCategory;
-import com.nextClass.repository.LoginRepository;
-import com.nextClass.repository.MailRepository;
-import com.nextClass.repository.NotificationDetailRepository;
-import com.nextClass.repository.TimeTableDetailRepository;
+import com.nextClass.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,18 +34,20 @@ public class MemberService {
     private final LoginRepository loginRepository;
     private final MailRepository mailRepository;
     private final TimeTableDetailRepository timeTableRepository;
+    private final BoardRepository boardRepository;
 
     private final NotificationDetailRepository notificationDetailRepository;
     private final String[] duplicatedKey= {"id","email"};
 
 
     @Autowired
-    public MemberService(PasswordEncoder passwordEncoder, TokenProvider tokenProvider, LoginRepository loginRepository, MailRepository mailRepository, TimeTableDetailRepository timeTableRepository, NotificationDetailRepository notificationDetailRepository) {
+    public MemberService(PasswordEncoder passwordEncoder, TokenProvider tokenProvider, LoginRepository loginRepository, MailRepository mailRepository, TimeTableDetailRepository timeTableRepository, BoardRepository boardRepository, NotificationDetailRepository notificationDetailRepository) {
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
         this.loginRepository = loginRepository;
         this.mailRepository = mailRepository;
         this.timeTableRepository = timeTableRepository;
+        this.boardRepository = boardRepository;
         this.notificationDetailRepository = notificationDetailRepository;
     }
 
@@ -105,6 +104,14 @@ public class MemberService {
         if(!passwordEncoder.matches(requestBody.getPassword(), member.getPassword()))
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, MEMBER_NOT_EXIST.getErrorCode(), MEMBER_NOT_EXIST.getErrorDescription());
         long howManyDeleted = timeTableRepository.deleteTimeTableAllByMemberUuid(memberUuid);
+        //게시글 데이터 삭제
+        boardRepository.deleteVoteByMemberUuid(memberUuid);
+        boardRepository.deleteCommentByMemberUuid(memberUuid);
+        boardRepository.deletePostByMemberUuid(memberUuid);
+
+        //알림설정 삭제
+        notificationDetailRepository.deleteNotificationConfigByMemberUuid(memberUuid);
+
         log.info("MemberService << deleteMember >> | deleted timetable : {}", howManyDeleted);
         loginRepository.deleteMember(member);
 
@@ -171,7 +178,7 @@ public class MemberService {
 
     public ResponseDto<?> changeEmail(MemberChangeEmailRequestDto requestBody){
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
-        log.info("MemberService << changeNormalInfo >> | memberUuid : {} requestBody : {}", memberUuid , requestBody);
+        log.info("MemberService << changeEmail >> | memberUuid : {} requestBody : {}", memberUuid , requestBody);
         if(memberUuid == null)
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
         //유효성 검사
@@ -194,12 +201,12 @@ public class MemberService {
 
     public ResponseDto<?> getMyInfo(){
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
-        log.info("MemberService << changeNormalInfo >> | memberUuid : {}", memberUuid );
+        log.info("MemberService << getMyInfo >> | memberUuid : {}", memberUuid );
         if(memberUuid == null)
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
 
         MemberInfoResponseDto memberInfo = loginRepository.getMyInfoByUuid(memberUuid);
-        log.info("MemberService << changeNormalInfo >> | memberInfo : {}", memberInfo );
+        log.info("MemberService << getMyInfo >> | memberInfo : {}", memberInfo );
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, memberInfo);
 
     }

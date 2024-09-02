@@ -124,6 +124,11 @@ public class BoardRepository {
                 .execute();
     }
 
+    public void deletePostByMemberUuid(String memberUuid){
+        queryFactory.delete(post)
+                .where(Expressions.stringTemplate("HEX({0})", post.member.uuid).eq(memberUuid.replace("-", "")))
+                .execute();
+    }
     public void deleteComment(CommentDeleteRequestDto commentDeleteRequestDto){
         queryFactory.delete(comment)
                 .where(comment.sequence.eq(commentDeleteRequestDto.getCommentSequence()))
@@ -133,6 +138,12 @@ public class BoardRepository {
     public void deleteCommentByPost(PostDeleteRequestDto postDeleteRequestDto){
         queryFactory.delete(comment)
                 .where(comment.post.sequence.eq(postDeleteRequestDto.getPostSequence()))
+                .execute();
+    }
+
+    public void deleteCommentByMemberUuid(String memberUuid){
+        queryFactory.delete(comment)
+                .where(Expressions.stringTemplate("HEX({0})", comment.member.uuid).eq(memberUuid.replace("-", "")))
                 .execute();
     }
 
@@ -148,6 +159,13 @@ public class BoardRepository {
                 .where(Expressions.stringTemplate("HEX({0})", vote.member.uuid).eq(memberUuid.replace("-", "")))
                 .execute();
     }
+
+    public void deleteVoteByMemberUuid(String memberUuid){
+        queryFactory.delete(vote)
+                .where(Expressions.stringTemplate("HEX({0})", vote.member.uuid).eq(memberUuid.replace("-", "")))
+                .execute();
+    }
+
 
     public List<PostListSelectResponseDto> selectAllPostList(String memberUuid, PostListSelectRequestDto postListSelectRequestDto) {
         JPAQuery<PostListSelectResponseDto> query = queryFactory.select(Projections.fields(PostListSelectResponseDto.class, post.sequence.as("postSequence"), post.subject, post.content, post.author, post.voteCount, post.commentCount, post.regDate)).from(post);
