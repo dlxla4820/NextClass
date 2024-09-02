@@ -1,5 +1,6 @@
 package com.nextClass.service;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.nextClass.dto.*;
 import com.nextClass.entity.Comment;
 import com.nextClass.entity.Member;
@@ -12,13 +13,10 @@ import com.nextClass.repository.LoginRepository;
 import com.nextClass.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,10 +31,14 @@ import static java.util.Arrays.stream;
 public class BoardService {
     private final BoardRepository boardRepository;
     private final LoginRepository loginRepository;
+    private final AndroidPushNotificationService androidPushNotificationService;
     private final static String ANONYMOUS_NAME = "익명";
-    public BoardService(BoardRepository boardRepository, LoginRepository loginRepository) {
+    private final static String PUSH_NOTIFICATION_TITLE = "board";
+    private final static String PUSH_NOTIFICATION_BODY = "회원님께서 작성하신 게시글에 새로운 댓글이 달렸어요.";
+    public BoardService(BoardRepository boardRepository, LoginRepository loginRepository, AndroidPushNotificationService androidPushNotificationService) {
         this.boardRepository = boardRepository;
         this.loginRepository = loginRepository;
+        this.androidPushNotificationService = androidPushNotificationService;
     }
 
 
@@ -164,9 +166,16 @@ public class BoardService {
         author = requestBody.getIsSecret() ? author : member.getId();
 
         boardRepository.saveComment(requestBody,member, author);
-
-
         boardRepository.updatePostCommentCount(requestBody.getPostSequence(), 1);
+
+        // 푸시 알람
+        Post post = boardRepository.selectPost(requestBody.getPostSequence());
+        try {
+            androidPushNotificationService.sendPushNotification(PUSH_NOTIFICATION_TITLE, PUSH_NOTIFICATION_BODY, post.getMember().getAppToken());
+        } catch (FirebaseMessagingException e){
+            log.error("BoardService << saveComment >> | Exception : {}", e.getMessage());
+            return new ResponseDto<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Description.FAIL);
+        }
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
@@ -346,5 +355,8 @@ public class BoardService {
     }
 
 
+    private void sendPushNotification(){
+        androidPushNotificationService.sendPushNotification()
+    }
 
 }
