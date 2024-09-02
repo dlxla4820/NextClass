@@ -45,12 +45,14 @@ public class ScoreService {
         List<Score> semesterScore;
 
         List<ScoreResponseDto.SemesterDto> semesterList = new ArrayList<>();
-        Double semesterScoreSum = 0.0;
-        Integer semeseterScoreCount = 0;
+        Double semesterScoreSum;
+        Integer semeseterScoreCount;
         Double semesterScoreSumAll = 0.0;
         Integer semesterScoreCountAll = 0;
         ScoreResponseDto.SemesterDto semesterDto;
         for (String semester : currentMemberScoreSemester) {
+            semesterScoreSum = 0.0;
+            semeseterScoreCount = 0;
             semesterScore = scoreRepository.findSemesterScores(semester, currentUser);
             semesterDto = ScoreResponseDto.SemesterDto.builder()
                     .semester(semester)
@@ -95,6 +97,7 @@ public class ScoreService {
             //한 학기 점수 가져오기 종료
             semesterDto.setScore(String.format("%.2f", (semesterScoreSum / semeseterScoreCount)));
             semesterDto.setData_list(dataList);
+            semesterDto.setCredit_sum(semeseterScoreCount);
             semesterScoreSumAll += semesterScoreSum;
             semesterScoreCountAll += semeseterScoreCount;
             semesterList.add(semesterDto);

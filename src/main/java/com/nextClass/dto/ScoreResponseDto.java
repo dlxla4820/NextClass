@@ -22,6 +22,7 @@ public class ScoreResponseDto {
     public static class SemesterDto {
         private String semester;
         private String score;
+        private Integer credit_sum;
         private List<SubjectDto> data_list;
 
         @Getter
