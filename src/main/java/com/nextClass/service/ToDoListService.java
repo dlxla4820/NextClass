@@ -44,22 +44,21 @@ public class ToDoListService {
     }
 
     public ResponseDto<?> createToDoList(ToDoListRequsetDto toDoListRequsetDto) {
-        log.info("ToDoService << createToDoList >> | requestBody : {}", toDoListRequsetDto);
+        String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+        log.info("ToDoService << createToDoList >> | memberUuid : {}, requestBody : {}", memberUuid, toDoListRequsetDto);
         String checkRequestDto = checkToDoListRequest(toDoListRequsetDto);
         LocalDateTime alarmTime = toDoListRequsetDto.getAlarm_time();
         //현재 로그인 한 사람 데이터 가져오기
-        if (checkRequestDto != null) {
-            log.error("ToDoService << createToDoList >> | PARAMETER_INVALID_SPECIFIC");
+        if (checkRequestDto != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), checkRequestDto);
-        }
-        if (toDoListRequsetDto.getGoal_time() == (null)) {
-            log.error("ToDoService << createToDoList >> | PARAMETER_INVALID_SPECIFIC");
+        if (toDoListRequsetDto.getGoal_time() == (null))
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "create_time"));
-        }
-        toDoListRequsetDto.setMember_uuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()));
+
+        toDoListRequsetDto.setMember_uuid(convertToUUID(memberUuid));
         toDoListRequsetDto.setCreated_time(now);
         toDoListRequsetDto.setUpdate_time(toDoListRequsetDto.getCreated_time());
-        toDoListRequsetDto.setApp_token(loginRepository.getMemberByUuid(CommonUtils.getMemberUuidIfAdminOrUser()).getAppToken());
+        toDoListRequsetDto.setApp_token(loginRepository.getMemberByUuid(memberUuid).getAppToken());
+
         if (toDoListRepository.checkDuplicate(toDoListRequsetDto) != null) return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TO_DO_LIST_ALREADY_EXIST.getErrorCode(), ErrorCode.TO_DO_LIST_ALREADY_EXIST.getErrorDescription());
         ToDoList result = toDoListRepository.save(toDoListRequsetDto);
         if (alarmTime != null && alarmTime.isAfter(now) && alarmTime.isBefore(nextHour)) schedulerMain.toDoListAlarmScheduler(result);
@@ -69,28 +68,26 @@ public class ToDoListService {
     }
 
         public ResponseDto<?> updateToDoList(ToDoListRequsetDto toDoListRequsetDto){
-        //request검증(uuid, updateTime, content, alarmTime,doneTime)
-            log.info("ToDoService << updateToDoList >> | requestBody : {}", toDoListRequsetDto);
+            String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+            log.info("ToDoService << updateToDoList >> | memberUuid : {}, requestBody : {}", memberUuid, toDoListRequsetDto);
             String checkRequestDto = checkToDoListRequest(toDoListRequsetDto);
             LocalDateTime alarmTime = toDoListRequsetDto.getAlarm_time();
             //현재 로그인 한 사람 데이터 가져오기
-            if (checkRequestDto != null) {
-                log.error("ToDoService << updateToDoList >> | PARAMETER_INVALID_SPECIFIC");
+            if (checkRequestDto != null)
                 return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), checkRequestDto);
-            }
-            if (toDoListRequsetDto.getGoal_time() == (null)) {
-                log.error("ToDoService << updateToDoList >> | PARAMETER_INVALID_SPECIFIC");
+
+            if (toDoListRequsetDto.getGoal_time() == (null))
                 return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "create_time"));
-            }
-            toDoListRequsetDto.setMember_uuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()));
+
+            toDoListRequsetDto.setMember_uuid(convertToUUID(memberUuid));
             ToDoList beforeToDoList = toDoListRepository.checkAuthorize(toDoListRequsetDto);
-            if (beforeToDoList == null) {
-                log.error("ToDoService << updateToDoList >> | UNAUTHORIZED TO DO LIST");
+
+            if (beforeToDoList == null)
                 return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TOKEN_UNAUTHORIZED.getErrorCode(), ErrorCode.TOKEN_UNAUTHORIZED.getErrorDescription());
-            }
+
             toDoListRequsetDto.setCreated_time(beforeToDoList.getCreateTime());
             toDoListRequsetDto.setUpdate_time(now);
-            toDoListRequsetDto.setApp_token(loginRepository.getMemberByUuid(CommonUtils.getMemberUuidIfAdminOrUser()).getAppToken());
+            toDoListRequsetDto.setApp_token(loginRepository.getMemberByUuid(memberUuid).getAppToken());
             ToDoList result = toDoListRepository.save(toDoListRequsetDto);
 
             if (alarmTime != null && alarmTime.isAfter(now)) schedulerMain.updateToDoListAlarmScheduler(result);
@@ -99,22 +96,20 @@ public class ToDoListService {
     }
 
     public ResponseDto<?> deleteToDoList(ToDoListRequsetDto toDoListRequsetDto){
-        log.info("ToDoService << deleteToDoList >> | requestBody : {}", toDoListRequsetDto);
+        String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+        log.info("ToDoService << deleteToDoList >> | memberUuid : {}, requestBody : {}", memberUuid, toDoListRequsetDto);
         String checkRequestDto = checkToDoListRequest(toDoListRequsetDto);
         LocalDateTime alarmTime = toDoListRequsetDto.getAlarm_time();
-        if (checkRequestDto != null) {
-            log.error("ToDoService << deleteToDoList >> | PARAMETER_INVALID_SPECIFIC");
+        if (checkRequestDto != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), checkRequestDto);
-        }
+
         ToDoList currentToDoList = toDoListRepository.checkExist(toDoListRequsetDto);
-        if (currentToDoList == (null)) {
-            log.error("ToDoService << deleteToDoList >> | TO_DO_LIST_ALREADY_DELETE");
+        if (currentToDoList == (null))
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TO_DO_LIST_ALREADY_DELETE.getErrorCode(), String.format(ErrorCode.TO_DO_LIST_ALREADY_DELETE.getErrorDescription()));
-        }
-        if (!CommonUtils.getMemberUuidIfAdminOrUser().equals(currentToDoList.getMember_uuid().toString())) {
-            log.error("ToDoService << deleteToDoList >> | UNAUTHORIZED TO DO LIST");
+
+        if (!memberUuid.equals(currentToDoList.getMember_uuid().toString()))
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TOKEN_UNAUTHORIZED.getErrorCode(), ErrorCode.TOKEN_UNAUTHORIZED.getErrorDescription());
-        }
+
         toDoListRepository.delete(currentToDoList);
         if (alarmTime != null && alarmTime.isAfter(now) && alarmTime.isBefore(nextHour)) schedulerMain.finishTask(currentToDoList.getUuid());
 
@@ -122,10 +117,8 @@ public class ToDoListService {
     }
 
     public ResponseDto<?> readAllToDoList(){
-        log.info("ToDoService << readAllToDoList >> | requestBody : none");
-        //로그인 한 유저 확인
         String currentUser = CommonUtils.getMemberUuidIfAdminOrUser();
-        //해당 유저가 생성한 ToDoList전부 읽어온 뒤에 return
+        log.info("ToDoService << readAllToDoList >> | memberUuid : {}", currentUser);
         List<ToDoListResponseDto> toDoList;
             toDoList = toDoListRepository.readAll(currentUser).stream().map(this::convertTupleToResponse).collect(Collectors.toList());
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, toDoList);

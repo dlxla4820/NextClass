@@ -1,6 +1,8 @@
 package com.nextClass.repository;
 
 import com.nextClass.dto.ScoreRequestDto;
+import com.nextClass.dto.TimeTableRequestDto;
+import com.nextClass.dto.ToDoListRequsetDto;
 import com.nextClass.entity.Score;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -16,11 +18,14 @@ import static com.nextClass.entity.QTimeTable.timeTable;
 @Repository
 public class ScoreDetailRepository {
     private final ScoreRepository scoreRepository;
+
+    private final LoginRepository loginRepository;
     private final JPAQueryFactory queryFactory;
 
-    ScoreDetailRepository(ScoreRepository scoreRepository, JPAQueryFactory queryFactory){
+    ScoreDetailRepository(ScoreRepository scoreRepository, JPAQueryFactory queryFactory,LoginRepository loginRepository){
         this.scoreRepository = scoreRepository;
         this.queryFactory = queryFactory;
+        this.loginRepository = loginRepository;
     }
 
     public List<Score> findSemesterScores(String semester, String currentUser) {
@@ -36,7 +41,16 @@ public class ScoreDetailRepository {
                 .execute();
     }
 
-    public void saveScore(Score score){
+    public void saveScore(TimeTableRequestDto timeTableRequestDto){
+        Score score = Score.builder()
+                .title(timeTableRequestDto.getTitle())
+                .credit(timeTableRequestDto.getScore())
+                .achievement("N")
+                .grade(0)
+                .category(timeTableRequestDto.getCategory())
+                .semester(timeTableRequestDto.getSemester())
+                .memberUuid(loginRepository.getMemberByUuid(timeTableRequestDto.getMember_uuid()).getUuid())
+                .build();
         scoreRepository.save(score);
     }
 

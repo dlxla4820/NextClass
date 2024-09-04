@@ -50,7 +50,6 @@ public class SchedulerMain {
                 ScheduledFuture<?> newSchedule = this.createScheduledFutureTaskUsingToDoList(toDoList);
                 scheduledTasks.put(toDoList.getUuid(), newSchedule);
             });
-            log.info("SchedulerMain << addAlarmOnTaskScheduler >> | Add Alarm On Task Scheduler Successfully");
         }
     }
 

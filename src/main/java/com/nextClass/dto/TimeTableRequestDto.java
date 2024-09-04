@@ -3,12 +3,15 @@ package com.nextClass.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
 public class TimeTableRequestDto {
     //member uuid : 로그인 시 세션으로 가져옴, class_uuid : 데이터 등록 시에 생성
     private String uuid;
+    private String member_uuid;
     private String week;
     private Integer class_start_time;
     private Integer class_end_time;
