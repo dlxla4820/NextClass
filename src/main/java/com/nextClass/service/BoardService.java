@@ -354,9 +354,4 @@ public class BoardService {
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);
     }
 
-
-    private void sendPushNotification(){
-        androidPushNotificationService.sendPushNotification()
-    }
-
 }
