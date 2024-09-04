@@ -33,8 +33,6 @@ public class TimeTable {
     private String category;
 
     private String semester;
-    @Column(name="class_uuid")
-    private UUID classDetailUuid;
     @Column(length = 50, nullable = false)
     private String title;
 

@@ -37,10 +37,10 @@ public class ScoreService {
 
 
     public ResponseDto<?> getAllScore() {
-        log.info("ScoreService << getAllScore >>");
+        String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+        log.info("ScoreService << getAllScore >> | memberUuid : {}", memberUuid);
         //현재 로그인한 유저의 저장된 semester 전부 가져오기
-        String currentUser = CommonUtils.getMemberUuidIfAdminOrUser();
-        List<String> currentMemberScoreSemester = scoreRepository.findSemesterList(currentUser);
+        List<String> currentMemberScoreSemester = scoreRepository.findSemesterList(memberUuid);
         //학기 내에서 학점 계산(for문)
         List<Score> semesterScore;
 
@@ -53,7 +53,7 @@ public class ScoreService {
         for (String semester : currentMemberScoreSemester) {
             semesterScoreSum = 0.0;
             semeseterScoreCount = 0;
-            semesterScore = scoreRepository.findSemesterScores(semester, currentUser);
+            semesterScore = scoreRepository.findSemesterScores(semester, memberUuid);
             semesterDto = ScoreResponseDto.SemesterDto.builder()
                     .semester(semester)
                     .build();
@@ -113,13 +113,14 @@ public class ScoreService {
     }
 
     public ResponseDto<?> addScoreOnSemester(ScoreRequestDto scoreRequestDto) {
-            log.info("ScoreService << addScoreOnSemester >> | requestBody : {}", scoreRequestDto);
+        String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
+            log.info("ScoreService << addScoreOnSemester >> |  memberUuid : {}, requestBody : {}", memberUuid, scoreRequestDto);
             //대한이가 request body에 대해서 전체적으로 관리해주는거 만들었다고 했었던거 다시 물어보기
-            String currentUser = CommonUtils.getMemberUuidIfAdminOrUser();
+
             UUID duplicateUUID;
             Score score;
             //db 리셋
-            scoreRepository.deleteAllDataAboutCurrentUser(currentUser);
+            scoreRepository.deleteAllDataAboutCurrentUser(memberUuid);
             //list 안에 있는 모든 객체에 대해서 행동
             ScoreRequestDto.ScoreInfo scoreInfo;
             Iterator<ScoreRequestDto.ScoreInfo> iteratorDataList = scoreRequestDto.getData().iterator();
@@ -146,7 +147,7 @@ public class ScoreService {
                             .averageScore(null)
                             .standardDeviation(null)
                             .semester(scoreInfo.getSemester())
-                            .memberUuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()))
+                            .memberUuid(convertToUUID(memberUuid))
                             .build();
 
                 } else if (scoreInfo.getCategory().equals("선택")) {
@@ -169,7 +170,7 @@ public class ScoreService {
                             .averageScore(scoreInfo.getAverage_score())
                             .standardDeviation(scoreInfo.getStandard_deviation())
                             .semester(scoreInfo.getSemester())
-                            .memberUuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()))
+                            .memberUuid(convertToUUID(memberUuid))
                             .build();
                 } else {
                     //창체 정보 저장
@@ -184,16 +185,14 @@ public class ScoreService {
                             .averageScore(null)
                             .standardDeviation(null)
                             .semester(scoreInfo.getSemester())
-                            .memberUuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()))
+                            .memberUuid(convertToUUID(memberUuid))
                             .build();
                 }
                 //해당 부분에서 score 객체를 만드는데 scoreInfo를 사용했으므로 이제 scoreInfo는 제거해도 괜찮음
                 //그래서 해당 부분에서 uuid 검증을 함
                 iteratorDataList.remove();
-                if (scoreRequestDto.checkDuplicateList(duplicateUUID.toString())) {
-                    log.error("ScoreService << addScoreOnSemester >> | Uuid Duplicate");
+                if (scoreRequestDto.checkDuplicateList(duplicateUUID.toString()))
                     return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), ErrorCode.INPUT_DUPLICATED.getErrorDescription());
-                }
                 allScore.add(score);
             }
             scoreRepository.saveAll(allScore);
