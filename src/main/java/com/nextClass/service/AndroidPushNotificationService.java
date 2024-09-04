@@ -15,11 +15,8 @@ public class AndroidPushNotificationService {
 
     public String sendPushNotification(String title, String body, String appToken) throws FirebaseMessagingException {
         Message message = Message.builder()
-                .setNotification(
-                        Notification.builder()
-                                .setTitle(title)
-                                .setBody(body)
-                        .build())
+                .putData("title", title)
+                .putData("body", body)
                 .setToken(appToken)
                 .build();
         return FirebaseMessaging.getInstance().send(message);
