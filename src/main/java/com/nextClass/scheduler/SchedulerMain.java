@@ -1,11 +1,13 @@
 package com.nextClass.scheduler;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.nextClass.entity.ToDoList;
 import com.nextClass.repository.ToDoListDetailRepository;
+import com.nextClass.service.AndroidPushNotificationService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -21,64 +23,72 @@ import java.util.concurrent.ScheduledFuture;
 @Slf4j
 public class SchedulerMain {
     private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
-    private final ToDoListScheduler toDoListScheduler;
     private final ToDoListDetailRepository toDoListRepository;
     private final Map<UUID, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
     private final Environment environment;
+    private final AndroidPushNotificationService androidPushNotificationService;
     public SchedulerMain(
             ThreadPoolTaskScheduler threadPoolTaskScheduler,
-            ToDoListScheduler toDoListScheduler,
             ToDoListDetailRepository toDoListRepository,
-            Environment environment
+            Environment environment,
+            AndroidPushNotificationService androidPushNotificationService
     ){
         this.threadPoolTaskScheduler = threadPoolTaskScheduler;
-        this.toDoListScheduler = toDoListScheduler;
+        this.androidPushNotificationService = androidPushNotificationService;
         this.toDoListRepository = toDoListRepository;
         this.environment = environment;
     }
 
     @PostConstruct
-    public void init(){
+    @Scheduled(cron = "0 0 * * * ?")
+    public void addAlarmOnTaskScheduler(){
+        //to do list에서 현재 시간 이후 한시간 이내로 울려야 되는 알람들을 전부 가져옴
         if(!environment.getActiveProfiles()[0].equals("local")){
-            log.info("SchedulerMain << init >> | start");
-            List<ToDoList> alarmList = toDoListRepository.readAllAlarmList();
-            log.info("SchedulerMain << init >> | Current Alarm List : {}", alarmList.size());
+            List<ToDoList> alarmList = toDoListRepository.readAlarmListWorkingAfterOneHour();
+            log.info("SchedulerMain << addAlarmOnTaskScheduler >> | Current Alarm List : {}", alarmList.size());
             alarmList.stream().forEach(toDoList -> {
-                ScheduledFuture<?> newSchedule = threadPoolTaskScheduler.schedule(() -> {
-                    // 작업 내용
-                    toDoListScheduler.sendToDoListAlarmToFcm(toDoList);
-                    scheduledTasks.remove(toDoList.getUuid()); // 스케줄 목록에서 제거
-                }, Date.from(toDoList.getAlarmTime().toInstant(ZoneOffset.of("+09:00"))));
+                ScheduledFuture<?> newSchedule = this.createScheduledFutureTaskUsingToDoList(toDoList);
                 scheduledTasks.put(toDoList.getUuid(), newSchedule);
             });
-            log.info("SchedulerMain << init >> | finish");
+            log.info("SchedulerMain << addAlarmOnTaskScheduler >> | Add Alarm On Task Scheduler Successfully");
         }
     }
 
     public void toDoListAlarmScheduler(ToDoList toDoList) {
-        log.info("SchedulerMain << toDoListAlarmScheduler >> | AlarmStartTime : {}", toDoList.getAlarmTime());
-        ScheduledFuture<?> newSchedule = threadPoolTaskScheduler.schedule(() -> {
-            // Runnable 실행
-            Runnable task = toDoListScheduler.sendToDoListAlarmToFcm(toDoList);
-            task.run(); // Runnable 실행
-            scheduledTasks.remove(toDoList.getUuid()); // 스케줄 목록에서 제거
-            log.info("SchedulerMain << toDoListAlarmScheduler >> | ScheduledTask Size : {} ", scheduledTasks.size());
-        }, Date.from(toDoList.getAlarmTime().toInstant(ZoneOffset.of("+09:00"))));
+        log.info("SchedulerMain << toDoListAlarmScheduler >> | start");
+        ScheduledFuture<?> newSchedule = this.createScheduledFutureTaskUsingToDoList(toDoList);
         scheduledTasks.put(toDoList.getUuid(), newSchedule);
-        log.info("SchedulerMain << toDoListAlarmScheduler >> | ScheduledTask Size : {} ", scheduledTasks.size());
         log.info("SchedulerMain << toDoListAlarmScheduler >> | Finish ");
     }
 
 
     public void updateToDoListAlarmScheduler(ToDoList toDoList){
-        log.info("SchedulerMain << updateToDoListAlarmScheduler >> | AlarmStartTime : {}", toDoList.getAlarmTime());
-        ScheduledFuture<?> newSchedule = threadPoolTaskScheduler.schedule(() -> {
-            // 작업 내용
-            toDoListScheduler.sendToDoListAlarmToFcm(toDoList);
-            scheduledTasks.remove(toDoList.getUuid()); // 스케줄 목록에서 제거
-        }, Date.from(toDoList.getAlarmTime().toInstant(ZoneOffset.of("+09:00"))));
+        log.info("SchedulerMain << updateToDoListAlarmScheduler >> | start");
+        ScheduledFuture<?> newSchedule = this.createScheduledFutureTaskUsingToDoList(toDoList);
         scheduledTasks.replace(toDoList.getUuid(), newSchedule);
         log.info("SchedulerMain << updateToDoListAlarmScheduler >> | Finish ");
+    }
+
+
+
+    private ScheduledFuture<?> createScheduledFutureTaskUsingToDoList(ToDoList toDoList){
+        return threadPoolTaskScheduler.schedule(() -> {
+            // 작업 내용
+            this.sendToDoListAlarmToFcm(toDoList);
+            scheduledTasks.remove(toDoList.getUuid()); // 스케줄 목록에서 제거
+        }, Date.from(toDoList.getAlarmTime().toInstant(ZoneOffset.of("+09:00"))));
+    }
+    private Runnable sendToDoListAlarmToFcm(ToDoList toDoList ){
+        return () -> {
+            // FCM 알림을 보내는 로직을 여기에 추가합니다.
+            // 예를 들어, FCM 서비스 호출 등의 작업을 수행
+            try {
+                String response = androidPushNotificationService.sendPushNotification("To Do List", toDoList.getContent(), toDoList.getAppToken());
+                log.info("ToDoListScheduler << sendToDoListAlarmToFcm >> | Response : {}", response);
+            } catch (FirebaseMessagingException e) {
+                log.error("ToDoListScheduler << sendToDoListAlarmToFcm >> | Exception : {}", e.getMessage());
+            }
+        };
     }
 
     public void finishTask(UUID scheduledTaskUuid) {

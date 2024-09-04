@@ -30,6 +30,8 @@ public class ToDoListService {
     private final ToDoListDetailRepository toDoListRepository;
     private final LoginRepository loginRepository;
     private final SchedulerMain schedulerMain;
+    private final LocalDateTime now = LocalDateTime.now();
+    private final LocalDateTime nextHour = now.plusHours(1).withMinute(0).withSecond(0).withNano(0);
 
     public ToDoListService(
             ToDoListDetailRepository toDoListDetailRepository,
@@ -55,18 +57,13 @@ public class ToDoListService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "create_time"));
         }
         toDoListRequsetDto.setMember_uuid(convertToUUID(CommonUtils.getMemberUuidIfAdminOrUser()));
-        toDoListRequsetDto.setCreated_time(LocalDateTime.now());
+        toDoListRequsetDto.setCreated_time(now);
         toDoListRequsetDto.setUpdate_time(toDoListRequsetDto.getCreated_time());
         toDoListRequsetDto.setApp_token(loginRepository.getMemberByUuid(CommonUtils.getMemberUuidIfAdminOrUser()).getAppToken());
-        if (toDoListRepository.checkDuplicate(toDoListRequsetDto) != null) {
-            log.error("ToDoService << createToDoList >> | TO_DO_LIST_ALREADY_EXIST");
-            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TO_DO_LIST_ALREADY_EXIST.getErrorCode(), ErrorCode.TO_DO_LIST_ALREADY_EXIST.getErrorDescription());
-        }
+        if (toDoListRepository.checkDuplicate(toDoListRequsetDto) != null) return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TO_DO_LIST_ALREADY_EXIST.getErrorCode(), ErrorCode.TO_DO_LIST_ALREADY_EXIST.getErrorDescription());
         ToDoList result = toDoListRepository.save(toDoListRequsetDto);
-        if (alarmTime != null && alarmTime.isAfter(LocalDateTime.now())) {
-            toDoListRepository.saveAlarm(result.getUuid());
-            schedulerMain.toDoListAlarmScheduler(result);
-        }
+        if (alarmTime != null && alarmTime.isAfter(now) && alarmTime.isBefore(nextHour)) schedulerMain.toDoListAlarmScheduler(result);
+
         log.info("ToDoService << createToDoList >> | toDoList : {}", result);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
@@ -92,14 +89,11 @@ public class ToDoListService {
                 return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TOKEN_UNAUTHORIZED.getErrorCode(), ErrorCode.TOKEN_UNAUTHORIZED.getErrorDescription());
             }
             toDoListRequsetDto.setCreated_time(beforeToDoList.getCreateTime());
-            toDoListRequsetDto.setUpdate_time(LocalDateTime.now());
+            toDoListRequsetDto.setUpdate_time(now);
             toDoListRequsetDto.setApp_token(loginRepository.getMemberByUuid(CommonUtils.getMemberUuidIfAdminOrUser()).getAppToken());
-
             ToDoList result = toDoListRepository.save(toDoListRequsetDto);
-            if (alarmTime != null && alarmTime.isAfter(LocalDateTime.now())) {
-                toDoListRepository.saveAlarm(result.getUuid());
-                schedulerMain.updateToDoListAlarmScheduler(result);
-            }
+
+            if (alarmTime != null && alarmTime.isAfter(now)) schedulerMain.updateToDoListAlarmScheduler(result);
             log.info("ToDoService << updateToDoList >> | toDoList : {}", result);
             return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
@@ -122,10 +116,8 @@ public class ToDoListService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TOKEN_UNAUTHORIZED.getErrorCode(), ErrorCode.TOKEN_UNAUTHORIZED.getErrorDescription());
         }
         toDoListRepository.delete(currentToDoList);
-        if (alarmTime != null && alarmTime.isAfter(LocalDateTime.now())) {
-            toDoListRepository.deleteAlarm(currentToDoList.getUuid());
-            schedulerMain.finishTask(currentToDoList.getUuid());
-        }
+        if (alarmTime != null && alarmTime.isAfter(now) && alarmTime.isBefore(nextHour)) schedulerMain.finishTask(currentToDoList.getUuid());
+
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 

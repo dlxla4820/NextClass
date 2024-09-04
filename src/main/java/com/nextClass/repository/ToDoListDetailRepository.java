@@ -8,6 +8,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,16 +20,16 @@ import static com.nextClass.entity.QToDoListAlarm.toDoListAlarm;
 public class ToDoListDetailRepository {
     private final JPAQueryFactory queryFactory;
     private final ToDoListRepository toDoListRepository;
-    private final ToDoListAlarmRepository toDoListAlarmRepository;
+
+    private final LocalDateTime now = LocalDateTime.now();
+    private final LocalDateTime nextHour = now.plusHours(1).withMinute(0).withSecond(0).withNano(0);
 
     ToDoListDetailRepository(
             JPAQueryFactory jpaQueryFactory,
-            ToDoListRepository toDoListRepository,
-            ToDoListAlarmRepository toDoListAlarmRepository
+            ToDoListRepository toDoListRepository
     ){
         this.queryFactory = jpaQueryFactory;
         this.toDoListRepository = toDoListRepository;
-        this.toDoListAlarmRepository = toDoListAlarmRepository;
     }
 
     public ToDoList checkDuplicate(ToDoListRequsetDto toDoListRequsetDto){
@@ -69,15 +70,6 @@ public class ToDoListDetailRepository {
         return toDoListRepository.save(toDoListData);
     }
 
-
-    public ToDoListAlarm saveAlarm(UUID toDoListUuid){
-        return toDoListAlarmRepository.save(ToDoListAlarm.builder().to_do_list_uuid(toDoListUuid).build());
-    }
-
-    public void deleteAlarm(UUID toDoListUuid){
-        toDoListAlarmRepository.delete(ToDoListAlarm.builder().to_do_list_uuid(toDoListUuid).build());
-    }
-
     public List<Tuple> readAll(String currentUser){
         return queryFactory.select(
                 toDoList.uuid,
@@ -90,10 +82,13 @@ public class ToDoListDetailRepository {
                 .fetch();
     }
 
-    public List<ToDoList> readAllAlarmList(){
-        List<UUID> alarmList = queryFactory.select(toDoListAlarm.to_do_list_uuid).from(toDoListAlarm).fetch();
+
+
+    public List<ToDoList> readAlarmListWorkingAfterOneHour(){
+        //현재 시간에서 한시간 이후에 보내져야 하는 알람들 가져오기
         return queryFactory.selectFrom(toDoList)
-                .where(toDoList.uuid.in(alarmList))
+                .where(toDoList.alarmTime.after(now))
+                .where(toDoList.alarmTime.before(nextHour))
                 .fetch();
     }
 }
