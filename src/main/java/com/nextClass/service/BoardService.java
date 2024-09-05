@@ -16,9 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.nextClass.enums.ErrorCode.MEMBER_NOT_EXIST;
@@ -171,7 +169,11 @@ public class BoardService {
         // 푸시 알람
         Post post = boardRepository.selectPost(requestBody.getPostSequence());
         try {
-            androidPushNotificationService.sendPushNotification(PUSH_NOTIFICATION_TITLE, PUSH_NOTIFICATION_BODY, post.getMember().getAppToken());
+            Map<String , String> data = new HashMap<>();
+            data.put("title", PUSH_NOTIFICATION_TITLE);
+            data.put("body", PUSH_NOTIFICATION_BODY);
+            data.put("sequence", post.getSequence().toString());
+            androidPushNotificationService.sendFcmDataToFirebase(data, post.getMember().getAppToken());
         } catch (FirebaseMessagingException e){
             log.error("BoardService << saveComment >> | Exception : {}", e.getMessage());
             return new ResponseDto<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Description.FAIL);
