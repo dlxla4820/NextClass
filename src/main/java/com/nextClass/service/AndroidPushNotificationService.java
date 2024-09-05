@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+
 @Service
 @Slf4j
 @Transactional
@@ -19,6 +21,13 @@ public class AndroidPushNotificationService {
                 .putData("body", body)
                 .setToken(appToken)
                 .build();
+        return FirebaseMessaging.getInstance().send(message);
+    }
+
+    public String sendFcmDataToFirebase(Map<String, String> fcmData, String appToken) throws FirebaseMessagingException {
+        Message.Builder messageBuilder = Message.builder().setToken(appToken);
+        fcmData.entrySet().stream().forEach(entry -> messageBuilder.putData(entry.getKey(), entry.getValue()));
+        Message message = messageBuilder.build();
         return FirebaseMessaging.getInstance().send(message);
     }
 }

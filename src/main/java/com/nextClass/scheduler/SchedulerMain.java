@@ -12,10 +12,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import java.time.ZoneOffset;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
@@ -83,7 +80,10 @@ public class SchedulerMain {
             // FCM 알림을 보내는 로직을 여기에 추가합니다.
             // 예를 들어, FCM 서비스 호출 등의 작업을 수행
             try {
-                String response = androidPushNotificationService.sendPushNotification("To Do List", toDoList.getContent(), toDoList.getAppToken());
+                Map<String, String> sendingData = new HashMap<>();
+                sendingData.put("title","To Do List");
+                sendingData.put("body" ,toDoList.getContent());
+                String response = androidPushNotificationService.sendFcmDataToFirebase(sendingData, toDoList.getAppToken());
                 log.info("ToDoListScheduler << sendToDoListAlarmToFcm >> | Response : {}", response.toString());
             } catch (FirebaseMessagingException e) {
                 log.error("ToDoListScheduler << sendToDoListAlarmToFcm >> | Exception : {}", e.getMessage());
