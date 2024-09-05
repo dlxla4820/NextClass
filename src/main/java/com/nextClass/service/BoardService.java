@@ -168,7 +168,7 @@ public class BoardService {
         boardRepository.updatePostCommentCount(requestBody.getPostSequence(), 1);
 
         // 푸시 알람
-        NotificationRequiredDataDto<?> notificationRequiredDataDto = boardRepository.selectPostAndNotificationByMemberUuid(memberUuid, NOTIFICATION_CATEGORY_COMMENT);
+        NotificationRequiredDataDto<?> notificationRequiredDataDto = boardRepository.selectPostAndNotificationByMemberUuid(requestBody.getPostSequence(), NOTIFICATION_CATEGORY_COMMENT);
         if(notificationRequiredDataDto.getIsNotificationActivated()) {
             try {
                 Map<String, String> data = new HashMap<>();

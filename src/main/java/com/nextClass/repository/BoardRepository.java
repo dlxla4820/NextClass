@@ -198,12 +198,12 @@ public class BoardRepository {
                 .fetchOne();
     }
 
-    public NotificationRequiredDataDto<?> selectPostAndNotificationByMemberUuid(String memberUuid, String category){
+    public NotificationRequiredDataDto<?> selectPostAndNotificationByMemberUuid(int postSequence, String category){
         return queryFactory.select(Projections.fields(NotificationRequiredDataDto.class, member.appToken.as("appToken"),notificationConfig.category.as("category"), notificationConfig.isNotificationActivated.as("isNotificationActivated"), post.sequence.as("data")))
                 .from(post)
                 .join(member).on(member.uuid.eq(post.member.uuid))
                 .join(notificationConfig).on(notificationConfig.member.uuid.eq(post.member.uuid))
-                .where(Expressions.stringTemplate("HEX({0})", post.member.uuid).eq(memberUuid.replace("-", "")))
+                .where(post.sequence.eq(postSequence))
                 .where(notificationConfig.category.eq(category))
                 .fetchOne();
     }

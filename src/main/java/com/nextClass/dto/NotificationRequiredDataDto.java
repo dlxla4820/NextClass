@@ -13,10 +13,8 @@ import java.util.StringJoiner;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationRequiredDataDto<T> {
-    @JsonProperty("app_token")
     private String appToken;
     private String category;
-    @JsonProperty("is_notification_activated")
     private Boolean isNotificationActivated;
     private T data;
 
