@@ -22,6 +22,7 @@ import java.util.List;
 
 import static com.nextClass.entity.QComment.comment;
 import static com.nextClass.entity.QMember.member;
+import static com.nextClass.entity.QNotificationConfig.notificationConfig;
 import static com.nextClass.entity.QPost.post;
 import static com.nextClass.entity.QVote.vote;
 
@@ -194,6 +195,16 @@ public class BoardRepository {
             return null;
         return queryFactory.selectFrom(post)
                 .where(post.sequence.eq(sequence))
+                .fetchOne();
+    }
+
+    public NotificationRequiredDataDto<?> selectPostAndNotificationByMemberUuid(String memberUuid, String category){
+        return queryFactory.select(Projections.fields(NotificationRequiredDataDto.class, member.appToken.as("appToken"),notificationConfig.category.as("category"), notificationConfig.isNotificationActivated.as("isNotificationActivated"), post.sequence.as("data")))
+                .from(post)
+                .join(member).on(member.uuid.eq(post.member.uuid))
+                .join(notificationConfig).on(notificationConfig.member.uuid.eq(post.member.uuid))
+                .where(Expressions.stringTemplate("HEX({0})", post.member.uuid).eq(memberUuid.replace("-", "")))
+                .where(notificationConfig.category.eq(category))
                 .fetchOne();
     }
 

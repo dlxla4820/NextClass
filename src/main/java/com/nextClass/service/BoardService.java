@@ -33,6 +33,7 @@ public class BoardService {
     private final static String ANONYMOUS_NAME = "익명";
     private final static String PUSH_NOTIFICATION_TITLE = "board";
     private final static String PUSH_NOTIFICATION_BODY = "회원님께서 작성하신 게시글에 새로운 댓글이 달렸어요.";
+    private final static String NOTIFICATION_CATEGORY_COMMENT = "comment_notification";
     public BoardService(BoardRepository boardRepository, LoginRepository loginRepository, AndroidPushNotificationService androidPushNotificationService) {
         this.boardRepository = boardRepository;
         this.loginRepository = loginRepository;
@@ -167,16 +168,18 @@ public class BoardService {
         boardRepository.updatePostCommentCount(requestBody.getPostSequence(), 1);
 
         // 푸시 알람
-        Post post = boardRepository.selectPost(requestBody.getPostSequence());
-        try {
-            Map<String , String> data = new HashMap<>();
-            data.put("title", PUSH_NOTIFICATION_TITLE);
-            data.put("body", PUSH_NOTIFICATION_BODY);
-            data.put("sequence", post.getSequence().toString());
-            androidPushNotificationService.sendFcmDataToFirebase(data, post.getMember().getAppToken());
-        } catch (FirebaseMessagingException e){
-            log.error("BoardService << saveComment >> | Exception : {}", e.getMessage());
-            return new ResponseDto<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Description.FAIL);
+        NotificationRequiredDataDto<?> notificationRequiredDataDto = boardRepository.selectPostAndNotificationByMemberUuid(memberUuid, NOTIFICATION_CATEGORY_COMMENT);
+        if(notificationRequiredDataDto.getIsNotificationActivated()) {
+            try {
+                Map<String, String> data = new HashMap<>();
+                data.put("title", PUSH_NOTIFICATION_TITLE);
+                data.put("body", PUSH_NOTIFICATION_BODY);
+                data.put("sequence", notificationRequiredDataDto.getData().toString());
+                androidPushNotificationService.sendFcmDataToFirebase(data, notificationRequiredDataDto.getAppToken());
+            } catch (FirebaseMessagingException e) {
+                log.error("BoardService << saveComment >> | Exception : {}", e.getMessage());
+                return new ResponseDto<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Description.FAIL);
+            }
         }
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
