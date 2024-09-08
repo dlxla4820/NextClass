@@ -67,13 +67,11 @@ public class TimeTableService {
         log.info("TimeTableService << deleteOneTimeTable >> | memberUuid : {}, requestBody : {}", memberUuid, timeTableRequestDto);
         if (timeTableRequestDto.getUuid() == null || timeTableRequestDto.getUuid().isBlank())
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "timeTableUuid"));
-        timeTableRequestDto.setSemester(memberUuid);
+        timeTableRequestDto.setMember_uuid(memberUuid);
         if (timeTableRepository.findTimeTableByUuid(timeTableRequestDto.getUuid()) == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.DATA_ALREADY_DELETED.getErrorCode(), ErrorCode.DATA_ALREADY_DELETED.getErrorDescription());
-
         if (timeTableRepository.checkCurrentUserIsOwnerOfTimeTable(timeTableRequestDto) == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
-
         long howManyDelete = timeTableRepository.deleteTimeTable(timeTableRequestDto.getUuid());
         log.info("TimeTableService << deleteOneTimeTable >> | howManyDelete : {}", howManyDelete);
 
@@ -87,7 +85,7 @@ public class TimeTableService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "semester"));
 
         //member와 semester 2개를 받아서 삭제
-        timeTableRequestDto.setSemester(memberUuid);
+        timeTableRequestDto.setMember_uuid(memberUuid);
         if (timeTableRepository.checkCurrentUserIsOwnerOfTimeTable(timeTableRequestDto) == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
 
@@ -105,7 +103,7 @@ public class TimeTableService {
         log.info("TimeTableService << getPersonalThisSemesterTimeTable >> | memberUuid : {}, requestBody : {}", memberUuid, timeTableRequestDto);
         if (timeTableRequestDto.getSemester() == null || timeTableRequestDto.getSemester().isBlank())
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "semester"));
-        timeTableRequestDto.setSemester(memberUuid);
+        timeTableRequestDto.setMember_uuid(memberUuid);
         //member와 semester를 가지고 해당 데이터 가져오기(현재는 semester만)
         List<TimeTableReponseDto> timeTableList = timeTableRepository.getTimeTableListOnSemesterFromUser(timeTableRequestDto);
         log.info("TimeTableService << getPersonalThisSemesterTimeTable >> | timeTableList : {}", timeTableList);
@@ -124,7 +122,7 @@ public class TimeTableService {
         if (timeTableRepository.isClassExistOnSameTime(timeTableRequestDto, memberUuid) != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.CLASS_ALREADY_EXIST_ON_SAME_TIME.getErrorCode(), ErrorCode.CLASS_ALREADY_EXIST_ON_SAME_TIME.getErrorDescription());
 
-        timeTableRequestDto.setSemester(memberUuid);
+        timeTableRequestDto.setMember_uuid(memberUuid);
 
         TimeTable isDataSaved = timeTableRepository.findTimeTable(timeTableRequestDto);
         if (isDataSaved != null)
