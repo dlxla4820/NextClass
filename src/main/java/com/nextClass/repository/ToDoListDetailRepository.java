@@ -69,6 +69,19 @@ public class ToDoListDetailRepository {
                 .build();
         return toDoListRepository.save(toDoListData);
     }
+    public ToDoList update(ToDoListRequsetDto toDoListRequsetDto) {
+        ToDoList toDoListData = ToDoList.builder()
+                .uuid(toDoListRequsetDto.getUuid())
+                .content(toDoListRequsetDto.getContent())
+                .appToken(toDoListRequsetDto.getApp_token())
+                .createTime(toDoListRequsetDto.getCreated_time())
+                .updateTime(toDoListRequsetDto.getUpdate_time())
+                .goalTime(toDoListRequsetDto.getGoal_time())
+                .member_uuid(toDoListRequsetDto.getMember_uuid())
+                .alarmTime(toDoListRequsetDto.getAlarm_time())
+                .build();
+        return toDoListRepository.save(toDoListData);
+    }
 
     public List<Tuple> readAll(String currentUser){
         return queryFactory.select(

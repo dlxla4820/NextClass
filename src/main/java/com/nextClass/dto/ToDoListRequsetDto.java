@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ToDoListRequsetDto {
 
-    private String uuid;
+    private UUID uuid;
     private UUID member_uuid;
     private LocalDateTime created_time;
     private LocalDateTime update_time;
@@ -28,7 +28,7 @@ public class ToDoListRequsetDto {
         this.goal_time = goal_time;
     }
 
-    public ToDoListRequsetDto(String uuid, String content, LocalDateTime alarm_time, LocalDateTime goal_time, String app_token){
+    public ToDoListRequsetDto(UUID uuid, String content, LocalDateTime alarm_time, LocalDateTime goal_time, String app_token){
         this.uuid = uuid;
         this.content = content;
         this.alarm_time = alarm_time;
