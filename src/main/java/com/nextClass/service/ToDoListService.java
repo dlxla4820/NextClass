@@ -85,10 +85,11 @@ public class ToDoListService {
             if (beforeToDoList == null)
                 return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TOKEN_UNAUTHORIZED.getErrorCode(), ErrorCode.TOKEN_UNAUTHORIZED.getErrorDescription());
 
+            toDoListRequsetDto.setUuid(beforeToDoList.getUuid());
             toDoListRequsetDto.setCreated_time(beforeToDoList.getCreateTime());
             toDoListRequsetDto.setUpdate_time(now);
             toDoListRequsetDto.setApp_token(loginRepository.getMemberByUuid(memberUuid).getAppToken());
-            ToDoList result = toDoListRepository.save(toDoListRequsetDto);
+            ToDoList result = toDoListRepository.update(toDoListRequsetDto);
 
             if (alarmTime != null && alarmTime.isAfter(now)) schedulerMain.updateToDoListAlarmScheduler(result);
             log.info("ToDoService << updateToDoList >> | toDoList : {}", result);
