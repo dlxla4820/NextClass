@@ -288,9 +288,9 @@ public class BoardService {
         List<PostListSelectResponseDto> responseList = boardRepository.selectAllPostList(memberUuid, requestBody);
         for(PostListSelectResponseDto data : responseList){
             if(data.getSubject().length() >10)
-                data.setSubject(data.getSubject().substring(7) + "...");
+                data.setSubject(data.getSubject().substring(0,7) + "...");
             if(data.getContent().length() >25)
-                data.setContent(data.getContent().substring(22) + "...");
+                data.setContent(data.getContent().substring(0,22) + "...");
         }
         log.info("BoardService << getPostList >> | responseList : {}", responseList);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);
