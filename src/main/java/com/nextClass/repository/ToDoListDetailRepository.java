@@ -57,6 +57,12 @@ public class ToDoListDetailRepository {
         toDoListRepository.delete(data);
     }
 
+    public long deleteToDoListByMemberId(String memberUuid){
+        return queryFactory.delete(toDoList)
+                .where(Expressions.stringTemplate("HEX({0})", toDoList.member_uuid).eq(memberUuid.replace("-","")))
+                .execute();
+    }
+
     public ToDoList save(ToDoListRequsetDto toDoListRequsetDto) {
         ToDoList toDoListData = ToDoList.builder()
                 .content(toDoListRequsetDto.getContent())

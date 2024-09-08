@@ -38,10 +38,12 @@ public class MemberService {
 
     private final NotificationDetailRepository notificationDetailRepository;
     private final String[] duplicatedKey= {"id","email"};
+    private final ToDoListDetailRepository toDoListRepository;
+    private final ScoreDetailRepository scoreRepository;
 
 
     @Autowired
-    public MemberService(PasswordEncoder passwordEncoder, TokenProvider tokenProvider, LoginRepository loginRepository, MailRepository mailRepository, TimeTableDetailRepository timeTableRepository, BoardRepository boardRepository, NotificationDetailRepository notificationDetailRepository) {
+    public MemberService(PasswordEncoder passwordEncoder, TokenProvider tokenProvider, LoginRepository loginRepository, MailRepository mailRepository, TimeTableDetailRepository timeTableRepository, BoardRepository boardRepository, NotificationDetailRepository notificationDetailRepository, ToDoListDetailRepository toDoListRepository, ScoreDetailRepository scoreRepository) {
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
         this.loginRepository = loginRepository;
@@ -49,6 +51,8 @@ public class MemberService {
         this.timeTableRepository = timeTableRepository;
         this.boardRepository = boardRepository;
         this.notificationDetailRepository = notificationDetailRepository;
+        this.toDoListRepository = toDoListRepository;
+        this.scoreRepository = scoreRepository;
     }
 
     public ResponseDto<?> saveMember(MemberRequestDto requestBody){
@@ -111,6 +115,16 @@ public class MemberService {
 
         //알림설정 삭제
         notificationDetailRepository.deleteNotificationConfigByMemberUuid(memberUuid);
+
+        //시간표 삭제
+        timeTableRepository.deleteTimeTableAllByMemberUuid(memberUuid);
+
+        //To Do List 삭제
+        toDoListRepository.deleteToDoListByMemberId(memberUuid);
+
+        //학점 삭제
+        scoreRepository.deleteAllDataAboutCurrentUser(memberUuid);
+
 
         log.info("MemberService << deleteMember >> | deleted timetable : {}", howManyDeleted);
         loginRepository.deleteMember(member);

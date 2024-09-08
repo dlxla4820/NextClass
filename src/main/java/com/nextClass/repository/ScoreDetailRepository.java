@@ -35,6 +35,8 @@ public class ScoreDetailRepository {
                 .fetch();
     }
 
+
+
     public long deleteAllDataAboutCurrentUser(String currentUser){
         return queryFactory.delete(score)
                 .where(Expressions.stringTemplate("HEX({0})", score.memberUuid).eq(currentUser.replace("-", "")))
