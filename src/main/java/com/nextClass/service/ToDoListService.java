@@ -31,7 +31,7 @@ public class ToDoListService {
     private final LoginRepository loginRepository;
     private final SchedulerMain schedulerMain;
     private final LocalDateTime now = LocalDateTime.now();
-    private final LocalDateTime nextHour = now.plusHours(1).withMinute(0).withSecond(0).withNano(0);
+    private final LocalDateTime nextMinute = now.plusMinutes(1).withSecond(0).withNano(0);
 
     public ToDoListService(
             ToDoListDetailRepository toDoListDetailRepository,
@@ -61,7 +61,7 @@ public class ToDoListService {
 
         if (toDoListRepository.checkDuplicate(toDoListRequsetDto) != null) return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TO_DO_LIST_ALREADY_EXIST.getErrorCode(), ErrorCode.TO_DO_LIST_ALREADY_EXIST.getErrorDescription());
         ToDoList result = toDoListRepository.save(toDoListRequsetDto);
-        if (alarmTime != null && alarmTime.isAfter(now) && alarmTime.isBefore(nextHour)) schedulerMain.toDoListAlarmScheduler(result);
+        if (alarmTime != null && alarmTime.isAfter(now) && alarmTime.isBefore(nextMinute)) schedulerMain.toDoListAlarmScheduler(result);
 
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
@@ -110,7 +110,7 @@ public class ToDoListService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TOKEN_UNAUTHORIZED.getErrorCode(), ErrorCode.TOKEN_UNAUTHORIZED.getErrorDescription());
 
         toDoListRepository.delete(currentToDoList);
-        if (alarmTime != null && alarmTime.isAfter(now) && alarmTime.isBefore(nextHour)) schedulerMain.finishTask(currentToDoList.getUuid());
+        if (alarmTime != null && alarmTime.isAfter(now) && alarmTime.isBefore(nextMinute)) schedulerMain.finishTask(currentToDoList.getUuid());
 
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }

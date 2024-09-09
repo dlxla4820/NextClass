@@ -17,7 +17,7 @@ public class ToDoListDetailRepository {
     private final ToDoListRepository toDoListRepository;
 
     private final LocalDateTime now = LocalDateTime.now();
-    private final LocalDateTime nextHour = now.plusHours(1).withMinute(0).withSecond(0).withNano(0);
+    private final LocalDateTime nextMinute = now.plusMinutes(1).withSecond(0).withNano(0);
 
     ToDoListDetailRepository(
             JPAQueryFactory jpaQueryFactory,
@@ -102,7 +102,7 @@ public class ToDoListDetailRepository {
         //현재 시간에서 한시간 이후에 보내져야 하는 알람들 가져오기
         return queryFactory.selectFrom(toDoList)
                 .where(toDoList.alarmTime.after(now))
-                .where(toDoList.alarmTime.before(nextHour))
+                .where(toDoList.alarmTime.before(nextMinute))
                 .fetch();
     }
 }

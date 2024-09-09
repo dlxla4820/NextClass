@@ -37,7 +37,7 @@ public class SchedulerMain {
     }
 
     @PostConstruct
-    @Scheduled(cron = "0 0 * * * ?")
+    @Scheduled(cron = "0 * * * * ?") // 1분마다 실행
     public void addAlarmOnTaskScheduler(){
         //to do list에서 현재 시간 이후 한시간 이내로 울려야 되는 알람들을 전부 가져옴
         if(!environment.getActiveProfiles()[0].equals("f")){
