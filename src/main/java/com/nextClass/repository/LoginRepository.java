@@ -1,6 +1,8 @@
 package com.nextClass.repository;
 
-import com.nextClass.dto.*;
+import com.nextClass.dto.MemberChangeNormalInfoRequestDto;
+import com.nextClass.dto.MemberInfoResponseDto;
+import com.nextClass.dto.MemberRequestDto;
 import com.nextClass.entity.Member;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -10,7 +12,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import static com.nextClass.entity.QMember.member;
 

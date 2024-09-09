@@ -3,7 +3,6 @@ package com.nextClass.service;
 import com.nextClass.dto.NotificationConfigRequestDto;
 import com.nextClass.dto.NotificationConfigResponseDto;
 import com.nextClass.dto.ResponseDto;
-import com.nextClass.entity.NotificationConfig;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.NotificationDetailRepository;
@@ -37,8 +36,6 @@ public class NotificationService {
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
 
         List<NotificationConfigResponseDto> responseList = notificationDetailRepository.getNotificationConfigByMemberUuid(memberUuid);
-
-        log.info("NotificationService << getNotificationConfig >> | responseList : {}", responseList);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);
     }
 

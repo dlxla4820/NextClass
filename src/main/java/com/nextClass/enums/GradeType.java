@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum GradeType {
-    freshman(1), sophomore(2), senior(3), etc(0);
+    FRESHMAN(1), SOPHOMORE(2), SENIOR(3), ETC(0);
 
     private final int grade;
 

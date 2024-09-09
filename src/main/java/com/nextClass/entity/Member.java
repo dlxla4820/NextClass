@@ -1,14 +1,9 @@
 package com.nextClass.entity;
 
-import com.nextClass.enums.GradeType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.StringJoiner;
 import java.util.UUID;
 
