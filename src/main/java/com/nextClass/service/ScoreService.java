@@ -10,13 +10,10 @@ import com.nextClass.repository.ScoreDetailRepository;
 import com.nextClass.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
 
 @Service
@@ -107,8 +104,6 @@ public class ScoreService {
                 .credit_sum(semesterScoreCountAll)
                 .semester_list(semesterList)
                 .build();
-
-        log.info("ScoreService << getAllScore >> | Complete");
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, scoreResponseDto);
     }
 
@@ -116,7 +111,6 @@ public class ScoreService {
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
             log.info("ScoreService << addScoreOnSemester >> |  memberUuid : {}, requestBody : {}", memberUuid, scoreRequestDto);
             //대한이가 request body에 대해서 전체적으로 관리해주는거 만들었다고 했었던거 다시 물어보기
-
             UUID duplicateUUID;
             Score score;
             //db 리셋
@@ -153,10 +147,8 @@ public class ScoreService {
                 } else if (scoreInfo.getCategory().equals("선택")) {
                     Integer grade = calculateGradeUsingAchievement(scoreInfo.getAverage_score(), scoreInfo.getStudent_score(), scoreInfo.getStandard_deviation());
                     if (grade == (null)) {
-                        log.error("ScoreService << getAllScore >> | INPUT_SCORE_OUT_OF_RANGE scoreInfo : {}", scoreInfo);
                         return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorCode(), ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorDescription());
                     } else if (grade.equals(10)) {
-                        log.error("ScoreService << getAllScore >> | INPUT_SCORE_OUT_OF_RANGE scoreInfo : {}", scoreInfo);
                         return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorCode(), ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorDescription());
                     }
                     score = Score.builder()
@@ -196,7 +188,6 @@ public class ScoreService {
                 allScore.add(score);
             }
             scoreRepository.saveAll(allScore);
-            log.info("ScoreService << addScoreOnSemester >> | save complete");
             return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 

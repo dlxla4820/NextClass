@@ -2,7 +2,6 @@ package com.nextClass.repository;
 
 import com.nextClass.dto.ToDoListRequsetDto;
 import com.nextClass.entity.ToDoList;
-import com.nextClass.entity.ToDoListAlarm;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -10,11 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import static com.nextClass.entity.QToDoList.toDoList;
-import static com.nextClass.entity.QToDoListAlarm.toDoListAlarm;
 
 @Repository
 public class ToDoListDetailRepository {

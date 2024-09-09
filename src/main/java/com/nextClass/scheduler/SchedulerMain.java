@@ -51,7 +51,6 @@ public class SchedulerMain {
     }
 
     public void toDoListAlarmScheduler(ToDoList toDoList) {
-        log.info("SchedulerMain << toDoListAlarmScheduler >> | start");
         ScheduledFuture<?> newSchedule = this.createScheduledFutureTaskUsingToDoList(toDoList);
         scheduledTasks.put(toDoList.getUuid(), newSchedule);
         log.info("SchedulerMain << toDoListAlarmScheduler >> | TaskLength : {}", scheduledTasks.size());
@@ -59,7 +58,6 @@ public class SchedulerMain {
 
 
     public void updateToDoListAlarmScheduler(ToDoList toDoList){
-        log.info("SchedulerMain << updateToDoListAlarmScheduler >> | start");
         ScheduledFuture<?> newSchedule = this.createScheduledFutureTaskUsingToDoList(toDoList);
         scheduledTasks.replace(toDoList.getUuid(), newSchedule);
         log.info("SchedulerMain << updateToDoListAlarmScheduler >> | TaskLength : {}", scheduledTasks.size());

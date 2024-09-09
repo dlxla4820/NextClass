@@ -5,12 +5,11 @@ import com.nextClass.dto.ResponseDto;
 import com.nextClass.dto.ToDoListRequsetDto;
 import com.nextClass.service.ToDoListService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
-
+@RestController
 public class ToDoListController {
     private final ToDoListService toDoListService;
 

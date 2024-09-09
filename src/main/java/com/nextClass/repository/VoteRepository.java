@@ -1,6 +1,5 @@
 package com.nextClass.repository;
 
-import com.nextClass.entity.Post;
 import com.nextClass.entity.Vote;
 import org.springframework.data.jpa.repository.JpaRepository;
 

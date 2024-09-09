@@ -1,19 +1,14 @@
 package com.nextClass.repository;
 
-import com.nextClass.dto.ScoreRequestDto;
 import com.nextClass.dto.TimeTableRequestDto;
-import com.nextClass.dto.ToDoListRequsetDto;
 import com.nextClass.entity.Score;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
 
-import com.nextClass.entity.QScore;
 
-//Score Table has a score column
 import java.util.List;
 import static com.nextClass.entity.QScore.score;
-import static com.nextClass.entity.QTimeTable.timeTable;
 
 @Repository
 public class ScoreDetailRepository {

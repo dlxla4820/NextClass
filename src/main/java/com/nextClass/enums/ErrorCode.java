@@ -1,6 +1,5 @@
 package com.nextClass.enums;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

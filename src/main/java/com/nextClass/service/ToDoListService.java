@@ -63,7 +63,6 @@ public class ToDoListService {
         ToDoList result = toDoListRepository.save(toDoListRequsetDto);
         if (alarmTime != null && alarmTime.isAfter(now) && alarmTime.isBefore(nextHour)) schedulerMain.toDoListAlarmScheduler(result);
 
-        log.info("ToDoService << createToDoList >> | toDoList : {}", result);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
@@ -92,7 +91,6 @@ public class ToDoListService {
             ToDoList result = toDoListRepository.update(toDoListRequsetDto);
 
             if (alarmTime != null && alarmTime.isAfter(now)) schedulerMain.updateToDoListAlarmScheduler(result);
-            log.info("ToDoService << updateToDoList >> | toDoList : {}", result);
             return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
