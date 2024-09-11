@@ -53,10 +53,5 @@ public class LoginController {
     public ResponseEntity<ResponseDto<?>> sendMail(@RequestBody EmailSendCodeRequestDto requestBody){
         return ResponseEntity.ok(mailService.sendEmailCreateCode(requestBody));
     }
-    @PostMapping(value = "/test")
-    public ResponseEntity<String> test(){
-        MemberSessionDto userSession = getUserSession();
-        return ResponseEntity.ok().body("test");
-    }
 
 }

@@ -9,12 +9,12 @@ import com.nextClass.enums.ErrorCode;
 import com.nextClass.enums.GradeType;
 import com.nextClass.enums.NotificationConfigCategory;
 import com.nextClass.repository.*;
+import com.nextClass.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.nextClass.utils.CommonUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
@@ -93,7 +93,6 @@ public class MemberService {
         token.put("accessToken",tokenProvider.createAccessToken(tokenSubject));
         token.put("refreshToken", tokenProvider.createRefreshToken(tokenSubject));
 
-        log.info("MemberService << loginMember >> | token : {}", token);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, token);
     }
 
@@ -125,8 +124,6 @@ public class MemberService {
         //학점 삭제
         scoreRepository.deleteAllDataAboutCurrentUser(memberUuid);
 
-
-        log.info("MemberService << deleteMember >> | deleted timetable : {}", howManyDeleted);
         loginRepository.deleteMember(member);
 
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
@@ -167,7 +164,7 @@ public class MemberService {
 
     public ResponseDto<?> changePassword(MemberChangePasswordRequestDto requestBody){
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
-        log.info("MemberService << changeNormalInfo >> | memberUuid : {} requestBody : {}", memberUuid , requestBody);
+        log.info("MemberService << changePassword >> | memberUuid : {} requestBody : {}", memberUuid , requestBody);
         if(memberUuid == null)
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
         //유효성 검사
@@ -220,7 +217,6 @@ public class MemberService {
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(),Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
 
         MemberInfoResponseDto memberInfo = loginRepository.getMyInfoByUuid(memberUuid);
-        log.info("MemberService << getMyInfo >> | memberInfo : {}", memberInfo );
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, memberInfo);
 
     }

@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.util.Map;
-import java.util.Random;
 
-import static com.nextClass.enums.ErrorCode.MEMBER_NOT_EXIST;
 import static com.nextClass.enums.ErrorCode.TOKEN_UNAUTHORIZED;
 
 @Service
@@ -55,7 +52,7 @@ public class MailService {
 
 
     public ResponseDto<?> checkEmailCreateCode(EmailCheckRequestDto requestBody){
-        log.info("MailService << checkEmailCode >> | requestBody : {}", requestBody);
+        log.info("MailService << checkEmailCreateCode >> | requestBody : {}", requestBody);
         if(requestBody.getEmail() == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "email"));
         if(requestBody.getCode() == null)
@@ -94,7 +91,7 @@ public class MailService {
     }
 
     public ResponseDto<?> sendEmailCreateCode(EmailSendCodeRequestDto requestBody){
-        log.info("MailService << sendEmailCode >> | requestBody : {}", requestBody);
+        log.info("MailService << sendEmailCreateCode >> | requestBody : {}", requestBody);
         // 유효성 검사
         if(requestBody.getEmail() == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(),Description.FAIL,ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "email"));

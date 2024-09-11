@@ -8,11 +8,8 @@ import com.nextClass.entity.Vote;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.impl.JPAUpdateClause;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -280,7 +277,7 @@ public class BoardRepository {
     }
     private BooleanExpression goeVoteCount(String sort) {
         if (VOTE.equals(sort))
-            return post.voteCount.goe(compareVoteCount).and(post.regDate.goe(LocalDate.now().atStartOfDay()));
+            return post.voteCount.goe(compareVoteCount).and(post.regDate.goe(LocalDate.now().atStartOfDay().minusDays(6L)));
         return null;
     }
     private BooleanExpression eqPostSequence(Integer postSequence) {
@@ -297,12 +294,6 @@ public class BoardRepository {
         if(searchWord == null)
             return null;
         return post.content.contains(searchWord).or(post.subject.contains(searchWord));
-    }
-
-    private BooleanExpression eqBoardSequence(Integer postSequence, Integer commentSequence){
-        if(commentSequence ==null)
-            return vote.boardSequence.eq(postSequence).and(vote.boardType.eq(Vote.BoardType.POST));
-        return vote.boardSequence.eq(commentSequence).and(vote.boardType.eq(Vote.BoardType.COMMENT));
     }
 
     private Member selectMember(String memberUuid) {

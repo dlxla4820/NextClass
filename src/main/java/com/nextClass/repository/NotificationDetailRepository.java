@@ -4,16 +4,15 @@ import com.nextClass.dto.NotificationConfigRequestDto;
 import com.nextClass.dto.NotificationConfigResponseDto;
 import com.nextClass.entity.Member;
 import com.nextClass.entity.NotificationConfig;
+import com.nextClass.enums.NotificationConfigCategory;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
-import com.nextClass.enums.NotificationConfigCategory;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.nextClass.entity.QComment.comment;
-import static com.nextClass.entity.QMember.member;
 import static com.nextClass.entity.QNotificationConfig.notificationConfig;
 
 @Repository

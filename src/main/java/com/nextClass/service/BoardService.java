@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 import static com.nextClass.enums.ErrorCode.MEMBER_NOT_EXIST;
 import static com.nextClass.enums.ErrorCode.TOKEN_UNAUTHORIZED;
-import static java.util.Arrays.stream;
 
 @Service
 @Transactional
@@ -186,7 +185,7 @@ public class BoardService {
 
     public ResponseDto<?> changeComment(CommentChangeRequestDto requestBody){
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
-        log.info("BoardService << saveComment >> | memberUuid : {}, requestBody : {}",memberUuid, requestBody);
+        log.info("BoardService << changeComment >> | memberUuid : {}, requestBody : {}",memberUuid, requestBody);
         if(memberUuid == null)
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
         //유효성 검사
@@ -247,7 +246,7 @@ public class BoardService {
 
     public ResponseDto<?> saveOrDeleteVote(VoteSaveOrDeleteRequestDto requestBody){
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
-        log.info("BoardService << saveVote >> | memberUuid : {}, requestBody : {}",memberUuid, requestBody);
+        log.info("BoardService << saveOrDeleteVote >> | memberUuid : {}, requestBody : {}",memberUuid, requestBody);
 
         if(memberUuid == null)
             return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
@@ -292,7 +291,6 @@ public class BoardService {
             if(data.getContent().length() >25)
                 data.setContent(data.getContent().substring(0,22) + "...");
         }
-        log.info("BoardService << getPostList >> | responseList : {}", responseList);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);
     }
 
@@ -317,7 +315,6 @@ public class BoardService {
                 data.setContent(data.getContent().substring(22) + "...");
         }
 
-        log.info("BoardService << searchPostList >> | responseList : {}", responseList);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);
     }
 
@@ -355,7 +352,6 @@ public class BoardService {
                     .build();
             responseList.add(response);
         }
-        log.info("BoardService << getCommentList >> | responseList : {}", responseList);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, responseList);
     }
 
