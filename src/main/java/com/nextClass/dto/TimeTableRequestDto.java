@@ -1,8 +1,11 @@
 package com.nextClass.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.StringJoiner;
 
 @Getter
 @Setter
@@ -10,51 +13,43 @@ import lombok.Setter;
 public class TimeTableRequestDto {
     //member uuid : 로그인 시 세션으로 가져옴, class_uuid : 데이터 등록 시에 생성
     private String uuid;
-    private String member_uuid;
+    @JsonProperty("member_uuid")
+    private String memberUuid;
     private String week;
-    private Integer class_start_time;
-    private Integer class_end_time;
-    private Integer class_grade;
-    private String teacher_name;
+    @JsonProperty("class_start_time")
+    private Integer classStartTime;
+    @JsonProperty("class_end_time")
+    private Integer classEndTime;
+    @JsonProperty("class_grade")
+    private Integer classGrade;
+    @JsonProperty("teacher_name")
+    private String teacherName;
     private Integer score;
     private String title;
     private String semester;
     private String school;
-    private String class_detail_uuid;
+    @JsonProperty("class_detail_uuid")
+    private String classDetailUuid;
     private String category;
     private String color;
 
-    public TimeTableRequestDto(String week, Integer class_start_time, Integer class_end_time, Integer class_grade, String teacher_name, Integer score, String title, String semester, String school, String category, String color){
-        this.week = week;
-        this.class_start_time = class_start_time;
-        this.class_end_time = class_end_time;
-        this.class_grade = class_grade;
-        this.teacher_name = teacher_name;
-        this.score = score;
-        this.title = title;
-        this.semester = semester;
-        this.school = school;
-        this.category = category;
-        this.color = color;
-    }
-
-    public TimeTableRequestDto(String uuid,String class_detail_uuid, String week, Integer class_start_time, Integer class_end_time, Integer class_grade, String teacher_name, Integer score, String title, String semester, String school, String category, String color){
-        this.uuid = uuid;
-        this.class_detail_uuid = class_detail_uuid;
-        this.week = week;
-        this.class_start_time = class_start_time;
-        this.class_end_time = class_end_time;
-        this.class_grade = class_grade;
-        this.teacher_name = teacher_name;
-        this.score = score;
-        this.title = title;
-        this.semester = semester;
-        this.school = school;
-        this.category = category;
-        this.color = color;
-    }
-
-    public TimeTableRequestDto(String semester){
-        this.semester = semester;
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", TimeTableRequestDto.class.getSimpleName() + "[", "]")
+                .add("uuid='" + uuid + "'")
+                .add("memberUuid='" + memberUuid + "'")
+                .add("week='" + week + "'")
+                .add("classStartTime='" + classStartTime + "'")
+                .add("classEndTime='" + classEndTime + "'")
+                .add("classGrade='" + classGrade + "'")
+                .add("teacherName='" + teacherName + "'")
+                .add("score='" + score + "'")
+                .add("title='" + title + "'")
+                .add("semester='" + semester + "'")
+                .add("school='" + school + "'")
+                .add("classDetailUuid='" + classDetailUuid + "'")
+                .add("category='" + category + "'")
+                .add("color='" + color + "'")
+                .toString();
     }
 }

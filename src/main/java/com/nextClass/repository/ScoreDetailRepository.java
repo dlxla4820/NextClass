@@ -46,7 +46,7 @@ public class ScoreDetailRepository {
                 .grade(0)
                 .category(timeTableRequestDto.getCategory())
                 .semester(timeTableRequestDto.getSemester())
-                .memberUuid(loginRepository.getMemberByUuid(timeTableRequestDto.getMember_uuid()).getUuid())
+                .memberUuid(loginRepository.getMemberByUuid(timeTableRequestDto.getMemberUuid()).getUuid())
                 .build();
         scoreRepository.save(score);
     }

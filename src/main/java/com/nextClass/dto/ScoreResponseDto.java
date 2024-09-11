@@ -1,7 +1,9 @@
 package com.nextClass.dto;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 @Getter
@@ -23,7 +25,8 @@ public class ScoreResponseDto {
         private String semester;
         private String score;
         private Integer credit_sum;
-        private List<SubjectDto> data_list;
+        @JsonProperty("dataList")
+        private List<SubjectDto> dataList;
 
         @Getter
         @Setter
@@ -37,10 +40,38 @@ public class ScoreResponseDto {
             private Integer credit;
             private String achievement;
             private Integer grade;
-            private Double student_score;
-            private Double average_score;
-            private Double standard_deviation;
+            @JsonProperty("student_score")
+            private Double studentScore;
+            @JsonProperty("average_score")
+            private Double averageScore;
+            @JsonProperty("standard_deviation")
+            private Double standardDeviation;
             private String semester;
+
+            @Override
+            public String toString() {
+                return new StringJoiner(", ", SubjectDto.class.getSimpleName() + "[", "]")
+                        .add("uuid='" + uuid + "'")
+                        .add("title='" + title + "'")
+                        .add("category='" + category + "'")
+                        .add("credit='" + credit + "'")
+                        .add("achievement='" + achievement + "'")
+                        .add("grade='" + grade + "'")
+                        .add("studentScore='" + studentScore + "'")
+                        .add("averageScore='" + averageScore + "'")
+                        .add("standardDeviation='" + standardDeviation + "'")
+                        .add("semester='" + semester + "'")
+                        .toString();
+            }
+        }
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", SemesterDto.class.getSimpleName() + "[", "]")
+                    .add("semester='" + semester + "'")
+                    .add("score='" + score + "'")
+                    .add("credit_sum='" + credit_sum + "'")
+                    .add("dataList='" + dataList + "'")
+                    .toString();
         }
     }
 }

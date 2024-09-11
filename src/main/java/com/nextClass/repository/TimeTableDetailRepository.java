@@ -53,7 +53,7 @@ public class TimeTableDetailRepository {
                 timeTable.color
                 )
                 .from(timeTable)
-                .where(Expressions.stringTemplate("HEX({0})", timeTable.memberUuid).eq(timeTableRequestDto.getMember_uuid().replace("-","")))
+                .where(Expressions.stringTemplate("HEX({0})", timeTable.memberUuid).eq(timeTableRequestDto.getMemberUuid().replace("-","")))
                 .where(timeTable.semester.eq(timeTableRequestDto.getSemester()))
                 .fetch().stream().map(this::convertTupleToDto).collect(Collectors.toList());
     }
@@ -64,7 +64,7 @@ public class TimeTableDetailRepository {
                 from(
                         timeTable
                 )
-                .where(Expressions.stringTemplate("HEX({0})", timeTable.memberUuid).eq(timeTableRequestDto.getMember_uuid().replace("-","")))
+                .where(Expressions.stringTemplate("HEX({0})", timeTable.memberUuid).eq(timeTableRequestDto.getMemberUuid().replace("-","")))
                 .where(timeTable.semester.eq(timeTableRequestDto.getSemester()))
                 .fetch().stream().map(UUID::toString).collect(Collectors.toList());
     }
@@ -87,30 +87,30 @@ public class TimeTableDetailRepository {
                 .selectFrom(timeTable)
                 .where(
                         timeTable.week.eq(timeTableRequestDto.getWeek()),
-                        timeTable.classStartTime.eq(timeTableRequestDto.getClass_start_time()),
-                        timeTable.classEndTime.eq(timeTableRequestDto.getClass_end_time()),
+                        timeTable.classStartTime.eq(timeTableRequestDto.getClassStartTime()),
+                        timeTable.classEndTime.eq(timeTableRequestDto.getClassEndTime()),
                         timeTable.semester.eq(timeTableRequestDto.getSemester()),
                         timeTable.title.eq(timeTableRequestDto.getTitle()),
-                        timeTable.classGrade.eq(timeTableRequestDto.getClass_grade()),
-                        timeTable.teacherName.eq(timeTableRequestDto.getTeacher_name()),
+                        timeTable.classGrade.eq(timeTableRequestDto.getClassGrade()),
+                        timeTable.teacherName.eq(timeTableRequestDto.getTeacherName()),
                         timeTable.score.eq(timeTableRequestDto.getScore()),
                         timeTable.school.eq(timeTableRequestDto.getSchool()),
                         timeTable.category.eq(timeTableRequestDto.getCategory()),
                         timeTable.color.eq(timeTableRequestDto.getColor())
                 )
-                .where(Expressions.stringTemplate("HEX({0})", timeTable.memberUuid).eq(timeTableRequestDto.getMember_uuid().replace("-","")))
+                .where(Expressions.stringTemplate("HEX({0})", timeTable.memberUuid).eq(timeTableRequestDto.getMemberUuid().replace("-","")))
                 .fetchOne();
     }
     public TimeTable saveTimeTable(TimeTableRequestDto timeTableRequestDto) {
         TimeTable timeTable = TimeTable.builder()
-                .memberUuid(loginRepository.getMemberByUuid(timeTableRequestDto.getMember_uuid()).getUuid())
+                .memberUuid(loginRepository.getMemberByUuid(timeTableRequestDto.getMemberUuid()).getUuid())
                 .week(timeTableRequestDto.getWeek())
                 .semester(timeTableRequestDto.getSemester())
-                .classStartTime(timeTableRequestDto.getClass_start_time())
-                .classEndTime(timeTableRequestDto.getClass_end_time())
+                .classStartTime(timeTableRequestDto.getClassStartTime())
+                .classEndTime(timeTableRequestDto.getClassEndTime())
                 .title(timeTableRequestDto.getTitle())
-                .classGrade(timeTableRequestDto.getClass_grade())
-                .teacherName(timeTableRequestDto.getTeacher_name())
+                .classGrade(timeTableRequestDto.getClassGrade())
+                .teacherName(timeTableRequestDto.getTeacherName())
                 .score(timeTableRequestDto.getScore())
                 .school(timeTableRequestDto.getSchool())
                 .category(timeTableRequestDto.getCategory())
@@ -129,7 +129,7 @@ public class TimeTableDetailRepository {
                                 .and(
                                         queryFactory.select(qTimeTable2.uuid)
                                                 .from(qTimeTable2)
-                                                .where(Expressions.stringTemplate("HEX({0})", qTimeTable2.memberUuid).eq(timeTableRequestDto.getMember_uuid().replace("-", "")))
+                                                .where(Expressions.stringTemplate("HEX({0})", qTimeTable2.memberUuid).eq(timeTableRequestDto.getMemberUuid().replace("-", "")))
                                                 .exists()
                                 )
                 ).fetchOne();
@@ -143,14 +143,14 @@ public class TimeTableDetailRepository {
 
     public void updateTimeTableWithNewClassDetail(TimeTableRequestDto timeTableRequestDto) {
         TimeTable timeTable = TimeTable.builder()
-                .memberUuid(loginRepository.getMemberByUuid(timeTableRequestDto.getMember_uuid()).getUuid())
+                .memberUuid(loginRepository.getMemberByUuid(timeTableRequestDto.getMemberUuid()).getUuid())
                 .week(timeTableRequestDto.getWeek())
                 .semester(timeTableRequestDto.getSemester())
-                .classStartTime(timeTableRequestDto.getClass_start_time())
-                .classEndTime(timeTableRequestDto.getClass_end_time())
+                .classStartTime(timeTableRequestDto.getClassStartTime())
+                .classEndTime(timeTableRequestDto.getClassEndTime())
                 .title(timeTableRequestDto.getTitle())
-                .classGrade(timeTableRequestDto.getClass_grade())
-                .teacherName(timeTableRequestDto.getTeacher_name())
+                .classGrade(timeTableRequestDto.getClassGrade())
+                .teacherName(timeTableRequestDto.getTeacherName())
                 .score(timeTableRequestDto.getScore())
                 .school(timeTableRequestDto.getSchool())
                 .category(timeTableRequestDto.getCategory())
@@ -167,8 +167,8 @@ public class TimeTableDetailRepository {
         return queryFactory.selectFrom(timeTable)
                 .where(
                         Expressions.stringTemplate("HEX({0})", timeTable.memberUuid).eq(memberUuid.replace("-","")),
-                        timeTable.classStartTime.between(timeTableRequestDto.getClass_start_time(), timeTableRequestDto.getClass_end_time()),
-                        timeTable.classEndTime.between(timeTableRequestDto.getClass_start_time(), timeTableRequestDto.getClass_end_time())
+                        timeTable.classStartTime.between(timeTableRequestDto.getClassStartTime(), timeTableRequestDto.getClassEndTime()),
+                        timeTable.classEndTime.between(timeTableRequestDto.getClassStartTime(), timeTableRequestDto.getClassEndTime())
                         )
                 .where(timeTable.week.eq(timeTableRequestDto.getWeek()))
                 .fetchFirst();
@@ -177,8 +177,8 @@ public class TimeTableDetailRepository {
         return queryFactory.selectFrom(timeTable)
                 .where(
                         Expressions.stringTemplate("HEX({0})", timeTable.memberUuid).eq(memberUuid.replace("-","")),
-                        timeTable.classStartTime.between(timeTableRequestDto.getClass_start_time(), timeTableRequestDto.getClass_end_time()),
-                        timeTable.classEndTime.between(timeTableRequestDto.getClass_start_time(), timeTableRequestDto.getClass_end_time())
+                        timeTable.classStartTime.between(timeTableRequestDto.getClassStartTime(), timeTableRequestDto.getClassEndTime()),
+                        timeTable.classEndTime.between(timeTableRequestDto.getClassStartTime(), timeTableRequestDto.getClassEndTime())
                 )
                 .where(timeTable.week.eq(timeTableRequestDto.getWeek()))
                 .where(Expressions.stringTemplate("HEX({0})", timeTable.uuid).ne(timeTableRequestDto.getUuid().replace("-","")))

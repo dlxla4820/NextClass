@@ -65,9 +65,9 @@ public class ScoreService {
                             .achievement(scoreInfo.getAchievement())
                             .grade(scoreInfo.getGrade())
                             .semester(scoreInfo.getSemester())
-                            .student_score(null)
-                            .average_score(null)
-                            .standard_deviation(null)
+                            .studentScore(null)
+                            .averageScore(null)
+                            .standardDeviation(null)
                             .build();
                     dataList.add(scoreDetail);
                     continue;
@@ -82,9 +82,9 @@ public class ScoreService {
                         .semester(scoreInfo.getSemester())
                         .build();
                 if (scoreInfo.getCategory().equals("선택")) {
-                    scoreDetail.setStudent_score(scoreInfo.getStudentScore());
-                    scoreDetail.setAverage_score(scoreInfo.getAverageScore());
-                    scoreDetail.setStandard_deviation(scoreInfo.getStandardDeviation());
+                    scoreDetail.setStudentScore(scoreInfo.getStudentScore());
+                    scoreDetail.setAverageScore(scoreInfo.getAverageScore());
+                    scoreDetail.setStandardDeviation(scoreInfo.getStandardDeviation());
                     //선택 과목의 경우 평균편차와 원점수, 평균 점수를 통해 등급을 유추해 낸 뒤에 해당 당급을 넣음
                 }
                 semesterScoreSum += scoreInfo.getGrade() * scoreInfo.getCredit();
@@ -93,7 +93,7 @@ public class ScoreService {
             }
             //한 학기 점수 가져오기 종료
             semesterDto.setScore(String.format("%.2f", (semesterScoreSum / semeseterScoreCount)));
-            semesterDto.setData_list(dataList);
+            semesterDto.setDataList(dataList);
             semesterDto.setCredit_sum(semeseterScoreCount);
             semesterScoreSumAll += semesterScoreSum;
             semesterScoreCountAll += semeseterScoreCount;
@@ -145,7 +145,7 @@ public class ScoreService {
                             .build();
 
                 } else if (scoreInfo.getCategory().equals("선택")) {
-                    Integer grade = calculateGradeUsingAchievement(scoreInfo.getAverage_score(), scoreInfo.getStudent_score(), scoreInfo.getStandard_deviation());
+                    Integer grade = calculateGradeUsingAchievement(scoreInfo.getAverageScore(), scoreInfo.getStudentScore(), scoreInfo.getStandardDeviation());
                     if (grade == (null)) {
                         return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorCode(), ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorDescription());
                     } else if (grade.equals(10)) {
@@ -158,9 +158,9 @@ public class ScoreService {
                             .category(scoreInfo.getCategory())
                             .achievement(scoreInfo.getAchievement())
                             .grade(scoreInfo.getGrade())
-                            .studentScore(scoreInfo.getStudent_score())
-                            .averageScore(scoreInfo.getAverage_score())
-                            .standardDeviation(scoreInfo.getStandard_deviation())
+                            .studentScore(scoreInfo.getStudentScore())
+                            .averageScore(scoreInfo.getAverageScore())
+                            .standardDeviation(scoreInfo.getStandardDeviation())
                             .semester(scoreInfo.getSemester())
                             .memberUuid(convertToUUID(memberUuid))
                             .build();

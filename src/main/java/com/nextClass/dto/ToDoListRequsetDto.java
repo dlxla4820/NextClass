@@ -1,11 +1,13 @@
 package com.nextClass.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 @Getter
@@ -14,24 +16,31 @@ import java.util.UUID;
 public class ToDoListRequsetDto {
 
     private UUID uuid;
-    private UUID member_uuid;
-    private LocalDateTime created_time;
-    private LocalDateTime update_time;
-    private LocalDateTime alarm_time;
-    private LocalDateTime goal_time;
+    @JsonProperty("member_uuid")
+    private UUID memberUuid;
+    @JsonProperty("created_time")
+    private LocalDateTime createdTime;
+    @JsonProperty("update_time")
+    private LocalDateTime updateTime;
+    @JsonProperty("alarm_time")
+    private LocalDateTime alarmTime;
+    @JsonProperty("goal_time")
+    private LocalDateTime goalTime;
     private String content;
-    private String app_token;
+    @JsonProperty("app_token")
+    private String appToken;
 
-    public ToDoListRequsetDto(String content, LocalDateTime alarm_time, LocalDateTime goal_time, String app_token){
-        this.content = content;
-        this.alarm_time = alarm_time;
-        this.goal_time = goal_time;
-    }
-
-    public ToDoListRequsetDto(UUID uuid, String content, LocalDateTime alarm_time, LocalDateTime goal_time, String app_token){
-        this.uuid = uuid;
-        this.content = content;
-        this.alarm_time = alarm_time;
-        this.goal_time = goal_time;
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", PostListSelectRequestDto.class.getSimpleName() + "[", "]")
+                .add("uuid='" + uuid + "'")
+                .add("memberUuid='" + memberUuid + "'")
+                .add("createdTime='" + createdTime + "'")
+                .add("updateTime='" + updateTime + "'")
+                .add("alarmTime='" + alarmTime + "'")
+                .add("goalTime='" + goalTime + "'")
+                .add("content='" + content + "'")
+                .add("appToken='" + appToken + "'")
+                .toString();
     }
 }

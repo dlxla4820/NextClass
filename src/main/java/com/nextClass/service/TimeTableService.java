@@ -43,7 +43,7 @@ public class TimeTableService {
     public ResponseDto<?> changeTimeTableData(TimeTableRequestDto timeTableRequestDto) {
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
         log.info("TimeTableService << changeTimeTableData >> | memberUuid : {}, requestBody : {}", memberUuid, timeTableRequestDto);
-        timeTableRequestDto.setMember_uuid(memberUuid);
+        timeTableRequestDto.setMemberUuid(memberUuid);
         //해당 부분에 uuid값의 검증도 추가해야 함
         String errorDescription = checkTimeTableRequest(timeTableRequestDto);
         if (errorDescription != null)
@@ -67,7 +67,7 @@ public class TimeTableService {
         log.info("TimeTableService << deleteOneTimeTable >> | memberUuid : {}, requestBody : {}", memberUuid, timeTableRequestDto);
         if (timeTableRequestDto.getUuid() == null || timeTableRequestDto.getUuid().isBlank())
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "timeTableUuid"));
-        timeTableRequestDto.setMember_uuid(memberUuid);
+        timeTableRequestDto.setMemberUuid(memberUuid);
         if (timeTableRepository.findTimeTableByUuid(timeTableRequestDto.getUuid()) == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.DATA_ALREADY_DELETED.getErrorCode(), ErrorCode.DATA_ALREADY_DELETED.getErrorDescription());
         if (timeTableRepository.checkCurrentUserIsOwnerOfTimeTable(timeTableRequestDto) == null)
@@ -85,7 +85,7 @@ public class TimeTableService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "semester"));
 
         //member와 semester 2개를 받아서 삭제
-        timeTableRequestDto.setMember_uuid(memberUuid);
+        timeTableRequestDto.setMemberUuid(memberUuid);
         if (timeTableRepository.checkCurrentUserIsOwnerOfTimeTable(timeTableRequestDto) == null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
 
@@ -103,7 +103,7 @@ public class TimeTableService {
         log.info("TimeTableService << getPersonalThisSemesterTimeTable >> | memberUuid : {}, requestBody : {}", memberUuid, timeTableRequestDto);
         if (timeTableRequestDto.getSemester() == null || timeTableRequestDto.getSemester().isBlank())
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "semester"));
-        timeTableRequestDto.setMember_uuid(memberUuid);
+        timeTableRequestDto.setMemberUuid(memberUuid);
         //member와 semester를 가지고 해당 데이터 가져오기(현재는 semester만)
         List<TimeTableReponseDto> timeTableList = timeTableRepository.getTimeTableListOnSemesterFromUser(timeTableRequestDto);
         log.info("TimeTableService << getPersonalThisSemesterTimeTable >> | timeTableList : {}", timeTableList);
@@ -122,7 +122,7 @@ public class TimeTableService {
         if (timeTableRepository.isClassExistOnSameTime(timeTableRequestDto, memberUuid) != null)
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.CLASS_ALREADY_EXIST_ON_SAME_TIME.getErrorCode(), ErrorCode.CLASS_ALREADY_EXIST_ON_SAME_TIME.getErrorDescription());
 
-        timeTableRequestDto.setMember_uuid(memberUuid);
+        timeTableRequestDto.setMemberUuid(memberUuid);
 
         TimeTable isDataSaved = timeTableRepository.findTimeTable(timeTableRequestDto);
         if (isDataSaved != null)
@@ -138,13 +138,13 @@ public class TimeTableService {
     private String checkTimeTableRequest(TimeTableRequestDto timeTableRequestDto) {
         if (timeTableRequestDto.getWeek() == null || timeTableRequestDto.getWeek().isBlank()) {
             return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "week");
-        } else if (timeTableRequestDto.getClass_start_time() == null || timeTableRequestDto.getClass_start_time() < 0 || timeTableRequestDto.getClass_start_time() > 8) {
+        } else if (timeTableRequestDto.getClassStartTime() == null || timeTableRequestDto.getClassStartTime() < 0 || timeTableRequestDto.getClassStartTime() > 8) {
             return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "class_start_time");
-        } else if (timeTableRequestDto.getClass_end_time() == null || timeTableRequestDto.getClass_end_time() < 0 || timeTableRequestDto.getClass_end_time() > 8) {
+        } else if (timeTableRequestDto.getClassEndTime() == null || timeTableRequestDto.getClassEndTime() < 0 || timeTableRequestDto.getClassEndTime() > 8) {
             return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "class_end_time");
-        } else if (timeTableRequestDto.getClass_grade() == null || timeTableRequestDto.getClass_grade() < 1 || timeTableRequestDto.getClass_grade() > 4) {
+        } else if (timeTableRequestDto.getClassGrade() == null || timeTableRequestDto.getClassGrade() < 1 || timeTableRequestDto.getClassGrade() > 4) {
             return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "class_grade");
-        } else if (timeTableRequestDto.getTeacher_name() == null || timeTableRequestDto.getTeacher_name().isBlank()) {
+        } else if (timeTableRequestDto.getTeacherName() == null || timeTableRequestDto.getTeacherName().isBlank()) {
             return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "teacher_name");
         } else if (timeTableRequestDto.getScore() == null || timeTableRequestDto.getScore() < 0 || timeTableRequestDto.getScore() > 3) {
             return String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "score");
