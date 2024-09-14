@@ -1,12 +1,11 @@
 package com.nextClass.service;
 
 import com.nextClass.dto.ResponseDto;
-import com.nextClass.dto.TimeTableResponseDto;
 import com.nextClass.dto.TimeTableRequestDto;
+import com.nextClass.dto.TimeTableResponseDto;
 import com.nextClass.entity.TimeTable;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
-import com.nextClass.repository.LoginRepository;
 import com.nextClass.repository.ScoreDetailRepository;
 import com.nextClass.repository.TimeTableDetailRepository;
 import com.nextClass.utils.CommonUtils;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
 import static com.nextClass.entity.QTimeTable.timeTable;
 import static com.nextClass.enums.ErrorCode.TOKEN_UNAUTHORIZED;
@@ -27,18 +25,15 @@ import static com.nextClass.enums.ErrorCode.TOKEN_UNAUTHORIZED;
 @Transactional(rollbackFor = Exception.class)
 public class TimeTableService {
     private final TimeTableDetailRepository timeTableRepository;
-    private final LoginRepository loginRepository;
 
     private final ScoreDetailRepository scoreRepository;
 
     @Autowired
     public TimeTableService(
             TimeTableDetailRepository timeTableRepository,
-            LoginRepository loginRepository,
             ScoreDetailRepository scoreRepository
     ) {
         this.timeTableRepository = timeTableRepository;
-        this.loginRepository = loginRepository;
         this.scoreRepository = scoreRepository;
     }
 
@@ -170,14 +165,4 @@ public class TimeTableService {
             return null;
         }
     }
-
-    private UUID convertToUUID(String uuidString) {
-        String formattedUuidString = uuidString.replaceAll(
-                "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{12})",
-                "$1-$2-$3-$4-$5"
-        );
-        return UUID.fromString(formattedUuidString);
-    }
-
-
 }

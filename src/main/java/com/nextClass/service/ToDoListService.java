@@ -150,5 +150,4 @@ public class ToDoListService {
     private ToDoListResponseDto convertTupleToResponse(Tuple tuple) {
         return new ToDoListResponseDto(tuple.get(toDoList.uuid), tuple.get(toDoList.content), tuple.get(toDoList.goalTime), tuple.get(toDoList.alarmTime));
     }
-
 }

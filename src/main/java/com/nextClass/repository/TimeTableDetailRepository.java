@@ -159,10 +159,6 @@ public class TimeTableDetailRepository {
         timeTableRepository.save(timeTable);
     }
 
-    public void updateTimeTable(TimeTable timeTable){
-
-    }
-
     public TimeTable isClassExistOnSameTime(TimeTableRequestDto timeTableRequestDto, String memberUuid){
         return queryFactory.selectFrom(timeTable)
                 .where(

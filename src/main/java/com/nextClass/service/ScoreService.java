@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -27,10 +26,7 @@ import static com.nextClass.enums.ErrorCode.TOKEN_UNAUTHORIZED;
 public class ScoreService {
     private final ScoreDetailRepository scoreRepository;
 
-    private final TransactionTemplate transactionTemplate;
-
-    public ScoreService(ScoreDetailRepository scoreRepository, TransactionTemplate transactionTemplate) {
-        this.transactionTemplate = transactionTemplate;
+    public ScoreService(ScoreDetailRepository scoreRepository) {
         this.scoreRepository = scoreRepository;
     }
 
