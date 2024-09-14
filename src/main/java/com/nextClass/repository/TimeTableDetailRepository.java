@@ -1,6 +1,6 @@
 package com.nextClass.repository;
 
-import com.nextClass.dto.TimeTableReponseDto;
+import com.nextClass.dto.TimeTableResponseDto;
 import com.nextClass.dto.TimeTableRequestDto;
 import com.nextClass.entity.QTimeTable;
 import com.nextClass.entity.TimeTable;
@@ -37,7 +37,7 @@ public class TimeTableDetailRepository {
                 .execute();
     }
 
-    public List<TimeTableReponseDto> getTimeTableListOnSemesterFromUser(TimeTableRequestDto timeTableRequestDto) {
+    public List<TimeTableResponseDto> getTimeTableListOnSemesterFromUser(TimeTableRequestDto timeTableRequestDto) {
         return queryFactory.select(
                 timeTable.uuid,
                 timeTable.week,
@@ -185,8 +185,8 @@ public class TimeTableDetailRepository {
                 .fetchFirst();
     }
 
-    private TimeTableReponseDto convertTupleToDto(Tuple tuple) {
-        return new TimeTableReponseDto(
+    private TimeTableResponseDto convertTupleToDto(Tuple tuple) {
+        return new TimeTableResponseDto(
                 tuple.get(timeTable.uuid),
                 tuple.get(timeTable.week),
                 tuple.get(timeTable.classStartTime),

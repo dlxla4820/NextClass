@@ -14,7 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
+
+import static com.nextClass.enums.ErrorCode.TOKEN_UNAUTHORIZED;
 
 @Service
 @Slf4j
@@ -24,10 +29,7 @@ public class ScoreService {
 
     private final TransactionTemplate transactionTemplate;
 
-    public ScoreService(
-            ScoreDetailRepository scoreRepository,
-            TransactionTemplate transactionTemplate
-    ) {
+    public ScoreService(ScoreDetailRepository scoreRepository, TransactionTemplate transactionTemplate) {
         this.transactionTemplate = transactionTemplate;
         this.scoreRepository = scoreRepository;
     }
@@ -36,6 +38,8 @@ public class ScoreService {
     public ResponseDto<?> getAllScore() {
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
         log.info("ScoreService << getAllScore >> | memberUuid : {}", memberUuid);
+        if (memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
         //현재 로그인한 유저의 저장된 semester 전부 가져오기
         List<String> currentMemberScoreSemester = scoreRepository.findSemesterList(memberUuid);
         //학기 내에서 학점 계산(for문)
@@ -51,36 +55,15 @@ public class ScoreService {
             semesterScoreSum = 0.0;
             semeseterScoreCount = 0;
             semesterScore = scoreRepository.findSemesterScores(semester, memberUuid);
-            semesterDto = ScoreResponseDto.SemesterDto.builder()
-                    .semester(semester)
-                    .build();
-            List<ScoreResponseDto.SemesterDto.SubjectDto> dataList= new ArrayList<>();
+            semesterDto = ScoreResponseDto.SemesterDto.builder().semester(semester).build();
+            List<ScoreResponseDto.SemesterDto.SubjectDto> dataList = new ArrayList<>();
             for (Score scoreInfo : semesterScore) {
                 if (scoreInfo.getCategory().equals("창체")) {
-                    ScoreResponseDto.SemesterDto.SubjectDto scoreDetail = ScoreResponseDto.SemesterDto.SubjectDto.builder()
-                            .uuid(scoreInfo.getUuid())
-                            .title(scoreInfo.getTitle())
-                            .category(scoreInfo.getCategory())
-                            .credit(scoreInfo.getCredit())
-                            .achievement(scoreInfo.getAchievement())
-                            .grade(scoreInfo.getGrade())
-                            .semester(scoreInfo.getSemester())
-                            .studentScore(null)
-                            .averageScore(null)
-                            .standardDeviation(null)
-                            .build();
+                    ScoreResponseDto.SemesterDto.SubjectDto scoreDetail = ScoreResponseDto.SemesterDto.SubjectDto.builder().uuid(scoreInfo.getUuid()).title(scoreInfo.getTitle()).category(scoreInfo.getCategory()).credit(scoreInfo.getCredit()).achievement(scoreInfo.getAchievement()).grade(scoreInfo.getGrade()).semester(scoreInfo.getSemester()).studentScore(null).averageScore(null).standardDeviation(null).build();
                     dataList.add(scoreDetail);
                     continue;
                 }
-                ScoreResponseDto.SemesterDto.SubjectDto scoreDetail = ScoreResponseDto.SemesterDto.SubjectDto.builder()
-                        .uuid(scoreInfo.getUuid())
-                        .title(scoreInfo.getTitle())
-                        .category(scoreInfo.getCategory())
-                        .credit(scoreInfo.getCredit())
-                        .achievement(scoreInfo.getAchievement())
-                        .grade(scoreInfo.getGrade())
-                        .semester(scoreInfo.getSemester())
-                        .build();
+                ScoreResponseDto.SemesterDto.SubjectDto scoreDetail = ScoreResponseDto.SemesterDto.SubjectDto.builder().uuid(scoreInfo.getUuid()).title(scoreInfo.getTitle()).category(scoreInfo.getCategory()).credit(scoreInfo.getCredit()).achievement(scoreInfo.getAchievement()).grade(scoreInfo.getGrade()).semester(scoreInfo.getSemester()).build();
                 if (scoreInfo.getCategory().equals("선택")) {
                     scoreDetail.setStudentScore(scoreInfo.getStudentScore());
                     scoreDetail.setAverageScore(scoreInfo.getAverageScore());
@@ -99,111 +82,71 @@ public class ScoreService {
             semesterScoreCountAll += semeseterScoreCount;
             semesterList.add(semesterDto);
         }
-        ScoreResponseDto scoreResponseDto = ScoreResponseDto.builder()
-                .average_grade(String.format("%.2f", (semesterScoreSumAll / semesterScoreCountAll)))
-                .credit_sum(semesterScoreCountAll)
-                .semester_list(semesterList)
-                .build();
+        ScoreResponseDto scoreResponseDto = ScoreResponseDto.builder().average_grade(String.format("%.2f", (semesterScoreSumAll / semesterScoreCountAll))).credit_sum(semesterScoreCountAll).semester_list(semesterList).build();
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, scoreResponseDto);
     }
 
     public ResponseDto<?> addScoreOnSemester(ScoreRequestDto scoreRequestDto) {
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
-            log.info("ScoreService << addScoreOnSemester >> |  memberUuid : {}, requestBody : {}", memberUuid, scoreRequestDto);
-            //대한이가 request body에 대해서 전체적으로 관리해주는거 만들었다고 했었던거 다시 물어보기
-            UUID duplicateUUID;
-            Score score;
-            //db 리셋
-            scoreRepository.deleteAllDataAboutCurrentUser(memberUuid);
-            //list 안에 있는 모든 객체에 대해서 행동
-            ScoreRequestDto.ScoreInfo scoreInfo;
-            Iterator<ScoreRequestDto.ScoreInfo> iteratorDataList = scoreRequestDto.getData().iterator();
-            List<Score> allScore = new ArrayList<>();
-            while (iteratorDataList.hasNext()) {
-                //iterator를 통해서 해당 리스트를 순차적으로 하나씩 꺼냄
-                scoreInfo = iteratorDataList.next();
-                //동일 제목, 학점, 학기, 멤버를가지고 있는 수업이 해당 테이블에 존재하는지 확인
-                //있으면 해당 값의 점수만 수정해서 저장
-                if (scoreInfo.getUuid() == null || scoreInfo.getUuid().isBlank()) {
-                    duplicateUUID = UUID.randomUUID();
-                } else {
-                    duplicateUUID = convertToUUID(scoreInfo.getUuid());
-                }
-                if (scoreInfo.getCategory().equals("공통")) {
-                    score = Score.builder()
-                            .uuid(duplicateUUID)
-                            .title(scoreInfo.getTitle())
-                            .credit(scoreInfo.getCredit())
-                            .category(scoreInfo.getCategory())
-                            .achievement(scoreInfo.getAchievement())
-                            .grade(scoreInfo.getGrade())
-                            .studentScore(null)
-                            .averageScore(null)
-                            .standardDeviation(null)
-                            .semester(scoreInfo.getSemester())
-                            .memberUuid(convertToUUID(memberUuid))
-                            .build();
-
-                } else if (scoreInfo.getCategory().equals("선택")) {
-                    Integer grade = calculateGradeUsingAchievement(scoreInfo.getAverageScore(), scoreInfo.getStudentScore(), scoreInfo.getStandardDeviation());
-                    if (grade == (null)) {
-                        return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorCode(), ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorDescription());
-                    } else if (grade.equals(10)) {
-                        return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorCode(), ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorDescription());
-                    }
-                    score = Score.builder()
-                            .uuid(duplicateUUID)
-                            .title(scoreInfo.getTitle())
-                            .credit(scoreInfo.getCredit())
-                            .category(scoreInfo.getCategory())
-                            .achievement(scoreInfo.getAchievement())
-                            .grade(scoreInfo.getGrade())
-                            .studentScore(scoreInfo.getStudentScore())
-                            .averageScore(scoreInfo.getAverageScore())
-                            .standardDeviation(scoreInfo.getStandardDeviation())
-                            .semester(scoreInfo.getSemester())
-                            .memberUuid(convertToUUID(memberUuid))
-                            .build();
-                } else {
-                    //창체 정보 저장
-                    score = Score.builder()
-                            .uuid(duplicateUUID)
-                            .title(scoreInfo.getTitle())
-                            .credit(scoreInfo.getCredit())
-                            .category(scoreInfo.getCategory())
-                            .achievement(scoreInfo.getAchievement())
-                            .grade(scoreInfo.getGrade())
-                            .studentScore(null)
-                            .averageScore(null)
-                            .standardDeviation(null)
-                            .semester(scoreInfo.getSemester())
-                            .memberUuid(convertToUUID(memberUuid))
-                            .build();
-                }
-                //해당 부분에서 score 객체를 만드는데 scoreInfo를 사용했으므로 이제 scoreInfo는 제거해도 괜찮음
-                //그래서 해당 부분에서 uuid 검증을 함
-                iteratorDataList.remove();
-                if (scoreRequestDto.checkDuplicateList(duplicateUUID.toString()))
-                    return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), ErrorCode.INPUT_DUPLICATED.getErrorDescription());
-                allScore.add(score);
+        log.info("ScoreService << addScoreOnSemester >> |  memberUuid : {}, requestBody : {}", memberUuid, scoreRequestDto);
+        if (memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
+        //대한이가 request body에 대해서 전체적으로 관리해주는거 만들었다고 했었던거 다시 물어보기
+        UUID duplicateUUID;
+        Score score;
+        //db 리셋
+        scoreRepository.deleteAllDataAboutCurrentUser(memberUuid);
+        //list 안에 있는 모든 객체에 대해서 행동
+        ScoreRequestDto.ScoreInfo scoreInfo;
+        Iterator<ScoreRequestDto.ScoreInfo> iteratorDataList = scoreRequestDto.getData().iterator();
+        List<Score> allScore = new ArrayList<>();
+        while (iteratorDataList.hasNext()) {
+            //iterator를 통해서 해당 리스트를 순차적으로 하나씩 꺼냄
+            scoreInfo = iteratorDataList.next();
+            //동일 제목, 학점, 학기, 멤버를가지고 있는 수업이 해당 테이블에 존재하는지 확인
+            //있으면 해당 값의 점수만 수정해서 저장
+            if (scoreInfo.getUuid() == null || scoreInfo.getUuid().isBlank()) {
+                duplicateUUID = UUID.randomUUID();
+            } else {
+                duplicateUUID = convertToUUID(scoreInfo.getUuid());
             }
-            scoreRepository.saveAll(allScore);
-            return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
+            if (scoreInfo.getCategory().equals("공통")) {
+                score = Score.builder().uuid(duplicateUUID).title(scoreInfo.getTitle()).credit(scoreInfo.getCredit()).category(scoreInfo.getCategory()).achievement(scoreInfo.getAchievement()).grade(scoreInfo.getGrade()).studentScore(null).averageScore(null).standardDeviation(null).semester(scoreInfo.getSemester()).memberUuid(convertToUUID(memberUuid)).build();
+
+            } else if (scoreInfo.getCategory().equals("선택")) {
+                Integer grade = calculateGradeUsingAchievement(scoreInfo.getAverageScore(), scoreInfo.getStudentScore(), scoreInfo.getStandardDeviation());
+                if (grade == (null)) {
+                    return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorCode(), ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorDescription());
+                } else if (grade.equals(10)) {
+                    return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorCode(), ErrorCode.INPUT_SCORE_OUT_OF_RANGE.getErrorDescription());
+                }
+                score = Score.builder().uuid(duplicateUUID).title(scoreInfo.getTitle()).credit(scoreInfo.getCredit()).category(scoreInfo.getCategory()).achievement(scoreInfo.getAchievement()).grade(scoreInfo.getGrade()).studentScore(scoreInfo.getStudentScore()).averageScore(scoreInfo.getAverageScore()).standardDeviation(scoreInfo.getStandardDeviation()).semester(scoreInfo.getSemester()).memberUuid(convertToUUID(memberUuid)).build();
+            } else {
+                //창체 정보 저장
+                score = Score.builder().uuid(duplicateUUID).title(scoreInfo.getTitle()).credit(scoreInfo.getCredit()).category(scoreInfo.getCategory()).achievement(scoreInfo.getAchievement()).grade(scoreInfo.getGrade()).studentScore(null).averageScore(null).standardDeviation(null).semester(scoreInfo.getSemester()).memberUuid(convertToUUID(memberUuid)).build();
+            }
+            //해당 부분에서 score 객체를 만드는데 scoreInfo를 사용했으므로 이제 scoreInfo는 제거해도 괜찮음
+            //그래서 해당 부분에서 uuid 검증을 함
+            iteratorDataList.remove();
+            if (scoreRequestDto.checkDuplicateList(duplicateUUID.toString()))
+                return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.INPUT_DUPLICATED.getErrorCode(), ErrorCode.INPUT_DUPLICATED.getErrorDescription());
+            allScore.add(score);
+        }
+        scoreRepository.saveAll(allScore);
+        log.info("ScoreService << addScoreOnSemester >> | SavedScore : {}", allScore);
+        return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
     private UUID convertToUUID(String uuidString) {
-        String formattedUuidString = uuidString.replaceAll(
-                "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{12})",
-                "$1-$2-$3-$4-$5"
-        );
+        String formattedUuidString = uuidString.replaceAll("(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{12})", "$1-$2-$3-$4-$5");
         return UUID.fromString(formattedUuidString);
     }
 
     private Integer calculateGradeUsingAchievement(Double averageScore, Double studentScore, Double standardDeviation) {
         double zScore;
-        try{
+        try {
             zScore = (studentScore - averageScore) / standardDeviation;
-        }catch(Exception e){
+        } catch (Exception e) {
             log.error("ScoreService << calculateGradeUsingAchievement >> | Exception e : {}", e.getMessage());
             return 10;
         }

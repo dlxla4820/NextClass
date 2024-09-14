@@ -11,7 +11,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TimeTableReponseDto {
+public class TimeTableResponseDto {
     private UUID uuid;
     private String week;
     @JsonProperty("class_start_time")
@@ -31,7 +31,7 @@ public class TimeTableReponseDto {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", TimeTableReponseDto.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", TimeTableResponseDto.class.getSimpleName() + "[", "]")
                 .add("uuid='" + uuid + "'")
                 .add("week='" + week + "'")
                 .add("classStartTime='" + classStartTime + "'")

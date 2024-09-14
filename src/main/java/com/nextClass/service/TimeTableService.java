@@ -1,7 +1,9 @@
 package com.nextClass.service;
 
-import com.nextClass.dto.*;
-import com.nextClass.entity.*;
+import com.nextClass.dto.ResponseDto;
+import com.nextClass.dto.TimeTableResponseDto;
+import com.nextClass.dto.TimeTableRequestDto;
+import com.nextClass.entity.TimeTable;
 import com.nextClass.enums.Description;
 import com.nextClass.enums.ErrorCode;
 import com.nextClass.repository.LoginRepository;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.nextClass.entity.QTimeTable.timeTable;
+import static com.nextClass.enums.ErrorCode.TOKEN_UNAUTHORIZED;
 
 @Slf4j
 @Service
@@ -43,6 +46,8 @@ public class TimeTableService {
     public ResponseDto<?> changeTimeTableData(TimeTableRequestDto timeTableRequestDto) {
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
         log.info("TimeTableService << changeTimeTableData >> | memberUuid : {}, requestBody : {}", memberUuid, timeTableRequestDto);
+        if (memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
         timeTableRequestDto.setMemberUuid(memberUuid);
         //해당 부분에 uuid값의 검증도 추가해야 함
         String errorDescription = checkTimeTableRequest(timeTableRequestDto);
@@ -65,6 +70,8 @@ public class TimeTableService {
     public ResponseDto deleteOneTimeTable(TimeTableRequestDto timeTableRequestDto) {
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
         log.info("TimeTableService << deleteOneTimeTable >> | memberUuid : {}, requestBody : {}", memberUuid, timeTableRequestDto);
+        if (memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
         if (timeTableRequestDto.getUuid() == null || timeTableRequestDto.getUuid().isBlank())
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "timeTableUuid"));
         timeTableRequestDto.setMemberUuid(memberUuid);
@@ -74,13 +81,14 @@ public class TimeTableService {
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorCode(), ErrorCode.TIME_TABLE_UNAUTHORIZED.getErrorDescription());
         long howManyDelete = timeTableRepository.deleteTimeTable(timeTableRequestDto.getUuid());
         log.info("TimeTableService << deleteOneTimeTable >> | howManyDelete : {}", howManyDelete);
-
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS);
     }
 
     public ResponseDto deleteAllTimeTableOnSemester(TimeTableRequestDto timeTableRequestDto) {
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
         log.info("TimeTableService << deleteAllTimeTableOnSemester >> | memberUuid : {}, requestBody : {}", memberUuid, timeTableRequestDto);
+        if (memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
         if (timeTableRequestDto.getSemester() == null || timeTableRequestDto.getSemester().isBlank())
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "semester"));
 
@@ -101,18 +109,21 @@ public class TimeTableService {
     public ResponseDto getPersonalThisSemesterTimeTable(TimeTableRequestDto timeTableRequestDto) {
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
         log.info("TimeTableService << getPersonalThisSemesterTimeTable >> | memberUuid : {}, requestBody : {}", memberUuid, timeTableRequestDto);
+        if (memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
         if (timeTableRequestDto.getSemester() == null || timeTableRequestDto.getSemester().isBlank())
             return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), Description.FAIL, ErrorCode.PARAMETER_INVALID_GENERAL.getErrorCode(), String.format(ErrorCode.PARAMETER_INVALID_SPECIFIC.getErrorDescription(), "semester"));
         timeTableRequestDto.setMemberUuid(memberUuid);
         //member와 semester를 가지고 해당 데이터 가져오기(현재는 semester만)
-        List<TimeTableReponseDto> timeTableList = timeTableRepository.getTimeTableListOnSemesterFromUser(timeTableRequestDto);
-        log.info("TimeTableService << getPersonalThisSemesterTimeTable >> | timeTableList : {}", timeTableList);
+        List<TimeTableResponseDto> timeTableList = timeTableRepository.getTimeTableListOnSemesterFromUser(timeTableRequestDto);
         return new ResponseDto<>(HttpStatus.OK.value(), Description.SUCCESS, timeTableList);
     }
 
     public ResponseDto makeTimeTable(TimeTableRequestDto timeTableRequestDto) {
         String memberUuid = CommonUtils.getMemberUuidIfAdminOrUser();
         log.info("TimeTableService << makeTimeTable >> | memberUuid : {}, requestBody : {}", memberUuid, timeTableRequestDto);
+        if (memberUuid == null)
+            return new ResponseDto<>(HttpStatus.UNAUTHORIZED.value(), Description.FAIL, TOKEN_UNAUTHORIZED.getErrorCode(), TOKEN_UNAUTHORIZED.getErrorDescription());
         //DTO의 값이 비어 있으면 해당 값 비어 있다는 error를 담아서 responseDTO return, for문을 통해서 진행
         String errorDescription = checkTimeTableRequest(timeTableRequestDto);
         if (errorDescription != null)

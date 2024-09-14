@@ -1,6 +1,6 @@
 package com.nextClass.repository;
 
-import com.nextClass.dto.ToDoListRequsetDto;
+import com.nextClass.dto.ToDoListRequestDto;
 import com.nextClass.entity.ToDoList;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.Expressions;
@@ -27,24 +27,24 @@ public class ToDoListDetailRepository {
         this.toDoListRepository = toDoListRepository;
     }
 
-    public ToDoList checkDuplicate(ToDoListRequsetDto toDoListRequsetDto){
+    public ToDoList checkDuplicate(ToDoListRequestDto ToDoListRequestDto){
         return queryFactory.selectFrom(toDoList)
-                .where(toDoList.content.eq(toDoListRequsetDto.getContent()))
-                .where(toDoList.appToken.eq(toDoListRequsetDto.getAppToken()))
-                .where(Expressions.stringTemplate("HEX({0})", toDoList.member_uuid).eq(toDoListRequsetDto.getMemberUuid().toString().replace("-","")))
+                .where(toDoList.content.eq(ToDoListRequestDto.getContent()))
+                .where(toDoList.appToken.eq(ToDoListRequestDto.getAppToken()))
+                .where(Expressions.stringTemplate("HEX({0})", toDoList.member_uuid).eq(ToDoListRequestDto.getMemberUuid().toString().replace("-","")))
                 .fetchOne();
     }
 
-    public ToDoList checkExist(ToDoListRequsetDto toDoListRequsetDto){
+    public ToDoList checkExist(ToDoListRequestDto ToDoListRequestDto){
         return queryFactory.selectFrom(toDoList)
-                .where(Expressions.stringTemplate("HEX({0})", toDoList.uuid).eq(toDoListRequsetDto.getUuid().toString().replace("-","")))
+                .where(Expressions.stringTemplate("HEX({0})", toDoList.uuid).eq(ToDoListRequestDto.getUuid().toString().replace("-","")))
                 .fetchOne();
     }
 
-    public ToDoList checkAuthorize(ToDoListRequsetDto toDoListRequsetDto){
+    public ToDoList checkAuthorize(ToDoListRequestDto ToDoListRequestDto){
         return queryFactory.selectFrom(toDoList)
-                .where(Expressions.stringTemplate("HEX({0})", toDoList.member_uuid).eq(toDoListRequsetDto.getMemberUuid().toString().replace("-","")))
-                .where(Expressions.stringTemplate("HEX({0})", toDoList.uuid).eq(toDoListRequsetDto.getUuid().toString().replace("-","")))
+                .where(Expressions.stringTemplate("HEX({0})", toDoList.member_uuid).eq(ToDoListRequestDto.getMemberUuid().toString().replace("-","")))
+                .where(Expressions.stringTemplate("HEX({0})", toDoList.uuid).eq(ToDoListRequestDto.getUuid().toString().replace("-","")))
                 .fetchOne();
     }
 
@@ -58,28 +58,28 @@ public class ToDoListDetailRepository {
                 .execute();
     }
 
-    public ToDoList save(ToDoListRequsetDto toDoListRequsetDto) {
+    public ToDoList save(ToDoListRequestDto ToDoListRequestDto) {
         ToDoList toDoListData = ToDoList.builder()
-                .content(toDoListRequsetDto.getContent())
-                .appToken(toDoListRequsetDto.getAppToken())
-                .createTime(toDoListRequsetDto.getCreatedTime())
-                .updateTime(toDoListRequsetDto.getUpdateTime())
-                .goalTime(toDoListRequsetDto.getGoalTime())
-                .member_uuid(toDoListRequsetDto.getMemberUuid())
-                .alarmTime(toDoListRequsetDto.getAlarmTime())
+                .content(ToDoListRequestDto.getContent())
+                .appToken(ToDoListRequestDto.getAppToken())
+                .createTime(ToDoListRequestDto.getCreatedTime())
+                .updateTime(ToDoListRequestDto.getUpdateTime())
+                .goalTime(ToDoListRequestDto.getGoalTime())
+                .member_uuid(ToDoListRequestDto.getMemberUuid())
+                .alarmTime(ToDoListRequestDto.getAlarmTime())
                 .build();
         return toDoListRepository.save(toDoListData);
     }
-    public ToDoList update(ToDoListRequsetDto toDoListRequsetDto) {
+    public ToDoList update(ToDoListRequestDto ToDoListRequestDto) {
         ToDoList toDoListData = ToDoList.builder()
-                .uuid(toDoListRequsetDto.getUuid())
-                .content(toDoListRequsetDto.getContent())
-                .appToken(toDoListRequsetDto.getAppToken())
-                .createTime(toDoListRequsetDto.getCreatedTime())
-                .updateTime(toDoListRequsetDto.getUpdateTime())
-                .goalTime(toDoListRequsetDto.getGoalTime())
-                .member_uuid(toDoListRequsetDto.getMemberUuid())
-                .alarmTime(toDoListRequsetDto.getAlarmTime())
+                .uuid(ToDoListRequestDto.getUuid())
+                .content(ToDoListRequestDto.getContent())
+                .appToken(ToDoListRequestDto.getAppToken())
+                .createTime(ToDoListRequestDto.getCreatedTime())
+                .updateTime(ToDoListRequestDto.getUpdateTime())
+                .goalTime(ToDoListRequestDto.getGoalTime())
+                .member_uuid(ToDoListRequestDto.getMemberUuid())
+                .alarmTime(ToDoListRequestDto.getAlarmTime())
                 .build();
         return toDoListRepository.save(toDoListData);
     }

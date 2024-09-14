@@ -13,7 +13,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ToDoListRequsetDto {
+public class ToDoListRequestDto {
 
     private UUID uuid;
     @JsonProperty("member_uuid")
