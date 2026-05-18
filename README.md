@@ -45,14 +45,15 @@
 - 이메일 인증번호 발송 및 Redis TTL 기반 유효시간 관리
 
 ### 🗓 시간표
-- 사용자가 직접 시간표 작성 / 수정 / 삭제
+- 사용자가 원하는 시간표를 직접 작성 / 수정 / 삭제
 
 ### 📊 성적
-- 시간표 데이터 연동하여 성적 편집 및 학점 계산
+- 직접 성적 편집 가능
+- 이전에 작성한 시간표 데이터를 연동하여 학점 계산
 
 ### ✅ TodoList
 - Todo 작성 및 마감 시간 기준 정렬 (오름차순 / 내림차순)
-- 마감 시간에 맞춘 푸시 알림 발송
+- 사용자가 설정한 시간에 맞춰 푸시 알림 발송
 
 ### 💬 커뮤니티
 - 게시물 작성 / 수정 / 삭제 / 추천
@@ -61,10 +62,15 @@
 - 게시물 필터링 5종
   - 전체 게시물
   - 내가 속한 학교 게시물
-  - 베스트 게시물 (추천 수 기준)
+  - 베스트 게시물 (일정 추천 수 이상)
   - 내가 작성한 게시물
   - 내가 댓글 단 게시물
 - 새 댓글 등록 시 Firebase(FCM) 푸시 알림 발송
+- 알림 터치 시 해당 게시물로 바로 이동
+
+### ⚙️ 사용자 설정
+- 이메일 / 비밀번호 등 개인정보 수정
+- 푸시 알림 수신 여부 설정
 
 ### 📋 AOP 로그
 - `LogAspect`로 API 요청/응답 자동 로깅
@@ -89,25 +95,40 @@ src
             └── util           # 공통 유틸리티
 ```
 
+<br>
 
-<img width="440" height="906" alt="380581119-5b032dd9-0728-4381-8661-e8627ca336fe" src="https://github.com/user-attachments/assets/f8a0ac10-7061-463b-bd73-f7ba4a2313f3" />
+## 🖥 스크린샷
 
-<img width="440" height="906" alt="380583214-8ea2d716-3bdf-4dc8-8856-0f7dee957646" src="https://github.com/user-attachments/assets/c9970744-0e12-4262-af18-4082ddfc0108" />
+<img width="440" height="906" alt="로그인" src="https://github.com/user-attachments/assets/f8a0ac10-7061-463b-bd73-f7ba4a2313f3" />
+<img width="440" height="906" alt="회원가입" src="https://github.com/user-attachments/assets/c9970744-0e12-4262-af18-4082ddfc0108" />
+<img width="447" height="922" alt="홈" src="https://github.com/user-attachments/assets/d3ae6389-475e-455e-b20f-58701b9fa914" />
+<img width="447" height="922" alt="시간표" src="https://github.com/user-attachments/assets/d9bcc7ea-2878-4aa6-b829-f262b6162d05" />
+<img width="440" height="906" alt="성적" src="https://github.com/user-attachments/assets/0b19a4a7-b33d-4fa6-a2d9-66a40cfd4c3b" />
+<img width="447" height="922" alt="커뮤니티" src="https://github.com/user-attachments/assets/a6b2fee4-2d19-4267-bd18-c8d0bdf87d6a" />
+<img width="447" height="922" alt="게시물 세부" src="https://github.com/user-attachments/assets/7d7f3a3d-af8c-4b6e-8119-e10cb6fd2301" />
+<img width="440" height="906" alt="TodoList" src="https://github.com/user-attachments/assets/618d9265-3f64-4bec-8bb8-f842bc1b0aad" />
+<img width="440" height="906" alt="사용자 설정" src="https://github.com/user-attachments/assets/c18f2ff7-13a1-471d-a5a1-4f4dda2bbf2e" />
+<img width="440" height="925" alt="아이디 찾기" src="https://github.com/user-attachments/assets/c521fdd9-9a85-42bb-991a-3bd2470c74ac" />
 
-<img width="447" height="922" alt="380581497-b4b6ed25-4120-406a-bf00-c9555bb8aebe" src="https://github.com/user-attachments/assets/d3ae6389-475e-455e-b20f-58701b9fa914" />
+<br>
 
-<img width="447" height="922" alt="380582182-d3b617a7-e42a-4bc6-a79f-47e8d2421edd" src="https://github.com/user-attachments/assets/d9bcc7ea-2878-4aa6-b829-f262b6162d05" />
+## 🚀 로컬 실행 방법
 
-<img width="440" height="906" alt="380581589-18ca85c1-1e72-4c5b-901d-7436e381635c" src="https://github.com/user-attachments/assets/0b19a4a7-b33d-4fa6-a2d9-66a40cfd4c3b" />
+```bash
+# 1. 저장소 클론
+git clone https://github.com/dlxla4820/NextClass.git
 
-<img width="447" height="922" alt="380581579-36e43af4-20d3-485a-aa13-978794502b56" src="https://github.com/user-attachments/assets/a6b2fee4-2d19-4267-bd18-c8d0bdf87d6a" />
+# 2. application.properties에 설정 입력
+spring.datasource.url=jdbc:mysql://localhost:3306/{DB명}
+spring.datasource.username={유저명}
+spring.datasource.password={비밀번호}
 
-<img width="447" height="922" alt="380581793-93d3fdc6-e7b9-4331-a6cf-3133d118af33" src="https://github.com/user-attachments/assets/7d7f3a3d-af8c-4b6e-8119-e10cb6fd2301" />
+spring.redis.host=localhost
+spring.redis.port=6379
 
-<img width="440" height="906" alt="380581826-34e0cab4-63f7-4b81-9200-a6d2a7e378c8" src="https://github.com/user-attachments/assets/618d9265-3f64-4bec-8bb8-f842bc1b0aad" />
+spring.mail.username={이메일}
+spring.mail.password={앱 비밀번호}
 
-<img width="440" height="906" alt="380581837-d8fee59a-ccfd-4ebd-aa14-fdf04027f1c9" src="https://github.com/user-attachments/assets/c18f2ff7-13a1-471d-a5a1-4f4dda2bbf2e" />
-
-<img width="440" height="925" alt="380583565-476d88e3-6e6b-43ae-a197-c51b7b8c54cf" src="https://github.com/user-attachments/assets/c521fdd9-9a85-42bb-991a-3bd2470c74ac" />
-
-
+# 3. 빌드 및 실행
+./gradlew bootRun
+```
