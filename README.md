@@ -99,36 +99,27 @@ src
 
 ## 🖥 스크린샷
 
-<img width="440" height="906" alt="로그인" src="https://github.com/user-attachments/assets/f8a0ac10-7061-463b-bd73-f7ba4a2313f3" />
-<img width="440" height="906" alt="회원가입" src="https://github.com/user-attachments/assets/c9970744-0e12-4262-af18-4082ddfc0108" />
-<img width="447" height="922" alt="홈" src="https://github.com/user-attachments/assets/d3ae6389-475e-455e-b20f-58701b9fa914" />
-<img width="447" height="922" alt="시간표" src="https://github.com/user-attachments/assets/d9bcc7ea-2878-4aa6-b829-f262b6162d05" />
-<img width="440" height="906" alt="성적" src="https://github.com/user-attachments/assets/0b19a4a7-b33d-4fa6-a2d9-66a40cfd4c3b" />
-<img width="447" height="922" alt="커뮤니티" src="https://github.com/user-attachments/assets/a6b2fee4-2d19-4267-bd18-c8d0bdf87d6a" />
-<img width="447" height="922" alt="게시물 세부" src="https://github.com/user-attachments/assets/7d7f3a3d-af8c-4b6e-8119-e10cb6fd2301" />
-<img width="440" height="906" alt="TodoList" src="https://github.com/user-attachments/assets/618d9265-3f64-4bec-8bb8-f842bc1b0aad" />
-<img width="440" height="906" alt="사용자 설정" src="https://github.com/user-attachments/assets/c18f2ff7-13a1-471d-a5a1-4f4dda2bbf2e" />
-<img width="440" height="925" alt="아이디 찾기" src="https://github.com/user-attachments/assets/c521fdd9-9a85-42bb-991a-3bd2470c74ac" />
+<table>
+  <tr>
+    <td><img width="440" height="906" alt="로그인" src="https://github.com/user-attachments/assets/f8a0ac10-7061-463b-bd73-f7ba4a2313f3" /></td>
+    <td><img width="440" height="906" alt="회원가입" src="https://github.com/user-attachments/assets/c9970744-0e12-4262-af18-4082ddfc0108" /></td>
+  </tr>
+  <tr>
+    <td><img width="447" height="922" alt="홈" src="https://github.com/user-attachments/assets/d3ae6389-475e-455e-b20f-58701b9fa914" /></td>
+    <td><img width="447" height="922" alt="시간표" src="https://github.com/user-attachments/assets/d9bcc7ea-2878-4aa6-b829-f262b6162d05" /></td>
+  </tr>
+  <tr>
+    <td><img width="440" height="906" alt="성적" src="https://github.com/user-attachments/assets/0b19a4a7-b33d-4fa6-a2d9-66a40cfd4c3b" /></td>
+    <td><img width="447" height="922" alt="커뮤니티" src="https://github.com/user-attachments/assets/a6b2fee4-2d19-4267-bd18-c8d0bdf87d6a" /></td>
+  </tr>
+  <tr>
+    <td><img width="447" height="922" alt="게시물 세부" src="https://github.com/user-attachments/assets/7d7f3a3d-af8c-4b6e-8119-e10cb6fd2301" /></td>
+    <td><img width="440" height="906" alt="TodoList" src="https://github.com/user-attachments/assets/618d9265-3f64-4bec-8bb8-f842bc1b0aad" /></td>
+  </tr>
+  <tr>
+    <td><img width="440" height="906" alt="사용자 설정" src="https://github.com/user-attachments/assets/c18f2ff7-13a1-471d-a5a1-4f4dda2bbf2e" /></td>
+    <td><img width="440" height="925" alt="아이디 찾기" src="https://github.com/user-attachments/assets/c521fdd9-9a85-42bb-991a-3bd2470c74ac" /></td>
+  </tr>
+</table>
 
 <br>
-
-## 🚀 로컬 실행 방법
-
-```bash
-# 1. 저장소 클론
-git clone https://github.com/dlxla4820/NextClass.git
-
-# 2. application.properties에 설정 입력
-spring.datasource.url=jdbc:mysql://localhost:3306/{DB명}
-spring.datasource.username={유저명}
-spring.datasource.password={비밀번호}
-
-spring.redis.host=localhost
-spring.redis.port=6379
-
-spring.mail.username={이메일}
-spring.mail.password={앱 비밀번호}
-
-# 3. 빌드 및 실행
-./gradlew bootRun
-```
