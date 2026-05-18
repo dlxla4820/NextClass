@@ -89,10 +89,11 @@ src
             ├── controller     # 요청 처리
             ├── dto            # 데이터 전송 객체
             ├── entity         # JPA 엔티티
+            ├── enums          # Enum 상수 정의
             ├── repository     # DB 접근 (JPA + QueryDSL)
+            ├── scheduler      # 스케줄링 작업
             ├── service        # 비즈니스 로직
-            ├── aop            # LogAspect
-            └── util           # 공통 유틸리티
+            └── utils          # 공통 유틸리티
 ```
 
 <br>
